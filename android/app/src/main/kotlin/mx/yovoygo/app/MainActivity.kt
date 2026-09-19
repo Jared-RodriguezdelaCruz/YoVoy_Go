@@ -1,4 +1,4 @@
-package com.example.yovoy_go
+package mx.yovoygo.app
 
 import io.flutter.embedding.android.FlutterActivity
 

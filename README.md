@@ -1,227 +1,221 @@
 # Yo Voy Go
 
-Aplicación de transporte público para la zona metropolitana de Aguascalientes.
+Cliente de transporte público para la zona metropolitana de Aguascalientes.
+Flutter, Android e iOS, sin backend propio todavía.
 
-Yo Voy Go responde tres preguntas:
+Responde tres preguntas, en este orden de importancia:
 
 1. ¿Dónde viene mi camión y en cuánto llega?
 2. ¿Qué rutas pasan por esta parada?
 3. ¿Cómo llego de A a B?
 
-A diferencia de otras aplicaciones de transporte, el objetivo principal no es verse mejor, sino comportarse mejor cuando los datos son incompletos, retrasados o incorrectos.
+**El objetivo no es verse mejor, es comportarse mejor cuando los datos son malos** — que es
+siempre. La especificación completa vive en [`YOVOY_GO_SPEC.md`](YOVOY_GO_SPEC.md); este archivo
+solo explica cómo trabajar en el repo.
+
+> Aplicación independiente. Sin afiliación con CMOV ni con el operador del sistema de transporte.
+> No integra la Tarjeta YoVoy: saldo, recargas y movimientos están fuera de alcance por completo.
 
 ---
 
-## Estado del proyecto
+## Estado
 
-🚧 En desarrollo
+Datos simulados de punta a punta (`MockTransitRepository`). Cero integraciones con APIs externas.
 
-Actualmente se encuentra en la implementación de la v1 utilizando datos simulados mediante un repositorio local (`MockTransitRepository`).
+| Fase | Contenido | Estado |
+|---|---|---|
+| 1 | Base: pubspec, análisis estricto, estructura, `go_router` con rutas vacías | ✅ |
+| 2 | Modelos GTFS con freezed + round-trip JSON | ⏳ |
+| 3 | Design system: tokens, temas, componentes, galería de debug | ⏳ |
+| 4 | Mock: dataset, simulador con sus fallas, panel de control | ⏳ |
+| 5 | Mapa: capa de rutas, marcadores interpolados, hoja inferior | ⏳ |
+| 6 | Pantallas de parada y de ruta | ⏳ |
+| 7 | Planificador con itinerarios mock | ⏳ |
+| 8 | Favoritos y ajustes | ⏳ |
+| 9 | Pulido: accesibilidad, rendimiento, los cuatro estados | ⏳ |
 
-No existe integración con APIs externas ni servicios oficiales.
-
----
-
-## Principios del proyecto
-
-### El tiempo real debe ser honesto
-
-La aplicación nunca muestra ETAs inventados.
-
-Cuando la información pierde frescura:
-
-- Menos de 60 segundos → dato en vivo.
-- Entre 60 y 180 segundos → dato viejo.
-- Más de 180 segundos → sin señal.
-
-Si la aplicación no puede estimar una llegada de forma confiable, lo indica explícitamente.
+Una fase por PR. No se empieza la siguiente sin cerrar la anterior.
 
 ---
 
-### Diseñada para datos imperfectos
+## Principios
 
-El simulador incorpora condiciones reales:
+### El tiempo real es honesto o no es
 
-- Latencia de red.
-- Errores aleatorios.
-- Pérdida temporal de vehículos.
-- Posiciones GPS con ruido.
-- Reportes incompletos.
-- Rutas sin servicio.
+La app nunca muestra un ETA numérico calculado desde una posición vieja. Los umbrales viven en
+[`lib/core/config/freshness.dart`](lib/core/config/freshness.dart):
 
-La interfaz debe seguir siendo útil incluso bajo estas condiciones.
+| Edad del dato | Estado | Presentación |
+|---|---|---|
+| < 60 s | `live` | Valor + indicador de pulso |
+| 60–180 s | `stale` | Valor + "hace X min" |
+| > 180 s | `unknown` | Sin ETA numérico: horario programado o "sin señal" |
 
----
+Un número inventado es peor que un "no sé".
 
-### Arquitectura preparada para GTFS
+### Diseñada contra datos imperfectos
 
-Los modelos replican GTFS y GTFS-Realtime para minimizar cambios cuando exista acceso a una fuente oficial.
+El simulador reproduce lo que pasa en producción: latencia de 200–1500 ms, ~5 % de llamadas con
+excepción, ruido GPS, vehículos que desaparecen minutos, `bearing` ausente, rutas sin servicio.
+Si la UI solo se ve bien con datos perfectos, está mal.
 
----
+Toda pantalla que consuma datos implementa **cuatro** estados: cargando (skeleton, no spinner),
+vacío, error y **dato viejo** — este último muestra el contenido con advertencia de frescura, nunca
+vacía la pantalla.
 
-## Stack tecnológico
+### Preparada para GTFS
 
-- Flutter
-- Dart 3
-- Riverpod 3
-- Freezed
-- Json Serializable
-- Go Router
-- Flutter Map
-- LatLong2
-- Intl
-- Mocktail
+Los modelos son GTFS y GTFS-Realtime calcados. El día que exista el feed oficial, la app no se
+refactoriza: se cambia la implementación del repositorio.
 
 ---
 
-## Arquitectura
+## Requisitos
 
-```text
-lib/
-  app/
-  core/
-    models/
-    data/
-      mock/
-      remote/
-    config/
-    utils/
-  design/
-    tokens/
-    components/
-  features/
-    map/
-    stop/
-    route/
-    planner/
-    favorites/
-    settings/
-```
+- Flutter 3.47.5 stable o superior (Dart 3.13.4+)
+- Android Studio / Xcode según la plataforma objetivo
 
-La arquitectura sigue una estructura feature-first.
-
-Cada feature se divide en:
-
-- application
-- presentation
-- data (cuando aplica)
-
-Las dependencias siempre apuntan hacia adentro.
-
----
-
-## Capas de datos
-
-### MockTransitRepository
-
-Implementación principal de desarrollo.
-
-Lee datos desde:
-
-```text
-assets/mock/
-```
-
-y simula un sistema de transporte real.
-
-### RemoteTransitRepository
-
-Esqueleto preparado para futura integración con:
-
-- GTFS Static
-- GTFS Realtime
-
-Actualmente todos los métodos lanzan:
-
-```dart
-UnimplementedError()
-```
-
----
-
-## Funcionalidades planeadas
-
-### Mapa
-
-- Vehículos en tiempo real.
-- Paradas cercanas.
-- Hoja inferior expandible.
-- Indicador global de frescura.
-
-### Paradas
-
-- Próximos arribos.
-- Alertas de servicio.
-- Favoritos.
-
-### Rutas
-
-- Trazo completo.
-- Vehículos activos.
-- Sentido de recorrido.
-
-### Planificador
-
-- Origen y destino.
-- Itinerarios simulados.
-- Transbordos.
-- Casos sin resultados.
-
-### Favoritos
-
-- Rutas favoritas.
-- Paradas favoritas.
-- Persistencia local.
-
-### Ajustes
-
-- Claro / oscuro.
-- Reducir animaciones.
-- Tamaño de texto.
-- Panel de simulación para debug.
-
----
-
-## Ejecución
-
-Instalar dependencias:
+## Puesta en marcha
 
 ```bash
 flutter pub get
-```
-
-Generar código:
-
-```bash
-dart run build_runner build --delete-conflicting-outputs
-```
-
-Ejecutar:
-
-```bash
+dart run build_runner build      # genera *.g.dart y *.freezed.dart
 flutter run
 ```
 
----
+El código generado **no está versionado**: después de clonar o de cambiar de rama hay que correr
+`build_runner`. Durante el desarrollo conviene `dart run build_runner watch`.
 
 ## Calidad
 
 Antes de integrar cambios:
 
 ```bash
-flutter analyze
+dart analyze     # incluye las reglas de riverpod_lint
 flutter test
 ```
 
-No se aceptan warnings en análisis estático.
+`dart analyze` debe salir en cero. Nota: `flutter analyze` **no** ejecuta `riverpod_lint` — ese
+plugin usa el sistema nuevo del analizador (`analysis_server_plugin`, declarado en
+`analysis_options.yaml`), que solo corre bajo `dart analyze`. Usa `dart analyze` como compuerta.
+
+---
+
+## Stack
+
+| Área | Paquete | Versión |
+|---|---|---|
+| Estado | `flutter_riverpod` + `riverpod_annotation` | 3.4.3 / 4.0.7 |
+| Codegen | `riverpod_generator`, `freezed`, `json_serializable`, `build_runner` | 4.0.9 / 4.0.2 / 6.14.1 / 2.16.1 |
+| Modelos | `freezed_annotation` + `json_annotation` | 3.1.0 / 4.12.0 |
+| Navegación | `go_router` | 18.0.1 |
+| Mapa | `flutter_map` | 8.3.2 |
+| Geometría | `latlong2` | 0.10.1 |
+| Formato | `intl` + `flutter_localizations` (`es_MX`) | 0.20.3 / SDK |
+| Lint | `flutter_lints` + `riverpod_lint` | 6.0.0 / 3.1.9 |
+| Tests | `flutter_test` + `mocktail` | SDK / 1.0.5 |
+
+No se agregan paquetes fuera de esta tabla sin discutirlo antes, como pide la
+sección 2 del spec.
+
+### Riverpod: solo la API generada
+
+Se usa exclusivamente `@riverpod` sobre funciones o clases `Notifier`/`AsyncNotifier`, con
+`riverpod_generator`. Está **prohibido**, aunque compile:
+
+- `StateNotifier` / `StateNotifierProvider`
+- `ChangeNotifierProvider`
+- declarar providers a mano en vez de generarlos
+
+Además: todo lo async expone `AsyncValue` (nada de `isLoading` booleano manual), todo provider con
+polling o stream conserva `autoDispose`, se parametriza con `family` y nunca con estado global
+mutable, `ref.watch` en `build` y `ref.read` en callbacks.
+
+---
+
+## Arquitectura
+
+Feature-first, tres capas por feature, dependencias solo hacia adentro.
+
+```text
+lib/
+  main.dart                    ProviderScope + YoVoyGoApp, sin lógica
+  app/
+    app.dart                   MaterialApp.router, locale es_MX, tema
+    router.dart                go_router como provider keepAlive
+    routes.dart                nombres y paths, sin strings sueltos
+    phase_placeholder.dart     andamio temporal de las pantallas por construir
+  core/
+    config/freshness.dart      umbrales de frescura
+    models/                    modelos GTFS compartidos (fase 2)
+    data/                      TransitRepository + mock/ + remote/ (fase 4)
+    utils/
+  design/
+    tokens/  components/       design system (fase 3)
+  features/
+    map/ stop/ route/ planner/ favorites/ settings/
+      application/             providers, casos de uso, modelos de vista
+      presentation/            widgets, sin lógica ni acceso a repos
+      data/                    solo si la feature tiene fuentes propias
+assets/
+  fonts/                       Barlow y Barlow Semi Condensed (OFL)
+  mock/                        dataset del simulador (fase 4)
+test/                          espeja la estructura de lib/
+```
+
+Reglas que se revisan en cada PR:
+
+- Un widget que llama `ref.read(transitRepositoryProvider)` directamente es un bug de arquitectura:
+  siempre a través de un provider de `application/`.
+- Cero referencias a implementaciones concretas de repositorio fuera de `core/data/`.
+- Los tests de providers inyectan repos falsos con `ProviderContainer` + `overrides`.
+
+### Rutas
+
+| Path | Nombre | Pantalla |
+|---|---|---|
+| `/` | `map` | Mapa (inicio) |
+| `/stop/:stopId` | `stop` | Detalle de parada |
+| `/route/:routeId` | `route` | Detalle de ruta |
+| `/planner` | `planner` | Planificador |
+| `/favorites` | `favorites` | Favoritos |
+| `/settings` | `settings` | Ajustes |
+
+---
+
+## Capa de datos
+
+Una sola interfaz, `TransitRepository`, con dos implementaciones. Ninguna capa superior sabe cuál
+está activa; la selección es por flag de compilación:
+
+```bash
+flutter run --dart-define=USE_REMOTE_API=true   # reservado, aún sin implementar
+```
+
+- `MockTransitRepository` — lee `assets/mock/` y simula el sistema con sus fallas. Es el default.
+- `RemoteTransitRepository` — esqueleto con `UnimplementedError` y `// TODO(api):` por método,
+  indicando qué endpoint GTFS-RT lo alimentaría. Existe para que la forma del código ya contemple
+  su llegada.
 
 ---
 
 ## Accesibilidad
 
-Objetivos mínimos:
+Piso no negociable, verificado por pantalla en la fase 9:
 
-- Contraste AA.
-- Área táctil mínima de 48x48 dp.
-- Compatibilidad con tamaño de texto hasta 200%.
-- Soporte
+- Contraste ≥ 4.5:1 en texto y ≥ 3:1 en gráficos, en tema claro y oscuro.
+- Área de toque ≥ 48×48 dp.
+- `Semantics` en todo control; los ETAs se anuncian completos ("ruta 20, llega en 4 minutos, dato
+  en vivo").
+- Texto del sistema hasta 200 % sin romper layouts.
+- Reducción de movimiento respetada.
+- El color nunca es el único portador de significado: la frescura lleva texto e ícono además de color.
+
+---
+
+## Licencias
+
+Barlow y Barlow Semi Condensed se distribuyen bajo SIL Open Font License 1.1
+([`assets/fonts/OFL.txt`](assets/fonts/OFL.txt)).
+
+Identificador de aplicación: `mx.yovoygo.app` (Android e iOS).
