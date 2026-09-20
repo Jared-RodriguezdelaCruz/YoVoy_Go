@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../design/gallery/design_gallery_screen.dart';
+import '../features/debug/presentation/simulator_screen.dart';
 import '../features/favorites/presentation/favorites_screen.dart';
 import '../features/map/presentation/map_screen.dart';
 import '../features/planner/presentation/planner_screen.dart';
@@ -68,7 +69,13 @@ GoRouter appRouter(Ref ref) {
           builder: (BuildContext context, GoRouterState state) =>
               const DesignGalleryScreen(),
         ),
-      // TODO(fase 4): /debug/simulator, el panel de control del simulador.
+      if (kDebugMode)
+        GoRoute(
+          path: AppRoute.simulator.path,
+          name: AppRoute.simulator.name,
+          builder: (BuildContext context, GoRouterState state) =>
+              const SimulatorScreen(),
+        ),
     ],
     // Como en la sección 9 del spec (estados obligatorios): ningún estado se
     // resuelve con la pantalla roja por defecto.

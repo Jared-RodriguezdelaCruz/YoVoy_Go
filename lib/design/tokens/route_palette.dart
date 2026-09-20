@@ -42,7 +42,7 @@ abstract final class RoutePalette {
   static Color colorForRoute({required String routeId, String? gtfsColor}) =>
       parseGtfsColor(gtfsColor) ?? colorForRouteId(routeId);
 
-  /// Hexadecimal de GTFS (`"00854A"`) a [Color]. Nulo si no se puede leer.
+  /// Hexadecimal de GTFS (`"652391"`) a [Color]. Nulo si no se puede leer.
   static Color? parseGtfsColor(String? hex) {
     if (hex == null) {
       return null;

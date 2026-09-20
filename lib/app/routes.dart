@@ -37,6 +37,12 @@ final class AppRoute {
 
   /// Galería del design system. Solo se monta en builds de debug.
   static const AppRoute gallery = AppRoute._('gallery', '/debug/gallery');
+
+  /// Panel de control del simulador. Solo en builds de debug.
+  static const AppRoute simulator = AppRoute._(
+    'simulator',
+    '/debug/simulator',
+  );
 }
 
 /// Nombres de los parámetros de path.

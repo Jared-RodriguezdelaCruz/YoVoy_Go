@@ -1,0 +1,161 @@
+# Dirección visual — Yo Voy Go
+
+El **qué** y el **por qué** del producto viven en [`YOVOY_GO_SPEC.md`](YOVOY_GO_SPEC.md); el orden
+de construcción en [`ROADMAP.md`](ROADMAP.md). Aquí está **cómo se ve y por qué se ve así**.
+
+---
+
+## La regla
+
+> **El índigo es del sistema. Lo cálido es tuyo.**
+
+El encargo era modernizar el estilo de Yo Voy: que se sienta futurista y a la vez hogareño. Los dos
+adjetivos jalan en direcciones opuestas y promediarlos da algo tibio. La salida es que una sola
+regla los resuelva, y que además cargue información.
+
+- **El índigo institucional y los cuatro colores de tiempo real son la voz del sistema.** Dónde
+  viene el camión, qué tan fresco es el dato, si hay alerta. Frío, preciso, de instrumento.
+- **`cantera` marca lo que el teléfono aprendió de ti.** Favoritos, rutas de siempre, "sal en
+  6 min", historial. Nada de eso sale del teléfono, y ahora además se ve distinto.
+
+Lo hogareño no es un fondo beige: es que tus cosas tengan otra temperatura que las del sistema. El
+color dice **de quién es el dato**, y eso es información, no decoración.
+
+---
+
+## De dónde salió cada color
+
+El spec (§6.2) ordenaba extraer el color institucional con cuentagotas de las unidades o de la app
+oficial, y **no inventarlo**. Hecho el 20 de septiembre de 2026, midiendo píxeles:
+
+| Fuente | Color dominante |
+|---|---|
+| Splash de la app oficial, `com.mx.nrtec.agsstopbus` | `#3A3578` — 583 885 px de 755 200 |
+| Ícono de la app oficial en Play | `#3A3578` |
+| Fotografía oficial de la Tarjeta Soluciones YoVoy | `#3A3578` |
+
+**Yo Voy no es verde: es índigo.** Las versiones anteriores del spec afirmaban lo contrario y
+fijaban un `#00854A` que nadie había medido. Ese verde, además, daba 3.95:1 contra la superficie
+oscura: llevaba tres fases sin pasar el piso de 4.5:1 que el propio spec exige.
+
+`cantera` no es institucional y no pretende serlo: es el rosa de la piedra con la que está
+construida Aguascalientes, y entra por la regla de arriba, no por la marca.
+
+**Lo que se descartó.** Los acentos neón del wordmark oficial —cian `#10AFE6`, lima `#BDD52F`,
+magenta `#EC3B94`, amarillo `#FFD200`— existen y se midieron, pero no se adoptan: acercarían la app
+a imitar la identidad oficial, que la §10 del spec prohíbe, y el lima compite con los colores de
+estado.
+
+---
+
+## Tokens, con su contraste medido
+
+Los números salen de la misma cuenta que usa la app en
+[`lib/design/tokens/contrast.dart`](lib/design/tokens/contrast.dart), y los vigila
+`test/design/route_palette_test.dart`.
+
+### Tema oscuro — superficie `#0E1016`
+
+| Token | Hex | Contraste | Para qué |
+|---|---|---|---|
+| `brand` | `#8179DC` | 5.16:1 | El índigo institucional, aclarado hasta que se lee sobre negro |
+| `cantera` | `#E0A98F` | 9.27:1 | Solo lo tuyo |
+| `live` | `#3DDC84` | 10.66:1 | Dato fresco, < 60 s |
+| `stale` | `#F2B705` | 10.46:1 | Dato viejo, 60–180 s |
+| `unknown` | `#7A8A82` | 5.24:1 | Sin dato, > 180 s |
+| `alert` | `#E5484D` | 4.86:1 | Alerta de servicio |
+| `textPrimary` | `#F2F3F7` | 17.15:1 | |
+| `textSecondary` | `#A2A7BD` | 7.97:1 | |
+| `surfaceRaised` / `surfaceSunken` / `outline` | `#171A24` / `#080910` / `#2A2E3D` | — | |
+
+### Tema claro — superficie `#F5F6FA`
+
+| Token | Hex | Contraste |
+|---|---|---|
+| `brand` | `#3A3578` | 9.92:1 — el índigo tal cual sale de la fuente |
+| `cantera` | `#8A4B32` | 6.21:1 |
+| `live` / `stale` / `unknown` / `alert` | `#0F7A3E` / `#8A6100` / `#5E6C65` / `#C42A2F` | 5.02 / 5.13 / 5.11 / 5.23 |
+| `textPrimary` / `textSecondary` | `#0E1016` / `#565C70` | 17.61:1 / 6.15:1 |
+| `surfaceRaised` / `surfaceSunken` / `outline` | `#FFFFFF` / `#E7E9F2` / `#C9CDDD` | — |
+
+Dos hex por token y por tema no es capricho: el índigo institucional es oscuro y sobre fondo negro
+da 1.74:1. El mismo patrón que ya usaban los cuatro semánticos.
+
+### El riesgo que asumo
+
+`cantera` y `stale` son los dos cálidos del sistema y los separan **26°** de tono. De reojo pueden
+confundirse. Se sostienen con una regla dura —**`cantera` jamás aparece en la misma fila que un
+estado de frescura**— y con que la frescura nunca depende solo del color: siempre lleva texto e
+ícono. Si al verlos en pantalla siguen peleando, se cambia `cantera`, no la regla.
+
+---
+
+## La firma: la tira con luz de recorrido
+
+[`RouteStrip`](lib/design/components/route_strip.dart) es el elemento por el que se debe recordar
+la app. La línea de ruta con las paradas como marcas y el vehículo como bloque:
+
+```
+Bonanza    Héroes     CBTIS         TÚ        Centro
+  ●━━━━━━━━━●━━━━━━━━━●━━━━█▸━━━━━━━━●━━━━━━━━━●
+  └──── cantera: ya pasó ────┘└─ índigo: lo que falta ─┘
+                           halo
+```
+
+- **Lo recorrido va en `cantera`.** Es pasado, es tibio, es de donde vienes.
+- **Lo que falta va en el índigo de marca.** Es sistema, es futuro, es lo que promete.
+- **El vehículo es la frontera**, con un halo encendido.
+
+Y cuando el dato vence, **la luz se apaga**: se va el halo, el índigo se vuelve gris y el trazo se
+puntea. La metáfora hace legible el estado sin una palabra extra —pero el texto se queda, porque
+hay daltonismo y hay sol directo.
+
+---
+
+## Superficies encendidas, cero sombras
+
+El spec prohíbe las sombras (§6.4) y tiene razón: en tema oscuro la sombra gris no comunica nada y
+cuesta render. Pero prohibir la sombra no obliga a que todo sea plano.
+
+[`LitSurface`](lib/design/components/lit_surface.dart) ilumina los paneles elevados: un gradiente
+vertical de 4 % que baja desde el borde superior, más un filo de 1 px un punto más claro. Un
+tablero encendido, una lámpara en un cuarto. Es futurista y hogareño con el mismo gesto, y en
+render cuesta un `LinearGradient`: cero `saveLayer`, cero `BackdropFilter`, nada de lo que prohíbe
+la §7.
+
+---
+
+## Tipografía: tres anchos de Barlow
+
+| Rol | Fuente | Por qué |
+|---|---|---|
+| Contador de minutos | **Barlow Condensed 700**, tracking −2 % | Condensada y apretada se lee como instrumento de tablero, no como texto grande |
+| Placas de ruta, datos densos | Barlow Semi Condensed | |
+| Texto corrido | Barlow | Humanista y redondeada: es la mitad hogareña del encargo |
+
+Sin versalitas, sin ALL CAPS, y los números siempre con `FontFeature.tabularFigures()`.
+
+---
+
+## Lo que se descartó, y por qué
+
+- **Neón cian sobre negro con cristal esmerilado.** Es el default de "futurista" y el
+  `BackdropFilter` está prohibido por rendimiento.
+- **Fondo crema, serif de alto contraste y terracota.** Es el default de "hogareño". `cantera` se
+  le parece de lejos, así que la diferencia tiene que ser real: **no es un fondo, es una regla.**
+  El cálido aparece únicamente sobre tus datos, nunca como ambiente.
+- **Marcadores numerados 01 / 02 / 03.** Aquí no hay secuencia que contar.
+- **Redondear la placa de ruta.** La señalética no redondea. Es la herencia literal de las
+  unidades y se queda en radio `0`.
+
+---
+
+## Cómo verlo
+
+```bash
+flutter run          # y de ahí al botón "Ver el design system"
+```
+
+`/debug/gallery` monta cada componente en todos sus estados, con interruptor de tema y escala de
+texto hasta 200 %. Sin dispositivo, las mismas piezas están fotografiadas en
+`test/design/goldens/` y se regeneran con `flutter test --update-goldens`.

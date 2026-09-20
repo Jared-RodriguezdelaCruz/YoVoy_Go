@@ -61,7 +61,7 @@ verse mejor, es comportarse mejor cuando los datos son malos** — que es siempr
 | Mapa | `flutter_map` + MapLibre/tiles vectoriales (§7) |
 | Geometría | `latlong2` |
 | Formato | `intl` + `flutter_localizations` (locale `es_MX`) |
-| Tipografía | **Barlow** y **Barlow Semi Condensed** empaquetadas en `assets/fonts/` (OFL). Sin paquete adicional |
+| Tipografía | **Barlow**, **Barlow Semi Condensed** y **Barlow Condensed** empaquetadas en `assets/fonts/` (OFL). Sin paquete adicional |
 | Tests | `flutter_test`, `mocktail` |
 
 **Riverpod — advertencia crítica.** La mayor parte del material público de Riverpod es de
@@ -306,20 +306,42 @@ Tres principios:
 
 ### 6.2 Color
 
-```
-// TODO: extraer el verde institucional real con cuentagotas de las unidades
-// o la app oficial antes de codificar. No inventar el hex.
-brandGreen      #00854A   ← PLACEHOLDER, verificar
+**El color institucional es índigo, no verde.** Extraído con cuentagotas el 20 de septiembre
+de 2026 del splash y el ícono de la app oficial (`com.mx.nrtec.agsstopbus`) y de la fotografía
+oficial de la Tarjeta Soluciones YoVoy: `#3A3578`, dominante en las tres fuentes. Las versiones
+anteriores de este documento afirmaban que el sistema era verde y fijaban un `#00854A` que nadie
+había medido; era falso, y además daba 3.95:1 contra la superficie oscura, por debajo del piso de
+la sección 11.
 
-surface         #0E1412   base neutra oscura con tinte verdoso frío
-surfaceRaised   #17201C
-surfaceSunken   #080C0A
-outline         #2C3A33
-textPrimary     #F2F5F3
-textSecondary   #9BABA3
+Dos hex por token y por tema, como ya hacían los semánticos: el índigo institucional es oscuro y
+sobre fondo negro no se lee.
+
+```
+brand           #3A3578   tema claro  — el índigo institucional, tal cual
+brand           #8179DC   tema oscuro — el mismo índigo aclarado hasta pasar 4.5:1
+
+cantera         #8A4B32   tema claro  — SOLO lo que el teléfono aprendió de ti
+cantera         #E0A98F   tema oscuro
+
+surface         #0E1016   base neutra oscura con tinte índigo frío
+surfaceRaised   #171A24
+surfaceSunken   #080910
+outline         #2A2E3D
+textPrimary     #F2F3F7
+textSecondary   #A2A7BD
+lumen           blanco al 4 % — el tinte del gradiente de superficie (§6.4)
 ```
 
-Semánticos de tiempo real (**no reutilizan el verde de marca**):
+**Regla de `cantera`: el índigo es del sistema, lo cálido es tuyo.** El índigo y los cuatro
+semánticos son la voz del sistema —dónde viene el camión, qué tan fresco es el dato—. `cantera`,
+el rosa de la piedra con la que está construida Aguascalientes, marca únicamente lo que el
+teléfono aprendió del usuario: favoritos, rutas de siempre, "sal en 6 min". El color dice de
+quién es el dato, y eso es información, no decoración.
+
+`cantera` y `stale` son los dos cálidos del sistema y los separan 26° de tono. **Regla dura:
+`cantera` jamás aparece en la misma fila que un estado de frescura.**
+
+Semánticos de tiempo real (**no reutilizan el índigo de marca**):
 
 ```
 live            #3DDC84   dato fresco, < 60 s
@@ -328,8 +350,8 @@ unknown         #7A8A82   sin dato
 alert           #E5484D   alerta de servicio
 ```
 
-**Regla: un color, un significado.** El verde de marca identifica a la app y marca acciones
-primarias. **No** significa "camión llegando". Si el mismo verde es marca y estado, el
+**Regla: un color, un significado.** El índigo de marca identifica a la app y marca acciones
+primarias. **No** significa "camión llegando". Si el mismo color es marca y estado, el
 usuario no puede leer estado.
 
 Color de ruta: viene de `Route.color` (campo GTFS). Cuando falte, generarlo determinísticamente
@@ -342,17 +364,20 @@ invertidos. El tema oscuro es el default de la app.
 
 ### 6.3 Tipografía
 
-Una sola familia, dos anchos. **Barlow** — grotesca de linaje señalético, contrapunto
-industrial, excelente en tamaños chicos, ancho semi-condensado disponible.
+Una sola familia, tres anchos. **Barlow** — grotesca de linaje señalético, contrapunto
+industrial, excelente en tamaños chicos, con dos anchos estrechos disponibles.
 
-- `Barlow Semi Condensed` — números, códigos de ruta, ETAs, datos densos.
+- `Barlow Condensed` — **solo el contador de minutos**, con tracking de −2 %. Condensada y
+  apretada se lee como instrumento de tablero y no como texto grande, que es justo la
+  diferencia entre un dato y una decoración.
+- `Barlow Semi Condensed` — números, códigos de ruta, datos densos.
 - `Barlow` — texto corrido, etiquetas, botones.
 
 Escala (razón 1.25, sentence case en todo):
 
 | Rol | Tamaño / peso | Uso |
 |---|---|---|
-| `etaDisplay` | 48 / 700 semi-cond. | El número grande de minutos |
+| `etaDisplay` | 48 / 700 condensada, tracking −2 % | El número grande de minutos |
 | `routeBadge` | 20 / 700 semi-cond. | Código de ruta en su placa |
 | `title` | 22 / 600 | Nombre de parada, encabezado de hoja |
 | `body` | 16 / 400 | Texto general |
@@ -377,6 +402,14 @@ Radios con jerarquía, no uno solo para todo:
 
 Sombras: ninguna. La jerarquía se resuelve con superficie y borde (`outline`, 1px). En tema
 oscuro, la sombra gris genérica no comunica nada y cuesta render.
+
+**Pero prohibir la sombra no obliga a que todo sea plano.** Las superficies elevadas se
+iluminan: un gradiente vertical de 4 % que baja desde el borde superior y un filo de 1px un
+punto más claro que la superficie. Un panel encendido, una lámpara en un cuarto. Cuesta un
+`LinearGradient`: cero `saveLayer`, cero `BackdropFilter`, nada de lo que prohíbe la §7.
+
+Los radios no se mueven. La placa de ruta sigue en `0` porque la señalética no redondea, y esa
+es la herencia directa de las unidades.
 
 ### 6.5 Motion
 
@@ -404,6 +437,11 @@ Construir en `design/components/` antes que cualquier pantalla:
 - `VehicleMarker` — ícono direccional; degrada a círculo sin dirección cuando `bearing` es null.
 - `EmptyState` — ícono, qué pasó, qué hacer. Nunca solo "No hay datos".
 - `ErrorState` — qué falló, botón de reintentar.
+- `LitSurface` — el panel encendido de §6.4. Sustituye a la sombra prohibida.
+- `RouteStrip` — **la firma de la app**. La línea de ruta con las paradas como marcas y el
+  vehículo como frontera: lo recorrido en `cantera`, lo que falta en el índigo de marca, el
+  vehículo con halo. Cuando el dato vence la luz se apaga —sin halo, el índigo se vuelve gris,
+  el trazo se puntea— y el texto se queda, porque el color nunca carga el significado solo.
 
 ---
 
@@ -513,8 +551,13 @@ sentimos, no fue posible obtener la información en este momento".
 - No imitar el ícono ni la identidad de la app oficial.
 - Pantalla "Acerca de" con aviso: app independiente, sin afiliación con CMOV ni con el
   operador del sistema.
-- El verde se conserva porque es el color del sistema de transporte y da reconocimiento
-  inmediato. La identidad (nombre, ícono, tipografía, layout) es propia.
+- **El índigo `#3A3578` se conserva porque es el color del sistema de transporte** y da
+  reconocimiento inmediato. Está extraído con cuentagotas de la app oficial y de la Tarjeta
+  Soluciones YoVoy (§6.2), no inventado. La identidad (nombre, ícono, tipografía, layout) es
+  propia.
+- **Los acentos neón del wordmark oficial** —cian `#10AFE6`, lima `#BDD52F`, magenta `#EC3B94`,
+  amarillo `#FFD200`— se descartan a propósito: adoptarlos acercaría la app a imitar la
+  identidad oficial, y el lima compite con los colores de estado.
 - **Atribución de los datos (enmienda de la fase 4a).** La pantalla "Acerca de" y
   `assets/mock/LICENSE.txt` llevan: *Datos de transporte: Gobierno del Estado de
   Aguascalientes (CMOV), vía el Hub de Datos de Transporte Público de Codeando México.

@@ -5,7 +5,11 @@ Plan de construcción de la v1. El **qué** y el **por qué** viven en
 terminado**. Las features propuestas encima del spec, con su justificación, están en
 [`FEATURES.md`](FEATURES.md).
 
-**Estado:** fases 1, 2, 3 y 4a cerradas. Siguiente: fase 4b (`MockTransitRepository` y simulador).
+**Estado:** fases 1, 2, 3, 4a y 4b cerradas, más el repintado de la marca. Siguiente: fase 5, el
+mapa.
+
+La dirección visual completa —de dónde salió cada color, la regla que los organiza y la firma de la
+app— vive en [`DESIGN.md`](DESIGN.md).
 
 Regla de trabajo: **una fase por PR, y no se empieza la siguiente sin cerrar la anterior.** Las
 fases 1 a 9 son las de la sección 12 del spec. Los hitos marcados como **(extra)** no están en el
@@ -23,8 +27,8 @@ spec, pero sin ellos la app no es entregable.
 | 3 | Design system | 2 | ✅ cerrada |
 | — | **(extra)** Identidad visual: ícono y splash | 3 | ⏳ |
 | 4a | Dataset del simulador | 2 | ✅ cerrada |
-| 4b | `MockTransitRepository` y simulador | 2, 4a | ⏳ siguiente |
-| 5 | Mapa | 3, 4b | ⏳ |
+| 4b | `MockTransitRepository` y simulador | 2, 4a | ✅ cerrada |
+| 5 | Mapa | 3, 4b | ⏳ siguiente |
 | 6 | Parada y ruta | 5 | ⏳ |
 | 7 | Planificador | 6 | ⏳ |
 | 8 | Favoritos y ajustes | 6 | ⏳ |
@@ -74,7 +78,8 @@ reescrito.
 **Verificado.** `dart analyze` en cero, 11 tests en verde, `flutter build apk --debug` con
 `package: name='mx.yovoygo.app'` y `application-label: 'Yo Voy Go'`.
 
-**Pendiente heredado.** Correr la app en un dispositivo Android real: no había ninguno conectado.
+**Pendiente heredado.** Corre en emulador (Pixel 8, API 36) desde el 20 de septiembre de 2026.
+Falta hardware real: un emulador no dice nada sobre fps ni sobre legibilidad con sol en la cara.
 
 ---
 
@@ -149,7 +154,7 @@ ocho componentes · galería en `/debug/gallery` · cuatro imágenes de referenc
 **Tareas**
 
 - [x] Tokens de superficie, contorno y texto, más los semánticos de tiempo real, que **no**
-      reutilizan el verde de marca. Verificado por test en los dos temas.
+      reutilizan el color de marca. Verificado por test en los dos temas.
 - [x] Paleta de doce tonos para rutas sin `color`, asignada con un FNV-1a determinista desde el
       `routeId` —`String.hashCode` no sirve: cambia entre ejecuciones— y con contraste mínimo
       4.5:1 contra la superficie oscura.
@@ -180,8 +185,10 @@ minutos con el dato vencido. 111 tests en verde y `dart analyze` en cero.
 3. **La placa se estiraba de lado a lado dentro de un `Wrap`.** Un `Container` con `alignment` crece
    hasta el ancho que le den. Lo delató la imagen de referencia de la paleta.
 
-**Decisión pendiente.** El verde institucional real. Hoy `#00854A` es un placeholder y el spec pide
-extraerlo con cuentagotas de las unidades o la app oficial, no inventarlo.
+**Decisión cerrada, y no como se esperaba.** El color institucional se extrajo con cuentagotas el
+20 de septiembre de 2026 y resultó ser **índigo `#3A3578`**, no verde: ver
+[el repintado](#extra-el-color-institucional-y-la-dirección-visual). Los tokens de esta fase se
+repintaron completos.
 
 ---
 
@@ -255,7 +262,33 @@ que el mismo feed declara —la R-08 es `#C4CBA6` con texto `#F0F0F0`, 1.5:1—,
 
 ---
 
-## Fase 4b — `MockTransitRepository` y simulador
+## (extra) El color institucional y la dirección visual ✅
+
+**Objetivo.** Cerrar el `TODO` que la sección 6.2 del spec arrastraba desde la fase 1: extraer el
+color institucional con cuentagotas de las unidades o de la app oficial, y **no inventarlo**.
+
+**Lo que salió.** No era verde. Midiendo píxeles del splash y el ícono de la app oficial
+(`com.mx.nrtec.agsstopbus`) y de la fotografía oficial de la Tarjeta Soluciones YoVoy, el color
+dominante en las tres fuentes es **índigo `#3A3578`**. El `#00854A` que este proyecto usó durante
+tres fases salió de una hoja en blanco.
+
+**El daño colateral que encontró la medición.** Ese verde daba **3.95:1** contra la superficie
+oscura: llevaba tres fases sin pasar el piso de 4.5:1 que el propio spec exige, y no había test que
+lo vigilara. Ahora lo hay.
+
+**Entregado.** Tokens repintados en los dos temas con el patrón de dos hex por tema que ya usaban
+los semánticos (`brand` `#3A3578` claro / `#8179DC` oscuro) · superficies enfriadas hacia el índigo
+· `cantera` con su regla de uso · Barlow Condensed como tercer ancho para el contador ·
+`LitSurface` y `RouteStrip` · cinco imágenes de referencia regeneradas · [`DESIGN.md`](DESIGN.md) ·
+enmiendas al spec en §2, §6.2, §6.3, §6.4, §6.6 y §10.
+
+**Lo que se descartó.** Los acentos neón del wordmark oficial —cian, lima, magenta, amarillo—. Se
+midieron y no se adoptan: acercarían la app a imitar la identidad oficial, que la sección 10
+prohíbe, y el lima compite con los colores de estado.
+
+---
+
+## Fase 4b — `MockTransitRepository` y simulador ✅
 
 **Objetivo.** Simular un sistema de transporte real **con sus fallas**. Un mock de datos perfectos
 produce una UI que se rompe en producción.
@@ -266,33 +299,52 @@ esqueleto · panel de control en `/debug/simulator`.
 
 **Tareas**
 
-- [ ] Interfaz `TransitRepository` con los nueve métodos del contrato, tal cual.
-- [ ] `MockTransitRepository` leyendo los JSON de `assets/mock/`. Son 2.8 MB: el parseo va fuera
+- [x] Interfaz `TransitRepository` con los nueve métodos del contrato, tal cual.
+- [x] `MockTransitRepository` leyendo los JSON de `assets/mock/`. Son 2.8 MB: el parseo va fuera
       del hilo de UI.
-- [ ] Flota según `service.json`: 323 vehículos repartidos por frecuencia, con `R_50B` y `R_52`
+- [x] Flota según `service.json`: 323 vehículos repartidos por frecuencia, con `R_50B` y `R_52`
       sin servicio. El panel de debug puede recortar el número para perfilar.
-- [ ] Movimiento: cada vehículo interpolado sobre los puntos de su `shape` a 20–40 km/h, con
+- [x] Movimiento: cada vehículo interpolado sobre los puntos de su `shape` a 20–40 km/h, con
       paradas de 15–30 s en cada `Stop`.
-- [ ] Cadencia de reporte de **30 s**, no por frame: es la cadencia real y obliga a la UI a
+- [x] Cadencia de reporte de **30 s**, no por frame: es la cadencia real y obliga a la UI a
       interpolar.
-- [ ] Ruido GPS de 5–20 m perpendicular al trazo.
-- [ ] Pérdida de señal: ~10 % de los vehículos desaparece de 1 a 3 minutos y reaparece adelantado.
-- [ ] `bearing` nulo en ~15 % de los reportes.
-- [ ] Latencia aleatoria de 200–1500 ms en todos los `Future`, y ~5 % de llamadas que lanzan
+- [x] Ruido GPS de 5–20 m perpendicular al trazo.
+- [x] Pérdida de señal: ~10 % de los vehículos desaparece de 1 a 3 minutos y reaparece adelantado.
+- [x] `bearing` nulo en ~15 % de los reportes.
+- [x] Latencia aleatoria de 200–1500 ms en todos los `Future`, y ~5 % de llamadas que lanzan
       excepción.
-- [ ] `planTrip` por proximidad contra los cuatro pares precocinados; lista vacía si el origen o el
+- [x] `planTrip` por proximidad contra los cuatro pares precocinados; lista vacía si el origen o el
       destino no cae cerca de ninguno.
-- [ ] `RemoteTransitRepository`: esqueleto con `UnimplementedError` en cada método y un
+- [x] `RemoteTransitRepository`: esqueleto con `UnimplementedError` en cada método y un
       `// TODO(api):` indicando qué endpoint GTFS-RT lo alimentaría. No se implementa; existe para
       que la forma del código ya contemple su llegada.
-- [ ] `transitRepositoryProvider` eligiendo implementación con
+- [x] `transitRepositoryProvider` eligiendo implementación con
       `bool.fromEnvironment('USE_REMOTE_API')`.
-- [ ] Panel de debug con los parámetros del simulador ajustables en vivo.
-- [ ] Tests: con semilla fija el simulador es determinista, y cada falla se puede forzar desde el
+- [x] Panel de debug con los parámetros del simulador ajustables en vivo.
+- [x] Tests: con semilla fija el simulador es determinista, y cada falla se puede forzar desde el
       panel.
 
-**Cierre.** Ninguna capa superior sabe qué implementación está activa y ningún widget importa una
-concreta.
+**Cierre.** `dart analyze` en cero y **183 tests en verde**. Ninguna capa superior sabe qué
+implementación está activa: el único import de una concreta fuera de `core/data/` es el del panel
+de debug, que existe precisamente para inspeccionarla.
+
+**Cómo verlo.** `/debug/simulator`, desde el segundo botón del placeholder del mapa: la flota
+reportando en vivo, los que se quedaron sin señal, y los controles para subir la latencia, forzar
+errores y apagar los GPS. Los botones **Perfecto** y **Hostil** son los dos extremos.
+
+**Tres decisiones**
+
+1. **La posición es una función pura del reloj.** `positionsAt(t)` calcula dónde va cada vehículo
+   desde una época fija, en vez de acumular estado en un `Timer`. Así el simulador es determinista
+   —un test puede afirmar una coordenada— y no se desincroniza cuando la app pasa a background.
+2. **El trazo se convierte en línea de tiempo una vez por `shape`, no por vehículo.** Son 92 trazos
+   para 323 vehículos: proyectar cada parada sobre la polilínea 323 veces habría sido tirar trabajo.
+3. **La latencia y los errores tienen su propio generador**, aparte del de movimiento. Subir la
+   tasa de error en el panel no teletransporta la flota.
+
+**Lo que encontró el test, no la vista.** El panel de debug desbordaba 40 px a lo ancho de un
+teléfono: la etiqueta "Vehículos que pierden señal" no cabía junto a su valor. Ahora la etiqueta
+cede y el valor se queda entero.
 
 ---
 
@@ -465,7 +517,7 @@ que les toca.
 
 | Decisión | Se vuelve bloqueante en | Nota |
 |---|---|---|
-| Verde institucional real | Fase 3 | `#00854A` es placeholder; el spec pide extraerlo con cuentagotas, no inventarlo |
+| ~~Verde institucional real~~ | ~~Fase 3~~ | **Resuelta**: no era verde. Índigo `#3A3578`, extraído de la app oficial y de la Tarjeta Soluciones YoVoy el 20 de septiembre de 2026. Ver [`DESIGN.md`](DESIGN.md) |
 | Proveedor de tiles, caché en disco y atribución | Fase 5 | Fuera de la tabla de stack de la sección 2 |
 | Paquete de ubicación y permisos | Fase 5 | Fuera de la tabla de stack; además necesita textos de permiso en es_MX en el manifest y el `Info.plist` |
 | `shared_preferences` o `drift` | Fase 8 | El spec pide elegir y justificar |

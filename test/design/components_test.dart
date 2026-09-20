@@ -497,6 +497,123 @@ void main() {
     });
   });
 
+  group('RouteStrip', () {
+    const List<String> paradas = <String>[
+      'Bonanza',
+      'Héroes',
+      'CBTIS',
+      'Centro',
+    ];
+
+    testWidgets('con dato en vivo la tira dice que el camión viene', (
+      WidgetTester tester,
+    ) async {
+      await pumpComponent(
+        tester,
+        const RouteStrip(
+          stops: paradas,
+          vehicleProgress: 0.5,
+          dataAge: Duration(seconds: 20),
+        ),
+      );
+
+      expect(find.text('en vivo'), findsOneWidget);
+      expect(find.text('Bonanza'), findsOneWidget);
+      expect(find.text('Centro'), findsOneWidget);
+      expect(
+        tester.getSemantics(find.byType(RouteStrip)).label,
+        contains('Vehículo en camino'),
+      );
+    });
+
+    testWidgets('con el dato vencido la luz se apaga', (
+      WidgetTester tester,
+    ) async {
+      await pumpComponent(
+        tester,
+        const RouteStrip(
+          stops: paradas,
+          vehicleProgress: 0.5,
+          dataAge: Duration(minutes: 9),
+        ),
+      );
+
+      // Apagada no significa muda: el estado se dice con palabras, porque hay
+      // daltonismo y hay sol directo.
+      expect(find.text('sin señal'), findsOneWidget);
+    });
+
+    testWidgets('el estado no depende solo del color', (
+      WidgetTester tester,
+    ) async {
+      for (final ({Duration age, String copy}) caso
+          in <({Duration age, String copy})>[
+            (age: Duration(seconds: 10), copy: 'en vivo'),
+            (age: Duration(seconds: 120), copy: 'hace 2 min'),
+            (age: Duration(minutes: 9), copy: 'sin señal'),
+          ]) {
+        await pumpComponent(
+          tester,
+          RouteStrip(
+            stops: paradas,
+            vehicleProgress: 0.3,
+            dataAge: caso.age,
+          ),
+        );
+
+        expect(find.text(caso.copy), findsOneWidget);
+      }
+    });
+
+    testWidgets('se anuncia completa para quien no la ve', (
+      WidgetTester tester,
+    ) async {
+      await pumpComponent(
+        tester,
+        const RouteStrip(
+          stops: paradas,
+          vehicleProgress: 0.5,
+          dataAge: Duration(minutes: 9),
+        ),
+      );
+
+      expect(
+        tester
+            .getSemantics(find.byType(RouteStrip))
+            .label,
+        allOf(contains('Bonanza'), contains('Sin señal'), contains('Centro')),
+      );
+    });
+  });
+
+  group('LitSurface', () {
+    testWidgets('la superficie se enciende con un gradiente, no con sombra', (
+      WidgetTester tester,
+    ) async {
+      await pumpComponent(tester, const LitSurface(child: Text('panel')));
+
+      final BoxDecoration decoration = _plateOf(tester, 'panel');
+
+      // La sección 6.4 del spec prohíbe las sombras. Esta es su sustituta.
+      expect(decoration.gradient, isNotNull);
+      expect(decoration.boxShadow, anyOf(isNull, isEmpty));
+    });
+
+    testWidgets('en los dos temas, y siempre sin sombra', (
+      WidgetTester tester,
+    ) async {
+      for (final Brightness brightness in Brightness.values) {
+        await pumpComponent(
+          tester,
+          const LitSurface(child: Text('panel')),
+          brightness: brightness,
+        );
+
+        expect(_plateOf(tester, 'panel').boxShadow, anyOf(isNull, isEmpty));
+      }
+    });
+  });
+
   group('AppMotion', () {
     testWidgets('las animaciones se anulan si el sistema lo pide', (
       WidgetTester tester,

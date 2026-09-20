@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 /// Los seis roles tipográficos de la sección 6.3 del spec.
 ///
-/// Una sola familia en dos anchos, ya empaquetada en `assets/fonts/`:
-/// `BarlowSemiCondensed` para números, códigos de ruta y datos densos;
-/// `Barlow` para texto corrido.
+/// Una sola familia en tres anchos, ya empaquetada en `assets/fonts/`:
+/// `BarlowCondensed` para el contador de minutos, `BarlowSemiCondensed` para
+/// números, códigos de ruta y datos densos, y `Barlow` para texto corrido.
 ///
 /// Los números llevan [FontFeature.tabularFigures]: un contador que cambia de
 /// ancho al pasar de 9 a 10 se ve barato y salta.
@@ -15,16 +15,28 @@ abstract final class AppTypography {
   /// Números, códigos de ruta, ETAs.
   static const String condensedFamily = 'BarlowSemiCondensed';
 
+  /// El ancho más estrecho, reservado **solo al contador de minutos**.
+  ///
+  /// Apretada y con tracking negativo se lee como instrumento de tablero y no
+  /// como texto grande, que es la diferencia entre un dato y una decoración.
+  /// Usarla en cualquier otro rol la gasta.
+  static const String tightFamily = 'BarlowCondensed';
+
   static const List<FontFeature> _tabular = <FontFeature>[
     FontFeature.tabularFigures(),
   ];
 
   /// El número grande de minutos. Su lugar natural es el modo paradero.
+  ///
+  /// El único rol en [tightFamily]. El tracking de −2 % —los −0.96 de abajo
+  /// sobre 48 px— es lo que lo vuelve instrumento: sin él, 48 px de condensada
+  /// se leen como un titular.
   static const TextStyle etaDisplay = TextStyle(
-    fontFamily: condensedFamily,
+    fontFamily: tightFamily,
     fontSize: 48,
     fontWeight: FontWeight.w700,
     height: 1,
+    letterSpacing: -0.96,
     fontFeatures: _tabular,
   );
 

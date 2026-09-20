@@ -52,19 +52,26 @@ void main() {
       }
     });
 
-    test('ninguno repite un color de estado de tiempo real', () {
+    test('ninguno repite un color con significado propio', () {
       // Un color, un significado: si una ruta fuera exactamente del verde de
-      // "en vivo", el usuario dejaría de poder leer el estado.
-      const List<Color> semanticos = <Color>[
-        Color(0xFF3DDC84),
-        Color(0xFFF2B705),
-        Color(0xFF7A8A82),
-        Color(0xFFE5484D),
-        Color(0xFF00854A),
+      // "en vivo", el usuario dejaría de poder leer el estado. Lo mismo con la
+      // marca y con cantera, que dice de quién es el dato.
+      final List<Color> reservados = <Color>[
+        for (final AppColors colors in <AppColors>[
+          AppColors.dark,
+          AppColors.light,
+        ]) ...<Color>[
+          colors.live,
+          colors.stale,
+          colors.unknown,
+          colors.alert,
+          colors.brand,
+          colors.cantera,
+        ],
       ];
 
       for (final Color tone in RoutePalette.tones) {
-        expect(semanticos, isNot(contains(tone)));
+        expect(reservados, isNot(contains(tone)));
       }
     });
 
@@ -201,6 +208,52 @@ void main() {
             reason: 'el estado $estado no es legible sobre ${colors.surface}',
           );
         }
+      }
+    });
+
+    test('la marca se lee sobre su propia superficie, en los dos temas', () {
+      // Este test faltaba, y su ausencia costó caro: el `#00854A` que la app
+      // usó durante tres fases daba 3.95:1 contra la superficie oscura y nadie
+      // se enteró. El índigo institucional es oscuro, así que el tema oscuro
+      // usa el mismo color aclarado.
+      for (final AppColors colors in <AppColors>[
+        AppColors.dark,
+        AppColors.light,
+      ]) {
+        expect(
+          contrastRatio(colors.brand, colors.surface),
+          greaterThanOrEqualTo(4.5),
+          reason: 'la marca ${colors.brand} no se lee sobre ${colors.surface}',
+        );
+      }
+    });
+
+    test('la marca del tema claro es el índigo institucional, tal cual', () {
+      // Extraído con cuentagotas de la app oficial y de la Tarjeta Soluciones
+      // YoVoy. No se redondea ni se "mejora": es el color del sistema.
+      expect(AppColors.light.brand, const Color(0xFF3A3578));
+    });
+
+    test('cantera se lee, y no se confunde con ningún estado', () {
+      for (final AppColors colors in <AppColors>[
+        AppColors.dark,
+        AppColors.light,
+      ]) {
+        expect(
+          contrastRatio(colors.cantera, colors.surface),
+          greaterThanOrEqualTo(4.5),
+        );
+        expect(
+          contrastRatio(colors.onCantera, colors.cantera),
+          greaterThanOrEqualTo(4.5),
+        );
+        // Un color, un significado: cantera marca lo que es tuyo y no puede
+        // ser además un estado del dato.
+        expect(colors.cantera, isNot(colors.live));
+        expect(colors.cantera, isNot(colors.stale));
+        expect(colors.cantera, isNot(colors.unknown));
+        expect(colors.cantera, isNot(colors.alert));
+        expect(colors.cantera, isNot(colors.brand));
       }
     });
 

@@ -80,6 +80,8 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
               ),
               children: const <Widget>[
                 _PaletteSection(),
+                _LitSurfaceSection(),
+                _RouteStripSection(),
                 _TypographySection(),
                 _RouteBadgeSection(),
                 _EtaChipSection(),
@@ -179,8 +181,9 @@ class _PaletteSection extends StatelessWidget {
     return _Section(
       title: 'Color',
       note:
-          'Los estados de tiempo real no comparten color con la marca: '
-          'un color, un significado.',
+          'El índigo es del sistema; cantera marca solo lo que el teléfono '
+          'aprendió de ti. Los estados de tiempo real no comparten color con '
+          'la marca: un color, un significado.',
       child: Wrap(
         spacing: Spacing.md,
         runSpacing: Spacing.md,
@@ -190,6 +193,7 @@ class _PaletteSection extends StatelessWidget {
           _Swatch(color: colors.surfaceSunken, label: 'sunken'),
           _Swatch(color: colors.outline, label: 'outline'),
           _Swatch(color: colors.brand, label: 'marca'),
+          _Swatch(color: colors.cantera, label: 'cantera'),
           _Swatch(color: colors.live, label: 'en vivo'),
           _Swatch(color: colors.stale, label: 'viejo'),
           _Swatch(color: colors.unknown, label: 'sin dato'),
@@ -225,6 +229,122 @@ class _Swatch extends StatelessWidget {
   }
 }
 
+class _LitSurfaceSection extends StatelessWidget {
+  const _LitSurfaceSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors colors = context.colors;
+
+    return _Section(
+      title: 'LitSurface',
+      note:
+          'El spec prohíbe las sombras, pero eso no obliga a que todo sea '
+          'plano: un gradiente de 4 % y un filo de 1 px arriba. Cuesta un '
+          'LinearGradient, no un saveLayer.',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          LitSurface(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  'Superficie encendida',
+                  style: AppTypography.title.copyWith(
+                    color: colors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: Spacing.xs),
+                Text(
+                  'La luz baja desde el borde superior y se acaba a dos '
+                  'tercios.',
+                  style: AppTypography.body.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: Spacing.md),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: colors.surfaceRaised,
+              borderRadius: AppRadius.cardRadius,
+              border: Border.all(
+                color: colors.outline,
+                width: AppSizes.outlineWidth,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(Spacing.lg),
+              child: Text(
+                'La misma superficie sin encender, para comparar.',
+                style: AppTypography.body.copyWith(color: colors.textSecondary),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RouteStripSection extends StatelessWidget {
+  const _RouteStripSection();
+
+  static const List<String> _paradas = <String>[
+    'Bonanza',
+    'Héroes',
+    'CBTIS',
+    'Centro',
+    'Terminal Sur',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return _Section(
+      title: 'RouteStrip',
+      note:
+          'La firma de la app. Lo recorrido en cantera, lo que falta en el '
+          'índigo de marca, el vehículo con halo. Cuando el dato vence, la luz '
+          'se apaga.',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const <Widget>[
+          _Labeled(
+            label: 'en vivo',
+            child: RouteStrip(
+              stops: _paradas,
+              vehicleProgress: 0.55,
+              dataAge: Duration(seconds: 20),
+            ),
+          ),
+          SizedBox(height: Spacing.lg),
+          _Labeled(
+            label: 'dato viejo',
+            child: RouteStrip(
+              stops: _paradas,
+              vehicleProgress: 0.38,
+              dataAge: Duration(seconds: 120),
+            ),
+          ),
+          SizedBox(height: Spacing.lg),
+          _Labeled(
+            label: 'sin señal: la luz apagada',
+            child: RouteStrip(
+              stops: _paradas,
+              vehicleProgress: 0.22,
+              dataAge: Duration(minutes: 9),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TypographySection extends StatelessWidget {
   const _TypographySection();
 
@@ -235,7 +355,8 @@ class _TypographySection extends StatelessWidget {
     return _Section(
       title: 'Tipografía',
       note:
-          'Barlow y Barlow Semi Condensed. Los números, con cifras tabulares.',
+          'Barlow en tres anchos. El contador va en Barlow Condensed con '
+          'tracking negativo; los números, con cifras tabulares.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -310,9 +431,10 @@ class _RouteBadgeSection extends StatelessWidget {
               _Labeled(
                 label: 'color de GTFS',
                 child: RouteBadge(
-                  shortName: '31-A',
-                  routeId: 'r31',
-                  gtfsColor: '00854A',
+                  shortName: 'R33',
+                  routeId: 'R_33',
+                  gtfsColor: '652391',
+                  gtfsTextColor: 'F0F0F0',
                 ),
               ),
             ],

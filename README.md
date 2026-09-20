@@ -23,16 +23,23 @@ solo explica cómo trabajar en el repo.
 Simulación de punta a punta (`MockTransitRepository`) sobre **datos reales**. Cero integraciones con
 APIs externas: el GTFS oficial está empaquetado, no se descarga.
 
-**Fases 1, 2, 3 y 4a cerradas**: base y router, modelos GTFS, el design system con sus ocho
-componentes, y el dataset —48 rutas y 1 507 paradas de Aguascalientes. Siguiente: fase 4b, el
-repositorio mock y el simulador.
+**Fases 1, 2, 3, 4a y 4b cerradas**, más el repintado de la marca: base y router, modelos GTFS, el
+design system, el dataset —48 rutas y 1 507 paradas de Aguascalientes— y el simulador, con 323
+camiones moviéndose sobre trazos reales. Siguiente: fase 5, el mapa.
 
-La app ya se ve: en builds de debug, el botón del mapa abre `/debug/gallery`, la galería con cada
-componente en todos sus estados, con interruptor de tema y escala de texto hasta 200 %. Sin
-dispositivo a la mano, las mismas piezas están fotografiadas en `test/design/goldens/`.
+**El color institucional es índigo `#3A3578`, no verde.** Se extrajo con cuentagotas de la app
+oficial y de la Tarjeta Soluciones YoVoy, como pedía el spec. La dirección visual completa está en
+[`DESIGN.md`](DESIGN.md).
+
+La app corre en emulador (Pixel 8, API 36). En builds de debug, el placeholder del mapa lleva a dos
+pantallas: `/debug/gallery`, la galería con cada componente en todos sus estados, con interruptor de
+tema y escala de texto hasta 200 %; y `/debug/simulator`, el panel del simulador, donde se ve la
+flota reportando y se le sube la latencia, se fuerzan errores y se apagan los GPS. Sin dispositivo a la mano, las mismas piezas están fotografiadas en
+`test/design/goldens/`. Falta probarla en hardware real: un emulador no dice nada sobre fps.
 
 El plan completo —las nueve fases con sus entregables, tareas y criterios de cierre, más las
-decisiones que siguen abiertas— vive en [`ROADMAP.md`](ROADMAP.md). Una fase por PR, y no se
+decisiones que siguen abiertas— vive en [`ROADMAP.md`](ROADMAP.md); la dirección visual, en
+[`DESIGN.md`](DESIGN.md). Una fase por PR, y no se
 empieza la siguiente sin cerrar la anterior.
 
 ---
@@ -222,7 +229,7 @@ lib/
   core/
     config/freshness.dart      umbrales de frescura
     models/                    modelos GTFS + converters, con models.dart de barril
-    data/                      TransitRepository + mock/ + remote/ (fase 4)
+    data/                      TransitRepository + mock/ (dataset y simulador) + remote/
     utils/
   design/
     theme.dart                 temas claro y oscuro sobre Material 3
@@ -230,12 +237,13 @@ lib/
     components/                los ocho componentes compartidos
     gallery/                   galería de debug, montada solo bajo kDebugMode
   features/
+    debug/                     panel del simulador, solo bajo kDebugMode
     map/ stop/ route/ planner/ favorites/ settings/
       application/             providers, casos de uso, modelos de vista
       presentation/            widgets, sin lógica ni acceso a repos
       data/                    solo si la feature tiene fuentes propias
 assets/
-  fonts/                       Barlow y Barlow Semi Condensed (OFL)
+  fonts/                       Barlow en sus tres anchos (OFL)
   mock/                        dataset del simulador, generado (CC BY-SA 4.0)
 test/                          espeja la estructura de lib/
 tool/
@@ -261,6 +269,7 @@ Reglas que se revisan en cada PR:
 | `/favorites` | `favorites` | Favoritos |
 | `/settings` | `settings` | Ajustes |
 | `/debug/gallery` | `gallery` | Galería del design system (solo en debug) |
+| `/debug/simulator` | `simulator` | Panel del simulador (solo en debug) |
 
 ---
 
@@ -311,6 +320,14 @@ flutter run --dart-define=USE_REMOTE_API=true   # reservado, aún sin implementa
   indicando qué endpoint GTFS-RT lo alimentaría. Existe para que la forma del código ya contemple
   su llegada.
 
+El simulador mueve **323 camiones** —el reparto sale de la frecuencia real de cada ruta— sobre los
+trazos del feed, reportando cada 30 s como el sistema de verdad. La posición es una función pura del
+reloj: con la misma semilla, dos corridas dan la misma coordenada, y por eso los tests pueden
+afirmar dónde va un camión. Encima de eso van las fallas de la sección 4.2 del spec: latencia de
+200–1500 ms, ~5 % de llamadas con excepción, ruido GPS de 5–20 m, ~10 % de vehículos que se quedan
+sin señal minutos enteros y ~15 % de reportes sin dirección. Todo se ajusta en vivo desde
+`/debug/simulator`.
+
 ---
 
 ## Accesibilidad
@@ -329,7 +346,7 @@ Piso no negociable, verificado por pantalla en la fase 9:
 
 ## Licencias
 
-Barlow y Barlow Semi Condensed se distribuyen bajo SIL Open Font License 1.1
+Barlow, Barlow Semi Condensed y Barlow Condensed se distribuyen bajo SIL Open Font License 1.1
 ([`assets/fonts/OFL.txt`](assets/fonts/OFL.txt)).
 
 Los datos de transporte de [`assets/mock/`](assets/mock/) son obra derivada del GTFS del Gobierno

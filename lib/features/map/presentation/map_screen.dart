@@ -16,13 +16,25 @@ class MapScreen extends StatelessWidget {
       title: 'Mapa',
       specSection: '8.1',
       phase: 5,
-      // Mientras la pantalla no existe, este es el único camino a la galería
-      // del design system. Desaparece con el placeholder.
+      // Mientras la pantalla no existe, estos son los únicos caminos a la
+      // galería y al panel del simulador. Desaparecen con el placeholder.
       action: kDebugMode
-          ? OutlinedButton.icon(
-              onPressed: () => context.goNamed(AppRoute.gallery.name),
-              icon: const Icon(Icons.palette_outlined),
-              label: const Text('Ver el design system'),
+          ? Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: <Widget>[
+                OutlinedButton.icon(
+                  onPressed: () => context.goNamed(AppRoute.gallery.name),
+                  icon: const Icon(Icons.palette_outlined),
+                  label: const Text('Ver el design system'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () => context.goNamed(AppRoute.simulator.name),
+                  icon: const Icon(Icons.directions_bus_outlined),
+                  label: const Text('Ver el simulador'),
+                ),
+              ],
             )
           : null,
     );

@@ -57,3 +57,9 @@ flutter:
           weight: 600
         - asset: assets/fonts/BarlowSemiCondensed-Bold.ttf
           weight: 700
+    # El tercer ancho existe para un solo rol: el contador de minutos. Apretada
+    # se lee como instrumento de tablero y no como texto grande.
+    - family: BarlowCondensed
+      fonts:
+        - asset: assets/fonts/BarlowCondensed-Bold.ttf
+          weight: 700

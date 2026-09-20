@@ -71,6 +71,20 @@ void main() {
     );
   });
 
+  testWidgets('la tira, encendida y apagada', (WidgetTester tester) async {
+    await _pumpSheet(
+      tester,
+      size: const Size(560, 700),
+      title: 'RouteStrip · la luz encendida y apagada',
+      child: const _StripSample(),
+    );
+
+    await expectLater(
+      find.byKey(_sheetKey),
+      matchesGoldenFile('goldens/route_strip.png'),
+    );
+  });
+
   testWidgets('el vacío, el error y el camión', (WidgetTester tester) async {
     await _pumpSheet(
       tester,
@@ -103,6 +117,9 @@ Future<void> _loadBarlow() async {
     AppTypography.condensedFamily: <String>[
       'assets/fonts/BarlowSemiCondensed-SemiBold.ttf',
       'assets/fonts/BarlowSemiCondensed-Bold.ttf',
+    ],
+    AppTypography.tightFamily: <String>[
+      'assets/fonts/BarlowCondensed-Bold.ttf',
     ],
   };
 
@@ -363,6 +380,52 @@ class _StatesSample extends StatelessWidget {
             VehicleMarker(color: color),
             VehicleMarker(color: color, bearing: 45, isStale: true),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+class _StripSample extends StatelessWidget {
+  const _StripSample();
+
+  static const List<String> _paradas = <String>[
+    'Bonanza',
+    'Héroes',
+    'CBTIS',
+    'Centro',
+    'Terminal Sur',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        // En vivo: el halo encendido y el índigo entero.
+        const RouteStrip(
+          stops: _paradas,
+          vehicleProgress: 0.55,
+          dataAge: Duration(seconds: 20),
+        ),
+        const RouteStrip(
+          stops: _paradas,
+          vehicleProgress: 0.38,
+          dataAge: Duration(seconds: 120),
+        ),
+        // Sin señal: sin halo, el índigo en gris y el trazo punteado.
+        const RouteStrip(
+          stops: _paradas,
+          vehicleProgress: 0.22,
+          dataAge: Duration(minutes: 9),
+        ),
+        LitSurface(
+          padding: const EdgeInsets.all(Spacing.md),
+          child: Text(
+            'Sal en 6 min para alcanzarlo',
+            style: AppTypography.body.copyWith(color: context.colors.cantera),
+          ),
         ),
       ],
     );
