@@ -22,19 +22,12 @@ solo explica cómo trabajar en el repo.
 
 Datos simulados de punta a punta (`MockTransitRepository`). Cero integraciones con APIs externas.
 
-| Fase | Contenido | Estado |
-|---|---|---|
-| 1 | Base: pubspec, análisis estricto, estructura, `go_router` con rutas vacías | ✅ |
-| 2 | Modelos GTFS con freezed + round-trip JSON | ⏳ |
-| 3 | Design system: tokens, temas, componentes, galería de debug | ⏳ |
-| 4 | Mock: dataset, simulador con sus fallas, panel de control | ⏳ |
-| 5 | Mapa: capa de rutas, marcadores interpolados, hoja inferior | ⏳ |
-| 6 | Pantallas de parada y de ruta | ⏳ |
-| 7 | Planificador con itinerarios mock | ⏳ |
-| 8 | Favoritos y ajustes | ⏳ |
-| 9 | Pulido: accesibilidad, rendimiento, los cuatro estados | ⏳ |
+**Fase 1 cerrada** (base: dependencias, análisis estricto, estructura y router). Siguiente: fase 2,
+modelos GTFS.
 
-Una fase por PR. No se empieza la siguiente sin cerrar la anterior.
+El plan completo —las nueve fases con sus entregables, tareas y criterios de cierre, más las
+decisiones que siguen abiertas— vive en [`ROADMAP.md`](ROADMAP.md). Una fase por PR, y no se
+empieza la siguiente sin cerrar la anterior.
 
 ---
 
