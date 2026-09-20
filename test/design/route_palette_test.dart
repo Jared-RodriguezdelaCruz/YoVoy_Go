@@ -115,6 +115,32 @@ void main() {
         );
       });
 
+      test('la tinta que declara GTFS se respeta si se puede leer', () {
+        // El feed oficial trae `route_text_color` en sus 48 rutas. Cuando es
+        // legible manda el feed: es parte de la identidad de la ruta.
+        expect(
+          RoutePalette.inkFor(const Color(0xFF1125FA), gtfsTextColor: 'F0F0F0'),
+          const Color(0xFFF0F0F0),
+        );
+      });
+
+      test('la tinta ilegible del feed cae a la calculada', () {
+        // La R-08 del feed es #C4CBA6 con tinta #F0F0F0: 1.5:1. El feed manda
+        // en identidad, no en legibilidad.
+        const Color r08 = Color(0xFFC4CBA6);
+        final Color tinta = RoutePalette.inkFor(r08, gtfsTextColor: 'F0F0F0');
+
+        expect(tinta, isNot(const Color(0xFFF0F0F0)));
+        expect(contrastRatio(tinta, r08), greaterThanOrEqualTo(4.5));
+      });
+
+      test('una tinta de GTFS inválida no tumba la placa', () {
+        expect(
+          RoutePalette.inkFor(const Color(0xFF1B3A6B), gtfsTextColor: 'nope'),
+          RoutePalette.onColor(const Color(0xFF1B3A6B)),
+        );
+      });
+
       test('el texto elegido siempre pasa 4.5:1 contra su placa', () {
         for (final Color tone in RoutePalette.tones) {
           expect(

@@ -278,7 +278,7 @@ class _RouteBadgeSection extends StatelessWidget {
       title: 'RouteBadge',
       note:
           'El color sale de GTFS; cuando falta, de un hash del id. '
-          'El texto se elige por luminancia del fondo.',
+          'La tinta del feed se respeta solo si se puede leer.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -314,6 +314,58 @@ class _RouteBadgeSection extends StatelessWidget {
                   routeId: 'r31',
                   gtfsColor: '00854A',
                 ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Spacing.lg),
+          Text(
+            'Los colores reales del feed de Aguascalientes, los feos incluidos',
+            style: AppTypography.caption.copyWith(
+              color: context.colors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: Spacing.sm),
+          const Wrap(
+            spacing: Spacing.sm,
+            runSpacing: Spacing.sm,
+            children: <Widget>[
+              // La tinta que declara el feed va tal cual: en la R08 y la R10S
+              // no llega a 4.5:1 y la placa la sustituye por la calculada.
+              RouteBadge(
+                shortName: 'R02',
+                routeId: 'R_02',
+                gtfsColor: 'BF0733',
+                gtfsTextColor: 'F0F0F0',
+              ),
+              RouteBadge(
+                shortName: 'R08',
+                routeId: 'R_08',
+                gtfsColor: 'C4CBA6',
+                gtfsTextColor: 'F0F0F0',
+              ),
+              RouteBadge(
+                shortName: 'R10S',
+                routeId: 'R_10S',
+                gtfsColor: 'F9E0E0',
+                gtfsTextColor: 'F0F0F0',
+              ),
+              RouteBadge(
+                shortName: 'R16',
+                routeId: 'R_16',
+                gtfsColor: 'EFEE73',
+                gtfsTextColor: 'F0F0F0',
+              ),
+              RouteBadge(
+                shortName: 'R18',
+                routeId: 'R_18',
+                gtfsColor: '38FA7C',
+                gtfsTextColor: 'F0F0F0',
+              ),
+              RouteBadge(
+                shortName: 'R23',
+                routeId: 'R_23',
+                gtfsColor: '18EBFE',
+                gtfsTextColor: 'F0F0F0',
               ),
             ],
           ),

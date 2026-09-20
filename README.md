@@ -20,10 +20,12 @@ solo explica cómo trabajar en el repo.
 
 ## Estado
 
-Datos simulados de punta a punta (`MockTransitRepository`). Cero integraciones con APIs externas.
+Simulación de punta a punta (`MockTransitRepository`) sobre **datos reales**. Cero integraciones con
+APIs externas: el GTFS oficial está empaquetado, no se descarga.
 
-**Fases 1, 2 y 3 cerradas**: base y router, modelos GTFS, y el design system con sus ocho
-componentes. Siguiente: fase 4a, el dataset del simulador.
+**Fases 1, 2, 3 y 4a cerradas**: base y router, modelos GTFS, el design system con sus ocho
+componentes, y el dataset —48 rutas y 1 507 paradas de Aguascalientes. Siguiente: fase 4b, el
+repositorio mock y el simulador.
 
 La app ya se ve: en builds de debug, el botón del mapa abre `/debug/gallery`, la galería con cada
 componente en todos sus estados, con interruptor de tema y escala de texto hasta 200 %. Sin
@@ -62,15 +64,17 @@ vacía la pantalla.
 
 ### Preparada para GTFS
 
-Los modelos son GTFS y GTFS-Realtime calcados. El día que exista el feed oficial, la app no se
-refactoriza: se cambia la implementación del repositorio.
+Los modelos son GTFS y GTFS-Realtime calcados. El feed oficial ya llegó y el mapeo no cambió: eso
+era exactamente lo que la regla protegía. Lo que falta para producción es tiempo real, y entra por
+la implementación del repositorio, no por los modelos.
 
 ---
 
 ## Requisitos
 
 - Flutter 3.47.5 stable o superior (Dart 3.13.4+)
-- Android Studio / Xcode según la plataforma objetivo
+- Android Studio (Windows, macOS o Linux) — ver [Correr en emulador](#correr-en-emulador)
+- Xcode, y por lo tanto macOS, si el objetivo es iOS: no hay forma de compilarlo desde Windows
 
 ## Puesta en marcha
 
@@ -82,6 +86,65 @@ flutter run
 
 El código generado **no está versionado**: después de clonar o de cambiar de rama hay que correr
 `build_runner`. Durante el desarrollo conviene `dart run build_runner watch`.
+
+---
+
+## Correr en emulador
+
+### Android
+
+La cadena de Android la resuelve Android Studio, pero el SDK viene **sin ninguna imagen de
+sistema**: hay que bajar una y crear un AVD antes de que `flutter run` tenga dónde instalar.
+
+```powershell
+$sdk = "$env:LOCALAPPDATA\Android\Sdk"
+
+# 1. Imagen de sistema (~1.5 GB). google_apis, no _playstore: la app no usa
+#    Play Services ni mapas nativos, y sin Play Store adb queda con root.
+& "$sdk\cmdline-tools\latest\bin\android.exe" sdk install "system-images/android-36/google_apis/x86_64"
+
+# 2. Perfil del dispositivo
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+& "$sdk\cmdline-tools\latest\bin\avdmanager.bat" create avd `
+    -n Pixel8_API36 -k "system-images;android-36;google_apis;x86_64" -d pixel_8
+
+# 3. Arrancar
+flutter emulators --launch Pixel8_API36
+flutter run -d emulator-5554
+```
+
+Dos trampas de la cadena de herramientas, por si algo falla:
+
+- **Los separadores no coinciden.** `android sdk install` (CLI nuevo) usa `/`; `avdmanager`
+  (herramienta vieja, todavía vigente) usa `;`. Es el mismo paquete escrito de dos formas.
+- **`android.exe` devuelve exit code 9 aunque haya funcionado.** Verificá por la salida, no por
+  el código de salida. `sdkmanager` quedó deprecado y ahora es un alias del CLI nuevo.
+
+Para que el emulador no vaya a los tumbos, en
+`%USERPROFILE%\.android\avd\Pixel8_API36.avd\config.ini`: `hw.ramSize=4096`, `vm.heapSize=512`,
+`hw.gpu.enabled=yes`, `hw.gpu.mode=auto`.
+
+El primer build baja Gradle 9.3.1 y AGP 9.1.0 enteros: tarda varios minutos y no está colgado. En
+CPU AMD el emulador necesita **Windows Hypervisor Platform** activo (HAXM es solo Intel); se
+verifica con `(Get-CimInstance Win32_ComputerSystem).HypervisorPresent`.
+
+### iOS
+
+**No se puede compilar iOS desde Windows ni desde Linux.** El simulador es un componente de Xcode
+y Xcode solo existe en macOS; no hay emulador de terceros que lo sustituya. En una Mac, con Xcode
+y CocoaPods instalados, alcanza con `flutter run -d <simulador>`.
+
+Lo que conviene saber antes de sentarse en una Mac:
+
+- `ios/Podfile` **no está en el repo**: lo genera la herramienta de Flutter en el primer build.
+  Tampoco están `Pods/` ni `Flutter/Generated.xcconfig`, por la misma razón.
+- Deployment target **iOS 15.0**, bundle id `mx.yovoygo.app`.
+- `DEVELOPMENT_TEAM` está vacío y para el simulador da igual: no exige firma. Recién hace falta
+  una cuenta de desarrollador para dispositivo físico o TestFlight.
+
+Sin Mac a mano hay dos salidas, cuando llegue el momento: un runner `macos-latest` en GitHub
+Actions que compile el target iOS y corra `flutter test` (verifica que iOS no se rompió, pero no
+se toca la UI), o subir el `.app` del simulador a Appetize.io y manejarlo desde el navegador.
 
 ## Calidad
 
@@ -173,8 +236,11 @@ lib/
       data/                    solo si la feature tiene fuentes propias
 assets/
   fonts/                       Barlow y Barlow Semi Condensed (OFL)
-  mock/                        dataset del simulador (fase 4)
+  mock/                        dataset del simulador, generado (CC BY-SA 4.0)
 test/                          espeja la estructura de lib/
+tool/
+  gtfs_to_mock.py              convierte el GTFS oficial en assets/mock/
+  gtfs/mex-ags-ags.zip         el feed, versionado para reproducir sin red
 ```
 
 Reglas que se revisan en cada PR:
@@ -195,6 +261,39 @@ Reglas que se revisan en cada PR:
 | `/favorites` | `favorites` | Favoritos |
 | `/settings` | `settings` | Ajustes |
 | `/debug/gallery` | `gallery` | Galería del design system (solo en debug) |
+
+---
+
+## Datos
+
+El dataset del simulador **no es inventado**: sale del GTFS estático oficial del transporte público
+concesionado de Aguascalientes, que publica el Gobierno del Estado (CMOV) y distribuye el
+[Hub de Datos de Transporte Público de Codeando México](https://hdtp.codeandomexico.org/datos/mex-ags-ags)
+bajo CC BY-SA 4.0.
+
+| | |
+|---|---|
+| Rutas | 48, con su color real |
+| Paradas | 1 507 |
+| Trazos | 92 (ida y vuelta), 41 252 puntos sobre calles |
+| Servicio | por frecuencia: un intervalo por ruta, no horarios |
+| Peso | 2.8 MB en disco, **423 KB comprimidos** dentro del APK |
+
+Los JSON de [`assets/mock/`](assets/mock/) los genera un script y no se editan a mano:
+
+```bash
+python tool/gtfs_to_mock.py                          # sin dependencias
+flutter test test/core/models/mock_dataset_test.dart # 24 verificaciones
+```
+
+Es determinista: dos corridas seguidas producen el mismo byte. Qué campo viene del feed, cuál se
+derivó y cuál está simulado —código de parada, accesibilidad, alertas, itinerarios— está anotado
+uno por uno en [`assets/mock/DATASET.md`](assets/mock/DATASET.md).
+
+El test del dataset no es decorativo: caza lo que el feed trae roto. Ya encontró dos cosas —un
+`stop_id` con un espacio adelante que dejaba una parada colgando en dos viajes de la R-30, y una
+vigencia de calendario vencida en 2025 que habría hecho que la app dijera que no hay servicio
+nunca.
 
 ---
 
@@ -232,5 +331,13 @@ Piso no negociable, verificado por pantalla en la fase 9:
 
 Barlow y Barlow Semi Condensed se distribuyen bajo SIL Open Font License 1.1
 ([`assets/fonts/OFL.txt`](assets/fonts/OFL.txt)).
+
+Los datos de transporte de [`assets/mock/`](assets/mock/) son obra derivada del GTFS del Gobierno
+del Estado de Aguascalientes (CMOV), distribuido por el Hub de Datos de Transporte Público de
+Codeando México, bajo **CC BY-SA 4.0**. La atribución completa está en
+[`assets/mock/LICENSE.txt`](assets/mock/LICENSE.txt) y aparece en la pantalla "Acerca de".
+CompartirIgual alcanza a los datos, no al código.
+
+Atribuir una fuente no es afiliarse a ella: el aviso de app independiente sigue en pie.
 
 Identificador de aplicación: `mx.yovoygo.app` (Android e iOS).

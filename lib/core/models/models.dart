@@ -8,6 +8,7 @@ export 'agency.dart';
 export 'arrival.dart';
 export 'calendar.dart';
 export 'enums.dart';
+export 'frequency.dart';
 export 'itinerary.dart';
 export 'leg.dart';
 export 'service_alert.dart';

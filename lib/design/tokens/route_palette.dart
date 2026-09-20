@@ -70,6 +70,22 @@ abstract final class RoutePalette {
   static Color onColor(Color background) =>
       Contrast.bestOn(background, _ink, _paper);
 
+  /// Texto legible sobre [background], prefiriendo la tinta que declara GTFS.
+  ///
+  /// El feed oficial de Aguascalientes trae `route_text_color` en sus 48 rutas
+  /// y en varias no se puede leer: la R-08 es `#C4CBA6` con tinta `#F0F0F0`,
+  /// que da 1.5:1. El feed manda en identidad, no en legibilidad, así que su
+  /// tinta se respeta solo si pasa el piso de la sección 11 del spec; si no,
+  /// se calcula.
+  static Color inkFor(Color background, {String? gtfsTextColor}) {
+    final Color? declared = parseGtfsColor(gtfsTextColor);
+    if (declared != null &&
+        Contrast.ratio(declared, background) >= Contrast.minText) {
+      return declared;
+    }
+    return onColor(background);
+  }
+
   /// Si una placa de este color necesita contorno para no disolverse en
   /// [surface].
   ///

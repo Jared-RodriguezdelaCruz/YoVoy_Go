@@ -157,4 +157,38 @@ void main() {
       expect(entreSemana.runsOn(DateTime.utc(2027, 1, 5)), isFalse);
     });
   });
+
+  group('Frequency', () {
+    final Frequency r01 = Frequency.fromJson(<String, dynamic>{
+      'trip_id': 'R_01_ES_0',
+      'start_time': '05:50:00',
+      'end_time': '23:30:00',
+      'headway_secs': 1199,
+      'exact_times': false,
+    });
+
+    test('round-trip JSON', () {
+      expect(r01.headway, const Duration(seconds: 1199));
+      expect(r01.startTime, const Duration(hours: 5, minutes: 50));
+      expect(r01.toJson()['end_time'], '23:30:00');
+    });
+
+    test('la ventana cubre el servicio, no la madrugada', () {
+      expect(r01.coversTime(const Duration(hours: 7)), isTrue);
+      expect(r01.coversTime(const Duration(hours: 4)), isFalse);
+    });
+
+    test('la flota sale del intervalo y de la vuelta', () {
+      // Dos horas y media de vuelta con 20 minutos de intervalo: ocho
+      // unidades. El número no se elige a ojo, se cuenta.
+      expect(r01.vehiclesFor(const Duration(seconds: 8850)), 8);
+      expect(r01.vehiclesFor(Duration.zero), 0);
+    });
+
+    test('sin intervalo no hay flota que repartir', () {
+      final Frequency rota = r01.copyWith(headway: Duration.zero);
+
+      expect(rota.vehiclesFor(const Duration(hours: 2)), 0);
+    });
+  });
 }

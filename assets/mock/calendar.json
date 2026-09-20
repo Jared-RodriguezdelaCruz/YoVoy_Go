@@ -1,0 +1,23 @@
+[
+  {
+    "service_id": "ES",
+    "days": [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday"
+    ],
+    "start_date": "20260101",
+    "end_date": "20271231"
+  },
+  {
+    "service_id": "FS",
+    "days": [
+      "saturday",
+      "sunday"
+    ],
+    "start_date": "20260101",
+    "end_date": "20271231"
+  }
+]

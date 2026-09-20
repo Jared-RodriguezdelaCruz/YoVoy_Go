@@ -1,0 +1,35 @@
+[
+  {
+    "id": "alerta_obra_lopez_mateos",
+    "header": "Desvío en López Mateos por obra",
+    "description": "La ruta no entra a López Mateos entre Aguascalientes y Chávez hasta nuevo aviso. Toma la parada de Héroes.",
+    "affected_route_ids": [
+      "R_03",
+      "R_09"
+    ],
+    "affected_stop_ids": [],
+    "cause": "CONSTRUCTION",
+    "effect": "DETOUR",
+    "active_period": {
+      "start": 1788242400,
+      "end": null
+    }
+  },
+  {
+    "id": "alerta_parada_movida_san_marcos",
+    "header": "Parada movida por la Feria de San Marcos",
+    "description": "Durante la feria la parada se recorrió una cuadra al norte. Ya volvió a su lugar.",
+    "affected_route_ids": [
+      "R_37"
+    ],
+    "affected_stop_ids": [
+      "P090"
+    ],
+    "cause": "HOLIDAY",
+    "effect": "STOP_MOVED",
+    "active_period": {
+      "start": 1776492000,
+      "end": 1778457540
+    }
+  }
+]

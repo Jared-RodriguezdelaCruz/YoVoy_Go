@@ -1,0 +1,1474 @@
+[
+  {
+    "trip_id": "R_01_ES_0",
+    "route_id": "R_01",
+    "service_id": "ES",
+    "trip_headsign": "Margaritas",
+    "direction_id": 0,
+    "shape_id": "R_01_IDA"
+  },
+  {
+    "trip_id": "R_01_ES_1",
+    "route_id": "R_01",
+    "service_id": "ES",
+    "trip_headsign": "Vicente Guerrero",
+    "direction_id": 1,
+    "shape_id": "R_01_REGRESO"
+  },
+  {
+    "trip_id": "R_01_FS_0",
+    "route_id": "R_01",
+    "service_id": "FS",
+    "trip_headsign": "Margaritas",
+    "direction_id": 0,
+    "shape_id": "R_01_IDA"
+  },
+  {
+    "trip_id": "R_01_FS_1",
+    "route_id": "R_01",
+    "service_id": "FS",
+    "trip_headsign": "Vicente Guerrero",
+    "direction_id": 1,
+    "shape_id": "R_01_REGRESO"
+  },
+  {
+    "trip_id": "R_02_ES_0",
+    "route_id": "R_02",
+    "service_id": "ES",
+    "trip_headsign": "Centro (Calle Morelos)",
+    "direction_id": 0,
+    "shape_id": "R_02_IDA"
+  },
+  {
+    "trip_id": "R_02_ES_1",
+    "route_id": "R_02",
+    "service_id": "ES",
+    "trip_headsign": "Lunaria",
+    "direction_id": 1,
+    "shape_id": "R_02_REGRESO"
+  },
+  {
+    "trip_id": "R_02_FS_0",
+    "route_id": "R_02",
+    "service_id": "FS",
+    "trip_headsign": "Centro (Calle Morelos)",
+    "direction_id": 0,
+    "shape_id": "R_02_IDA"
+  },
+  {
+    "trip_id": "R_02_FS_1",
+    "route_id": "R_02",
+    "service_id": "FS",
+    "trip_headsign": "Lunaria",
+    "direction_id": 1,
+    "shape_id": "R_02_REGRESO"
+  },
+  {
+    "trip_id": "R_03_ES_0",
+    "route_id": "R_03",
+    "service_id": "ES",
+    "trip_headsign": "UAA Sur",
+    "direction_id": 0,
+    "shape_id": "R_03_IDA"
+  },
+  {
+    "trip_id": "R_03_ES_1",
+    "route_id": "R_03",
+    "service_id": "ES",
+    "trip_headsign": "La Ribera",
+    "direction_id": 1,
+    "shape_id": "R_03_REGRESO"
+  },
+  {
+    "trip_id": "R_03_FS_0",
+    "route_id": "R_03",
+    "service_id": "FS",
+    "trip_headsign": "UAA Sur",
+    "direction_id": 0,
+    "shape_id": "R_03_IDA"
+  },
+  {
+    "trip_id": "R_03_FS_1",
+    "route_id": "R_03",
+    "service_id": "FS",
+    "trip_headsign": "La Ribera",
+    "direction_id": 1,
+    "shape_id": "R_03_REGRESO"
+  },
+  {
+    "trip_id": "R_04_ES_0",
+    "route_id": "R_04",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Sur",
+    "direction_id": 0,
+    "shape_id": "R_04_IDA"
+  },
+  {
+    "trip_id": "R_04_ES_1",
+    "route_id": "R_04",
+    "service_id": "ES",
+    "trip_headsign": "Jesús María",
+    "direction_id": 1,
+    "shape_id": "R_04_REGRESO"
+  },
+  {
+    "trip_id": "R_04_FS_0",
+    "route_id": "R_04",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Sur",
+    "direction_id": 0,
+    "shape_id": "R_04_IDA"
+  },
+  {
+    "trip_id": "R_04_FS_1",
+    "route_id": "R_04",
+    "service_id": "FS",
+    "trip_headsign": "Jesús María",
+    "direction_id": 1,
+    "shape_id": "R_04_REGRESO"
+  },
+  {
+    "trip_id": "R_05_ES_0",
+    "route_id": "R_05",
+    "service_id": "ES",
+    "trip_headsign": "Vicente Guerrero",
+    "direction_id": 0,
+    "shape_id": "R_05_IDA"
+  },
+  {
+    "trip_id": "R_05_ES_1",
+    "route_id": "R_05",
+    "service_id": "ES",
+    "trip_headsign": "La Ribera",
+    "direction_id": 1,
+    "shape_id": "R_05_REGRESO"
+  },
+  {
+    "trip_id": "R_05_FS_0",
+    "route_id": "R_05",
+    "service_id": "FS",
+    "trip_headsign": "Vicente Guerrero",
+    "direction_id": 0,
+    "shape_id": "R_05_IDA"
+  },
+  {
+    "trip_id": "R_05_FS_1",
+    "route_id": "R_05",
+    "service_id": "FS",
+    "trip_headsign": "La Ribera",
+    "direction_id": 1,
+    "shape_id": "R_05_REGRESO"
+  },
+  {
+    "trip_id": "R_06_ES_0",
+    "route_id": "R_06",
+    "service_id": "ES",
+    "trip_headsign": "Jesús María",
+    "direction_id": 0,
+    "shape_id": "R_06_IDA"
+  },
+  {
+    "trip_id": "R_06_ES_1",
+    "route_id": "R_06",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Sur",
+    "direction_id": 1,
+    "shape_id": "R_06_REGRESO"
+  },
+  {
+    "trip_id": "R_06_FS_0",
+    "route_id": "R_06",
+    "service_id": "FS",
+    "trip_headsign": "Jesús María",
+    "direction_id": 0,
+    "shape_id": "R_06_IDA"
+  },
+  {
+    "trip_id": "R_06_FS_1",
+    "route_id": "R_06",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Sur",
+    "direction_id": 1,
+    "shape_id": "R_06_REGRESO"
+  },
+  {
+    "trip_id": "R_07_ES_0",
+    "route_id": "R_07",
+    "service_id": "ES",
+    "trip_headsign": "Las Palmas",
+    "direction_id": 0,
+    "shape_id": "R_07_IDA"
+  },
+  {
+    "trip_id": "R_07_ES_1",
+    "route_id": "R_07",
+    "service_id": "ES",
+    "trip_headsign": "Centro (Calle Morelos)",
+    "direction_id": 1,
+    "shape_id": "R_07_REGRESO"
+  },
+  {
+    "trip_id": "R_07_FS_0",
+    "route_id": "R_07",
+    "service_id": "FS",
+    "trip_headsign": "Las Palmas",
+    "direction_id": 0,
+    "shape_id": "R_07_IDA"
+  },
+  {
+    "trip_id": "R_07_FS_1",
+    "route_id": "R_07",
+    "service_id": "FS",
+    "trip_headsign": "Centro (Calle Morelos)",
+    "direction_id": 1,
+    "shape_id": "R_07_REGRESO"
+  },
+  {
+    "trip_id": "R_08_ES_0",
+    "route_id": "R_08",
+    "service_id": "ES",
+    "trip_headsign": "UTMA",
+    "direction_id": 0,
+    "shape_id": "R_08_IDA"
+  },
+  {
+    "trip_id": "R_08_ES_1",
+    "route_id": "R_08",
+    "service_id": "ES",
+    "trip_headsign": "Centro (Rivero y Gutiérrez)",
+    "direction_id": 1,
+    "shape_id": "R_08_REGRESO"
+  },
+  {
+    "trip_id": "R_08_FS_0",
+    "route_id": "R_08",
+    "service_id": "FS",
+    "trip_headsign": "UTMA",
+    "direction_id": 0,
+    "shape_id": "R_08_IDA"
+  },
+  {
+    "trip_id": "R_08_FS_1",
+    "route_id": "R_08",
+    "service_id": "FS",
+    "trip_headsign": "Centro (Rivero y Gutiérrez)",
+    "direction_id": 1,
+    "shape_id": "R_08_REGRESO"
+  },
+  {
+    "trip_id": "R_09_ES_0",
+    "route_id": "R_09",
+    "service_id": "ES",
+    "trip_headsign": "Los Laureles",
+    "direction_id": 0,
+    "shape_id": "R_09_IDA"
+  },
+  {
+    "trip_id": "R_09_ES_1",
+    "route_id": "R_09",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Sur",
+    "direction_id": 1,
+    "shape_id": "R_09_REGRESO"
+  },
+  {
+    "trip_id": "R_09_FS_0",
+    "route_id": "R_09",
+    "service_id": "FS",
+    "trip_headsign": "Los Laureles",
+    "direction_id": 0,
+    "shape_id": "R_09_IDA"
+  },
+  {
+    "trip_id": "R_09_FS_1",
+    "route_id": "R_09",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Sur",
+    "direction_id": 1,
+    "shape_id": "R_09_REGRESO"
+  },
+  {
+    "trip_id": "R_10N_ES_0",
+    "route_id": "R_10N",
+    "service_id": "ES",
+    "trip_headsign": "Paseos de Aguascalientes",
+    "direction_id": 0,
+    "shape_id": "R_10N_IDA"
+  },
+  {
+    "trip_id": "R_10N_ES_1",
+    "route_id": "R_10N",
+    "service_id": "ES",
+    "trip_headsign": "Centro (Calle Morelos)",
+    "direction_id": 1,
+    "shape_id": "R_10N_REGRESO"
+  },
+  {
+    "trip_id": "R_10N_FS_0",
+    "route_id": "R_10N",
+    "service_id": "FS",
+    "trip_headsign": "Paseos de Aguascalientes",
+    "direction_id": 0,
+    "shape_id": "R_10N_IDA"
+  },
+  {
+    "trip_id": "R_10N_FS_1",
+    "route_id": "R_10N",
+    "service_id": "FS",
+    "trip_headsign": "Centro (Calle Morelos)",
+    "direction_id": 1,
+    "shape_id": "R_10N_REGRESO"
+  },
+  {
+    "trip_id": "R_10S_ES_0",
+    "route_id": "R_10S",
+    "service_id": "ES",
+    "trip_headsign": "UAA Sur",
+    "direction_id": 0,
+    "shape_id": "R_10S_IDA"
+  },
+  {
+    "trip_id": "R_10S_ES_1",
+    "route_id": "R_10S",
+    "service_id": "ES",
+    "trip_headsign": "Centro (Calle Rivero y Gtz.)",
+    "direction_id": 1,
+    "shape_id": "R_10S_REGRESO"
+  },
+  {
+    "trip_id": "R_10S_FS_0",
+    "route_id": "R_10S",
+    "service_id": "FS",
+    "trip_headsign": "UAA Sur",
+    "direction_id": 0,
+    "shape_id": "R_10S_IDA"
+  },
+  {
+    "trip_id": "R_10S_FS_1",
+    "route_id": "R_10S",
+    "service_id": "FS",
+    "trip_headsign": "Centro (Calle Rivero y Gtz.)",
+    "direction_id": 1,
+    "shape_id": "R_10S_REGRESO"
+  },
+  {
+    "trip_id": "R_11_ES_0",
+    "route_id": "R_11",
+    "service_id": "ES",
+    "trip_headsign": "Chichimeco",
+    "direction_id": 0,
+    "shape_id": "R_11_IDA"
+  },
+  {
+    "trip_id": "R_11_ES_1",
+    "route_id": "R_11",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Sur",
+    "direction_id": 1,
+    "shape_id": "R_11_REGRESO"
+  },
+  {
+    "trip_id": "R_11_FS_0",
+    "route_id": "R_11",
+    "service_id": "FS",
+    "trip_headsign": "Chichimeco",
+    "direction_id": 0,
+    "shape_id": "R_11_IDA"
+  },
+  {
+    "trip_id": "R_11_FS_1",
+    "route_id": "R_11",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Sur",
+    "direction_id": 1,
+    "shape_id": "R_11_REGRESO"
+  },
+  {
+    "trip_id": "R_12_ES_0",
+    "route_id": "R_12",
+    "service_id": "ES",
+    "trip_headsign": "Vicente Guerrero",
+    "direction_id": 0,
+    "shape_id": "R_12_IDA"
+  },
+  {
+    "trip_id": "R_12_ES_1",
+    "route_id": "R_12",
+    "service_id": "ES",
+    "trip_headsign": "Lunaria",
+    "direction_id": 1,
+    "shape_id": "R_12_REGRESO"
+  },
+  {
+    "trip_id": "R_12_FS_0",
+    "route_id": "R_12",
+    "service_id": "FS",
+    "trip_headsign": "Vicente Guerrero",
+    "direction_id": 0,
+    "shape_id": "R_12_IDA"
+  },
+  {
+    "trip_id": "R_12_FS_1",
+    "route_id": "R_12",
+    "service_id": "FS",
+    "trip_headsign": "Lunaria",
+    "direction_id": 1,
+    "shape_id": "R_12_REGRESO"
+  },
+  {
+    "trip_id": "R_14_ES_0",
+    "route_id": "R_14",
+    "service_id": "ES",
+    "trip_headsign": "Vicente Guerrero",
+    "direction_id": 0,
+    "shape_id": "R_14_IDA"
+  },
+  {
+    "trip_id": "R_14_ES_1",
+    "route_id": "R_14",
+    "service_id": "ES",
+    "trip_headsign": "Vistabella",
+    "direction_id": 1,
+    "shape_id": "R_14_REGRESO"
+  },
+  {
+    "trip_id": "R_14_FS_0",
+    "route_id": "R_14",
+    "service_id": "FS",
+    "trip_headsign": "Vicente Guerrero",
+    "direction_id": 0,
+    "shape_id": "R_14_IDA"
+  },
+  {
+    "trip_id": "R_14_FS_1",
+    "route_id": "R_14",
+    "service_id": "FS",
+    "trip_headsign": "Vistabella",
+    "direction_id": 1,
+    "shape_id": "R_14_REGRESO"
+  },
+  {
+    "trip_id": "R_16_ES_0",
+    "route_id": "R_16",
+    "service_id": "ES",
+    "trip_headsign": "Vistas del Valle",
+    "direction_id": 0,
+    "shape_id": "R_16_IDA"
+  },
+  {
+    "trip_id": "R_16_ES_1",
+    "route_id": "R_16",
+    "service_id": "ES",
+    "trip_headsign": "Hacienda Nueva",
+    "direction_id": 1,
+    "shape_id": "R_16_REGRESO"
+  },
+  {
+    "trip_id": "R_16_FS_0",
+    "route_id": "R_16",
+    "service_id": "FS",
+    "trip_headsign": "Vistas del Valle",
+    "direction_id": 0,
+    "shape_id": "R_16_IDA"
+  },
+  {
+    "trip_id": "R_16_FS_1",
+    "route_id": "R_16",
+    "service_id": "FS",
+    "trip_headsign": "Hacienda Nueva",
+    "direction_id": 1,
+    "shape_id": "R_16_REGRESO"
+  },
+  {
+    "trip_id": "R_18_ES_0",
+    "route_id": "R_18",
+    "service_id": "ES",
+    "trip_headsign": "UAA",
+    "direction_id": 0,
+    "shape_id": "R_18_IDA"
+  },
+  {
+    "trip_id": "R_18_ES_1",
+    "route_id": "R_18",
+    "service_id": "ES",
+    "trip_headsign": "Lunaria",
+    "direction_id": 1,
+    "shape_id": "R_18_REGRESO"
+  },
+  {
+    "trip_id": "R_18_FS_0",
+    "route_id": "R_18",
+    "service_id": "FS",
+    "trip_headsign": "UAA",
+    "direction_id": 0,
+    "shape_id": "R_18_IDA"
+  },
+  {
+    "trip_id": "R_18_FS_1",
+    "route_id": "R_18",
+    "service_id": "FS",
+    "trip_headsign": "Lunaria",
+    "direction_id": 1,
+    "shape_id": "R_18_REGRESO"
+  },
+  {
+    "trip_id": "R_19_ES_0",
+    "route_id": "R_19",
+    "service_id": "ES",
+    "trip_headsign": "Pocitos",
+    "direction_id": 0,
+    "shape_id": "R_19_IDA"
+  },
+  {
+    "trip_id": "R_19_ES_1",
+    "route_id": "R_19",
+    "service_id": "ES",
+    "trip_headsign": "Vistas de Oriente",
+    "direction_id": 1,
+    "shape_id": "R_19_REGRESO"
+  },
+  {
+    "trip_id": "R_19_FS_0",
+    "route_id": "R_19",
+    "service_id": "FS",
+    "trip_headsign": "Pocitos",
+    "direction_id": 0,
+    "shape_id": "R_19_IDA"
+  },
+  {
+    "trip_id": "R_19_FS_1",
+    "route_id": "R_19",
+    "service_id": "FS",
+    "trip_headsign": "Vistas de Oriente",
+    "direction_id": 1,
+    "shape_id": "R_19_REGRESO"
+  },
+  {
+    "trip_id": "R_20N_ES_0",
+    "route_id": "R_20N",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Oriente Circuito",
+    "direction_id": 0,
+    "shape_id": "R_20N_IDA"
+  },
+  {
+    "trip_id": "R_20N_FS_0",
+    "route_id": "R_20N",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Oriente Circuito",
+    "direction_id": 0,
+    "shape_id": "R_20N_IDA"
+  },
+  {
+    "trip_id": "R_20S_ES_0",
+    "route_id": "R_20S",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Oriente Circuito",
+    "direction_id": 0,
+    "shape_id": "R_20S_IDA"
+  },
+  {
+    "trip_id": "R_20S_FS_0",
+    "route_id": "R_20S",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Oriente Circuito",
+    "direction_id": 0,
+    "shape_id": "R_20S_IDA"
+  },
+  {
+    "trip_id": "R_23_ES_0",
+    "route_id": "R_23",
+    "service_id": "ES",
+    "trip_headsign": "Villa Montaña",
+    "direction_id": 0,
+    "shape_id": "R_23_IDA"
+  },
+  {
+    "trip_id": "R_23_ES_1",
+    "route_id": "R_23",
+    "service_id": "ES",
+    "trip_headsign": "Los Arquitos",
+    "direction_id": 1,
+    "shape_id": "R_23_REGRESO"
+  },
+  {
+    "trip_id": "R_23_FS_0",
+    "route_id": "R_23",
+    "service_id": "FS",
+    "trip_headsign": "Villa Montaña",
+    "direction_id": 0,
+    "shape_id": "R_23_IDA"
+  },
+  {
+    "trip_id": "R_23_FS_1",
+    "route_id": "R_23",
+    "service_id": "FS",
+    "trip_headsign": "Los Arquitos",
+    "direction_id": 1,
+    "shape_id": "R_23_REGRESO"
+  },
+  {
+    "trip_id": "R_24_ES_0",
+    "route_id": "R_24",
+    "service_id": "ES",
+    "trip_headsign": "Los Negritos",
+    "direction_id": 0,
+    "shape_id": "R_24_IDA"
+  },
+  {
+    "trip_id": "R_24_ES_1",
+    "route_id": "R_24",
+    "service_id": "ES",
+    "trip_headsign": "Vistas de Oriente",
+    "direction_id": 1,
+    "shape_id": "R_24_REGRESO"
+  },
+  {
+    "trip_id": "R_24_FS_0",
+    "route_id": "R_24",
+    "service_id": "FS",
+    "trip_headsign": "Los Negritos",
+    "direction_id": 0,
+    "shape_id": "R_24_IDA"
+  },
+  {
+    "trip_id": "R_24_FS_1",
+    "route_id": "R_24",
+    "service_id": "FS",
+    "trip_headsign": "Vistas de Oriente",
+    "direction_id": 1,
+    "shape_id": "R_24_REGRESO"
+  },
+  {
+    "trip_id": "R_25_ES_0",
+    "route_id": "R_25",
+    "service_id": "ES",
+    "trip_headsign": "UTA",
+    "direction_id": 0,
+    "shape_id": "R_25_IDA"
+  },
+  {
+    "trip_id": "R_25_ES_1",
+    "route_id": "R_25",
+    "service_id": "ES",
+    "trip_headsign": "Las Palmas",
+    "direction_id": 1,
+    "shape_id": "R_25_REGRESO"
+  },
+  {
+    "trip_id": "R_25_FS_0",
+    "route_id": "R_25",
+    "service_id": "FS",
+    "trip_headsign": "UTA",
+    "direction_id": 0,
+    "shape_id": "R_25_IDA"
+  },
+  {
+    "trip_id": "R_25_FS_1",
+    "route_id": "R_25",
+    "service_id": "FS",
+    "trip_headsign": "Las Palmas",
+    "direction_id": 1,
+    "shape_id": "R_25_REGRESO"
+  },
+  {
+    "trip_id": "R_27_ES_0",
+    "route_id": "R_27",
+    "service_id": "ES",
+    "trip_headsign": "Vicente Guerrero",
+    "direction_id": 0,
+    "shape_id": "R_27_IDA"
+  },
+  {
+    "trip_id": "R_27_ES_1",
+    "route_id": "R_27",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Sur Oriente",
+    "direction_id": 1,
+    "shape_id": "R_27_REGRESO"
+  },
+  {
+    "trip_id": "R_27_FS_0",
+    "route_id": "R_27",
+    "service_id": "FS",
+    "trip_headsign": "Vicente Guerrero",
+    "direction_id": 0,
+    "shape_id": "R_27_IDA"
+  },
+  {
+    "trip_id": "R_27_FS_1",
+    "route_id": "R_27",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Sur Oriente",
+    "direction_id": 1,
+    "shape_id": "R_27_REGRESO"
+  },
+  {
+    "trip_id": "R_28_ES_0",
+    "route_id": "R_28",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Sur",
+    "direction_id": 0,
+    "shape_id": "R_28_IDA"
+  },
+  {
+    "trip_id": "R_28_ES_1",
+    "route_id": "R_28",
+    "service_id": "ES",
+    "trip_headsign": "Chichimeco",
+    "direction_id": 1,
+    "shape_id": "R_28_REGRESO"
+  },
+  {
+    "trip_id": "R_28_FS_0",
+    "route_id": "R_28",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Sur",
+    "direction_id": 0,
+    "shape_id": "R_28_IDA"
+  },
+  {
+    "trip_id": "R_28_FS_1",
+    "route_id": "R_28",
+    "service_id": "FS",
+    "trip_headsign": "Chichimeco",
+    "direction_id": 1,
+    "shape_id": "R_28_REGRESO"
+  },
+  {
+    "trip_id": "R_29_ES_0",
+    "route_id": "R_29",
+    "service_id": "ES",
+    "trip_headsign": "Centro (Calle Morelos)",
+    "direction_id": 0,
+    "shape_id": "R_29_IDA"
+  },
+  {
+    "trip_id": "R_29_ES_1",
+    "route_id": "R_29",
+    "service_id": "ES",
+    "trip_headsign": "Lunaria",
+    "direction_id": 1,
+    "shape_id": "R_29_REGRESO"
+  },
+  {
+    "trip_id": "R_29_FS_0",
+    "route_id": "R_29",
+    "service_id": "FS",
+    "trip_headsign": "Centro (Calle Morelos)",
+    "direction_id": 0,
+    "shape_id": "R_29_IDA"
+  },
+  {
+    "trip_id": "R_29_FS_1",
+    "route_id": "R_29",
+    "service_id": "FS",
+    "trip_headsign": "Lunaria",
+    "direction_id": 1,
+    "shape_id": "R_29_REGRESO"
+  },
+  {
+    "trip_id": "R_30_ES_0",
+    "route_id": "R_30",
+    "service_id": "ES",
+    "trip_headsign": "Martínez Domínguez",
+    "direction_id": 0,
+    "shape_id": "R_30_IDA"
+  },
+  {
+    "trip_id": "R_30_ES_1",
+    "route_id": "R_30",
+    "service_id": "ES",
+    "trip_headsign": "Villa Montaña",
+    "direction_id": 1,
+    "shape_id": "R_30_REGRESO"
+  },
+  {
+    "trip_id": "R_30_FS_0",
+    "route_id": "R_30",
+    "service_id": "FS",
+    "trip_headsign": "Martínez Domínguez",
+    "direction_id": 0,
+    "shape_id": "R_30_IDA"
+  },
+  {
+    "trip_id": "R_30_FS_1",
+    "route_id": "R_30",
+    "service_id": "FS",
+    "trip_headsign": "Villa Montaña",
+    "direction_id": 1,
+    "shape_id": "R_30_REGRESO"
+  },
+  {
+    "trip_id": "R_33_ES_0",
+    "route_id": "R_33",
+    "service_id": "ES",
+    "trip_headsign": "Jesús María",
+    "direction_id": 0,
+    "shape_id": "R_33_IDA"
+  },
+  {
+    "trip_id": "R_33_ES_1",
+    "route_id": "R_33",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Sur",
+    "direction_id": 1,
+    "shape_id": "R_33_REGRESO"
+  },
+  {
+    "trip_id": "R_33_FS_0",
+    "route_id": "R_33",
+    "service_id": "FS",
+    "trip_headsign": "Jesús María",
+    "direction_id": 0,
+    "shape_id": "R_33_IDA"
+  },
+  {
+    "trip_id": "R_33_FS_1",
+    "route_id": "R_33",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Sur",
+    "direction_id": 1,
+    "shape_id": "R_33_REGRESO"
+  },
+  {
+    "trip_id": "R_34_ES_0",
+    "route_id": "R_34",
+    "service_id": "ES",
+    "trip_headsign": "Villa Montaña",
+    "direction_id": 0,
+    "shape_id": "R_34_IDA"
+  },
+  {
+    "trip_id": "R_34_ES_1",
+    "route_id": "R_34",
+    "service_id": "ES",
+    "trip_headsign": "UPA",
+    "direction_id": 1,
+    "shape_id": "R_34_REGRESO"
+  },
+  {
+    "trip_id": "R_34_FS_0",
+    "route_id": "R_34",
+    "service_id": "FS",
+    "trip_headsign": "Villa Montaña",
+    "direction_id": 0,
+    "shape_id": "R_34_IDA"
+  },
+  {
+    "trip_id": "R_34_FS_1",
+    "route_id": "R_34",
+    "service_id": "FS",
+    "trip_headsign": "UPA",
+    "direction_id": 1,
+    "shape_id": "R_34_REGRESO"
+  },
+  {
+    "trip_id": "R_35_ES_0",
+    "route_id": "R_35",
+    "service_id": "ES",
+    "trip_headsign": "UAA",
+    "direction_id": 0,
+    "shape_id": "R_35_IDA"
+  },
+  {
+    "trip_id": "R_35_ES_1",
+    "route_id": "R_35",
+    "service_id": "ES",
+    "trip_headsign": "Lunaria",
+    "direction_id": 1,
+    "shape_id": "R_35_REGRESO"
+  },
+  {
+    "trip_id": "R_35_FS_0",
+    "route_id": "R_35",
+    "service_id": "FS",
+    "trip_headsign": "UAA",
+    "direction_id": 0,
+    "shape_id": "R_35_IDA"
+  },
+  {
+    "trip_id": "R_35_FS_1",
+    "route_id": "R_35",
+    "service_id": "FS",
+    "trip_headsign": "Lunaria",
+    "direction_id": 1,
+    "shape_id": "R_35_REGRESO"
+  },
+  {
+    "trip_id": "R_36_ES_0",
+    "route_id": "R_36",
+    "service_id": "ES",
+    "trip_headsign": "Lunaria",
+    "direction_id": 0,
+    "shape_id": "R_36_IDA"
+  },
+  {
+    "trip_id": "R_36_ES_1",
+    "route_id": "R_36",
+    "service_id": "ES",
+    "trip_headsign": "Centro (Mercado Teran)",
+    "direction_id": 1,
+    "shape_id": "R_36_REGRESO"
+  },
+  {
+    "trip_id": "R_36_FS_0",
+    "route_id": "R_36",
+    "service_id": "FS",
+    "trip_headsign": "Lunaria",
+    "direction_id": 0,
+    "shape_id": "R_36_IDA"
+  },
+  {
+    "trip_id": "R_36_FS_1",
+    "route_id": "R_36",
+    "service_id": "FS",
+    "trip_headsign": "Centro (Mercado Teran)",
+    "direction_id": 1,
+    "shape_id": "R_36_REGRESO"
+  },
+  {
+    "trip_id": "R_37_ES_0",
+    "route_id": "R_37",
+    "service_id": "ES",
+    "trip_headsign": "San Marcos",
+    "direction_id": 0,
+    "shape_id": "R_37_IDA"
+  },
+  {
+    "trip_id": "R_37_ES_1",
+    "route_id": "R_37",
+    "service_id": "ES",
+    "trip_headsign": "UTMA",
+    "direction_id": 1,
+    "shape_id": "R_37_REGRESO"
+  },
+  {
+    "trip_id": "R_37_FS_0",
+    "route_id": "R_37",
+    "service_id": "FS",
+    "trip_headsign": "San Marcos",
+    "direction_id": 0,
+    "shape_id": "R_37_IDA"
+  },
+  {
+    "trip_id": "R_37_FS_1",
+    "route_id": "R_37",
+    "service_id": "FS",
+    "trip_headsign": "UTMA",
+    "direction_id": 1,
+    "shape_id": "R_37_REGRESO"
+  },
+  {
+    "trip_id": "R_38_ES_0",
+    "route_id": "R_38",
+    "service_id": "ES",
+    "trip_headsign": "Paso Blanco",
+    "direction_id": 0,
+    "shape_id": "R_38_IDA"
+  },
+  {
+    "trip_id": "R_38_ES_1",
+    "route_id": "R_38",
+    "service_id": "ES",
+    "trip_headsign": "Vicente Guerrero",
+    "direction_id": 1,
+    "shape_id": "R_38_REGRESO"
+  },
+  {
+    "trip_id": "R_38_FS_0",
+    "route_id": "R_38",
+    "service_id": "FS",
+    "trip_headsign": "Paso Blanco",
+    "direction_id": 0,
+    "shape_id": "R_38_IDA"
+  },
+  {
+    "trip_id": "R_38_FS_1",
+    "route_id": "R_38",
+    "service_id": "FS",
+    "trip_headsign": "Vicente Guerrero",
+    "direction_id": 1,
+    "shape_id": "R_38_REGRESO"
+  },
+  {
+    "trip_id": "R_39_ES_0",
+    "route_id": "R_39",
+    "service_id": "ES",
+    "trip_headsign": "El Conejal",
+    "direction_id": 0,
+    "shape_id": "R_39_IDA"
+  },
+  {
+    "trip_id": "R_39_ES_1",
+    "route_id": "R_39",
+    "service_id": "ES",
+    "trip_headsign": "Centro (Calle Morelos)",
+    "direction_id": 1,
+    "shape_id": "R_39_REGRESO"
+  },
+  {
+    "trip_id": "R_39_FS_0",
+    "route_id": "R_39",
+    "service_id": "FS",
+    "trip_headsign": "El Conejal",
+    "direction_id": 0,
+    "shape_id": "R_39_IDA"
+  },
+  {
+    "trip_id": "R_39_FS_1",
+    "route_id": "R_39",
+    "service_id": "FS",
+    "trip_headsign": "Centro (Calle Morelos)",
+    "direction_id": 1,
+    "shape_id": "R_39_REGRESO"
+  },
+  {
+    "trip_id": "R_40N_ES_0",
+    "route_id": "R_40N",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Oriente Circuito",
+    "direction_id": 0,
+    "shape_id": "R_40N_IDA"
+  },
+  {
+    "trip_id": "R_40N_FS_0",
+    "route_id": "R_40N",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Oriente Circuito",
+    "direction_id": 1,
+    "shape_id": "R_40N_IDA"
+  },
+  {
+    "trip_id": "R_40S_ES_0",
+    "route_id": "R_40S",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Oriente Circuito",
+    "direction_id": 0,
+    "shape_id": "R_40S_IDA"
+  },
+  {
+    "trip_id": "R_40S_FS_0",
+    "route_id": "R_40S",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Oriente Circuito",
+    "direction_id": 1,
+    "shape_id": "R_40S_IDA"
+  },
+  {
+    "trip_id": "R_41ALAMEDA_ES_0",
+    "route_id": "R_41ALAMEDA",
+    "service_id": "ES",
+    "trip_headsign": "Alameda Terminal Oriente Circuito",
+    "direction_id": 0,
+    "shape_id": "R_41ALAMEDA_IDA"
+  },
+  {
+    "trip_id": "R_41ALAMEDA_ES_1",
+    "route_id": "R_41ALAMEDA",
+    "service_id": "ES",
+    "trip_headsign": "Alameda Terminal Oriente Circuito",
+    "direction_id": 1,
+    "shape_id": "R_41ALAMEDA_REGRESO"
+  },
+  {
+    "trip_id": "R_41ALAMEDA_FS_0",
+    "route_id": "R_41ALAMEDA",
+    "service_id": "FS",
+    "trip_headsign": "Alameda Terminal Oriente Circuito",
+    "direction_id": 0,
+    "shape_id": "R_41ALAMEDA_IDA"
+  },
+  {
+    "trip_id": "R_41ALAMEDA_FS_1",
+    "route_id": "R_41ALAMEDA",
+    "service_id": "FS",
+    "trip_headsign": "Alameda Terminal Oriente Circuito",
+    "direction_id": 1,
+    "shape_id": "R_41ALAMEDA_REGRESO"
+  },
+  {
+    "trip_id": "R_41PENAL_ES_0",
+    "route_id": "R_41PENAL",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Oriente Circuito",
+    "direction_id": 0,
+    "shape_id": "R_41PENAL_IDA"
+  },
+  {
+    "trip_id": "R_41PENAL_ES_1",
+    "route_id": "R_41PENAL",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Oriente Circuito",
+    "direction_id": 1,
+    "shape_id": "R_41PENAL_REGRESO"
+  },
+  {
+    "trip_id": "R_41PENAL_FS_0",
+    "route_id": "R_41PENAL",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Oriente Circuito",
+    "direction_id": 0,
+    "shape_id": "R_41PENAL_IDA"
+  },
+  {
+    "trip_id": "R_41PENAL_FS_1",
+    "route_id": "R_41PENAL",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Oriente Circuito",
+    "direction_id": 1,
+    "shape_id": "R_41PENAL_REGRESO"
+  },
+  {
+    "trip_id": "R_42_ES_0",
+    "route_id": "R_42",
+    "service_id": "ES",
+    "trip_headsign": "Vistas del Valle",
+    "direction_id": 0,
+    "shape_id": "R_42_IDA"
+  },
+  {
+    "trip_id": "R_42_ES_1",
+    "route_id": "R_42",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Sur",
+    "direction_id": 1,
+    "shape_id": "R_42_REGRESO"
+  },
+  {
+    "trip_id": "R_42_FS_0",
+    "route_id": "R_42",
+    "service_id": "FS",
+    "trip_headsign": "Vistas del Valle",
+    "direction_id": 0,
+    "shape_id": "R_42_IDA"
+  },
+  {
+    "trip_id": "R_42_FS_1",
+    "route_id": "R_42",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Sur",
+    "direction_id": 1,
+    "shape_id": "R_42_REGRESO"
+  },
+  {
+    "trip_id": "R_43N_ES_0",
+    "route_id": "R_43N",
+    "service_id": "ES",
+    "trip_headsign": "UTMA",
+    "direction_id": 0,
+    "shape_id": "R_43N_IDA"
+  },
+  {
+    "trip_id": "R_43N_ES_1",
+    "route_id": "R_43N",
+    "service_id": "ES",
+    "trip_headsign": "Centro (Calle Morelos)",
+    "direction_id": 1,
+    "shape_id": "R_43N_REGRESO"
+  },
+  {
+    "trip_id": "R_43N_FS_0",
+    "route_id": "R_43N",
+    "service_id": "FS",
+    "trip_headsign": "UTMA",
+    "direction_id": 0,
+    "shape_id": "R_43N_IDA"
+  },
+  {
+    "trip_id": "R_43N_FS_1",
+    "route_id": "R_43N",
+    "service_id": "FS",
+    "trip_headsign": "Centro (Calle Morelos)",
+    "direction_id": 1,
+    "shape_id": "R_43N_REGRESO"
+  },
+  {
+    "trip_id": "R_43S_ES_0",
+    "route_id": "R_43S",
+    "service_id": "ES",
+    "trip_headsign": "San Antonio",
+    "direction_id": 0,
+    "shape_id": "R_43S_IDA"
+  },
+  {
+    "trip_id": "R_43S_ES_1",
+    "route_id": "R_43S",
+    "service_id": "ES",
+    "trip_headsign": "Centro (Calle Rivero y Gtz.)",
+    "direction_id": 1,
+    "shape_id": "R_43S_REGRESO"
+  },
+  {
+    "trip_id": "R_43S_FS_0",
+    "route_id": "R_43S",
+    "service_id": "FS",
+    "trip_headsign": "San Antonio",
+    "direction_id": 0,
+    "shape_id": "R_43S_IDA"
+  },
+  {
+    "trip_id": "R_43S_FS_1",
+    "route_id": "R_43S",
+    "service_id": "FS",
+    "trip_headsign": "Centro (Calle Rivero y Gtz.)",
+    "direction_id": 1,
+    "shape_id": "R_43S_REGRESO"
+  },
+  {
+    "trip_id": "R_45_ES_0",
+    "route_id": "R_45",
+    "service_id": "ES",
+    "trip_headsign": "Terminal Sur Oriente",
+    "direction_id": 0,
+    "shape_id": "R_45_IDA"
+  },
+  {
+    "trip_id": "R_45_ES_1",
+    "route_id": "R_45",
+    "service_id": "ES",
+    "trip_headsign": "UAA",
+    "direction_id": 1,
+    "shape_id": "R_45_REGRESO"
+  },
+  {
+    "trip_id": "R_45_FS_0",
+    "route_id": "R_45",
+    "service_id": "FS",
+    "trip_headsign": "Terminal Sur Oriente",
+    "direction_id": 0,
+    "shape_id": "R_45_IDA"
+  },
+  {
+    "trip_id": "R_45_FS_1",
+    "route_id": "R_45",
+    "service_id": "FS",
+    "trip_headsign": "UAA",
+    "direction_id": 1,
+    "shape_id": "R_45_REGRESO"
+  },
+  {
+    "trip_id": "R_46_ES_0",
+    "route_id": "R_46",
+    "service_id": "ES",
+    "trip_headsign": "Vicente Guerrero",
+    "direction_id": 0,
+    "shape_id": "R_46_IDA"
+  },
+  {
+    "trip_id": "R_46_ES_1",
+    "route_id": "R_46",
+    "service_id": "ES",
+    "trip_headsign": "Calvillito",
+    "direction_id": 1,
+    "shape_id": "R_46_REGRESO"
+  },
+  {
+    "trip_id": "R_46_FS_0",
+    "route_id": "R_46",
+    "service_id": "FS",
+    "trip_headsign": "Vicente Guerrero",
+    "direction_id": 0,
+    "shape_id": "R_46_IDA"
+  },
+  {
+    "trip_id": "R_46_FS_1",
+    "route_id": "R_46",
+    "service_id": "FS",
+    "trip_headsign": "Calvillito",
+    "direction_id": 1,
+    "shape_id": "R_46_REGRESO"
+  },
+  {
+    "trip_id": "R_47_ES_0",
+    "route_id": "R_47",
+    "service_id": "ES",
+    "trip_headsign": "San Marcos",
+    "direction_id": 0,
+    "shape_id": "R_47_IDA"
+  },
+  {
+    "trip_id": "R_47_ES_1",
+    "route_id": "R_47",
+    "service_id": "ES",
+    "trip_headsign": "Clínica 10",
+    "direction_id": 1,
+    "shape_id": "R_47_REGRESO"
+  },
+  {
+    "trip_id": "R_47_FS_0",
+    "route_id": "R_47",
+    "service_id": "FS",
+    "trip_headsign": "San Marcos",
+    "direction_id": 0,
+    "shape_id": "R_47_IDA"
+  },
+  {
+    "trip_id": "R_47_FS_1",
+    "route_id": "R_47",
+    "service_id": "FS",
+    "trip_headsign": "Clínica 10",
+    "direction_id": 1,
+    "shape_id": "R_47_REGRESO"
+  },
+  {
+    "trip_id": "R_48_ES_0",
+    "route_id": "R_48",
+    "service_id": "ES",
+    "trip_headsign": "Centro (Panteón de la Cruz)",
+    "direction_id": 0,
+    "shape_id": "R_48_IDA"
+  },
+  {
+    "trip_id": "R_48_ES_1",
+    "route_id": "R_48",
+    "service_id": "ES",
+    "trip_headsign": "Vistas del Valle",
+    "direction_id": 1,
+    "shape_id": "R_48_REGRESO"
+  },
+  {
+    "trip_id": "R_48_FS_0",
+    "route_id": "R_48",
+    "service_id": "FS",
+    "trip_headsign": "Centro (Panteón de la Cruz)",
+    "direction_id": 0,
+    "shape_id": "R_48_IDA"
+  },
+  {
+    "trip_id": "R_48_FS_1",
+    "route_id": "R_48",
+    "service_id": "FS",
+    "trip_headsign": "Vistas del Valle",
+    "direction_id": 1,
+    "shape_id": "R_48_REGRESO"
+  },
+  {
+    "trip_id": "R_50B_ES_0",
+    "route_id": "R_50B",
+    "service_id": "ES",
+    "trip_headsign": "UTA",
+    "direction_id": 0,
+    "shape_id": "R_50B_IDA"
+  },
+  {
+    "trip_id": "R_50B_ES_1",
+    "route_id": "R_50B",
+    "service_id": "ES",
+    "trip_headsign": "Jesús María",
+    "direction_id": 1,
+    "shape_id": "R_50B_REGRESO"
+  },
+  {
+    "trip_id": "R_50B_FS_0",
+    "route_id": "R_50B",
+    "service_id": "FS",
+    "trip_headsign": "UTA",
+    "direction_id": 0,
+    "shape_id": "R_50B_IDA"
+  },
+  {
+    "trip_id": "R_50B_FS_1",
+    "route_id": "R_50B",
+    "service_id": "FS",
+    "trip_headsign": "Jesús María",
+    "direction_id": 1,
+    "shape_id": "R_50B_REGRESO"
+  },
+  {
+    "trip_id": "R_50_ES_0",
+    "route_id": "R_50",
+    "service_id": "ES",
+    "trip_headsign": "UTA",
+    "direction_id": 0,
+    "shape_id": "R_50_IDA"
+  },
+  {
+    "trip_id": "R_50_ES_1",
+    "route_id": "R_50",
+    "service_id": "ES",
+    "trip_headsign": "Chicahuales",
+    "direction_id": 1,
+    "shape_id": "R_50_REGRESO"
+  },
+  {
+    "trip_id": "R_50_FS_0",
+    "route_id": "R_50",
+    "service_id": "FS",
+    "trip_headsign": "UTA",
+    "direction_id": 0,
+    "shape_id": "R_50_IDA"
+  },
+  {
+    "trip_id": "R_50_FS_1",
+    "route_id": "R_50",
+    "service_id": "FS",
+    "trip_headsign": "Chicahuales",
+    "direction_id": 1,
+    "shape_id": "R_50_REGRESO"
+  },
+  {
+    "trip_id": "R_51_ES_0",
+    "route_id": "R_51",
+    "service_id": "ES",
+    "trip_headsign": "Ex Viñedos Guadalupe",
+    "direction_id": 0,
+    "shape_id": "R_51_IDA"
+  },
+  {
+    "trip_id": "R_51_ES_1",
+    "route_id": "R_51",
+    "service_id": "ES",
+    "trip_headsign": "Casa Blanca",
+    "direction_id": 1,
+    "shape_id": "R_51_REGRESO"
+  },
+  {
+    "trip_id": "R_51_FS_0",
+    "route_id": "R_51",
+    "service_id": "FS",
+    "trip_headsign": "Ex Viñedos Guadalupe",
+    "direction_id": 0,
+    "shape_id": "R_51_IDA"
+  },
+  {
+    "trip_id": "R_51_FS_1",
+    "route_id": "R_51",
+    "service_id": "FS",
+    "trip_headsign": "Casa Blanca",
+    "direction_id": 1,
+    "shape_id": "R_51_REGRESO"
+  },
+  {
+    "trip_id": "R_52_ES_0",
+    "route_id": "R_52",
+    "service_id": "ES",
+    "trip_headsign": "Lomas del Ajedrez",
+    "direction_id": 0,
+    "shape_id": "R_52_IDA"
+  },
+  {
+    "trip_id": "R_52_ES_1",
+    "route_id": "R_52",
+    "service_id": "ES",
+    "trip_headsign": "Palomino",
+    "direction_id": 1,
+    "shape_id": "R_52_REGRESO"
+  },
+  {
+    "trip_id": "R_52_FS_0",
+    "route_id": "R_52",
+    "service_id": "FS",
+    "trip_headsign": "Lomas del Ajedrez",
+    "direction_id": 0,
+    "shape_id": "R_52_IDA"
+  },
+  {
+    "trip_id": "R_52_FS_1",
+    "route_id": "R_52",
+    "service_id": "FS",
+    "trip_headsign": "Palomino",
+    "direction_id": 1,
+    "shape_id": "R_52_REGRESO"
+  }
+]

@@ -152,6 +152,10 @@ esperar dos minutos o veinte?
 **Por qué.** Convierte el cuarto estado obligatorio del spec —dato viejo— en información en vez de
 en una disculpa.
 
+**El dato ya está.** El feed oficial no publica horarios, publica intervalos, y la fase 4a los
+bajó a `assets/mock/frequencies.json` con su modelo `Frequency`. El respaldo se arma con el
+intervalo real de la ruta, no con un promedio inventado.
+
 **Fase 6.**
 
 ---
@@ -228,9 +232,9 @@ les cierre la puerta:
 | Búsqueda única | 5 | Dataset |
 | ¿Ya me voy? | 5 | Ubicación |
 | Modo paradero | 6 | Detalle de parada |
-| Frecuencia como respaldo | 6 | Horarios del dataset |
+| Frecuencia como respaldo | 6 | `Frequency` del dataset ✅ |
 | Ocupación | 6 | `occupancyStatus` |
-| Accesibilidad como filtro | 6 | `wheelchairBoarding` |
+| Accesibilidad como filtro | 6 | `wheelchairBoarding` (simulado, ver `assets/mock/DATASET.md`) |
 | Confiabilidad observada (mostrar) | 6 | Historial local |
 | Modo viaje | 7 | Seguimiento de vehículo |
 | Mis rutas aprendidas | 8 | Persistencia local |

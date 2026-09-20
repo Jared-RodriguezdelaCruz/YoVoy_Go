@@ -94,7 +94,14 @@ Stop     { id, code, name, lat, lon, wheelchairBoarding }
 StopTime { tripId, stopId, stopSequence, arrivalTime, departureTime }
 Shape    { id, points: List<LatLng> }   // shape_pt_sequence ya ordenado
 Calendar { serviceId, days: Set<Weekday>, startDate, endDate }
+Frequency{ tripId, startTime, endTime, headway, exactTimes }
 ```
+
+**Enmienda (fase 4a).** `Frequency` no estaba en la lista original y entró al llegar el feed
+oficial: el sistema no opera con horarios, opera con intervalos. Es una entidad GTFS de
+primera clase —`frequencies.txt`— así que entra por la misma regla que las demás. De ahí
+sale el reparto de la flota del simulador y el respaldo "pasa cada 20 min" cuando ningún
+vehículo está reportando.
 
 ### Tiempo real (GTFS-Realtime)
 
@@ -200,8 +207,19 @@ producción. Configurable desde una pantalla de debug:
 - **Errores:** ~5% de las llamadas lanza excepción.
 - **Rutas sin servicio:** al menos una ruta del dataset sin ningún vehículo activo.
 
-Dataset mínimo en `assets/mock/`: 6 rutas con `shape` real (traza sobre calles reales de
-Aguascalientes usando OpenStreetMap), ~120 paradas, 25 vehículos, 2 alertas de servicio.
+**Dataset (enmendado en la fase 4a).** Ya no se traza a mano. `assets/mock/` se genera con
+`tool/gtfs_to_mock.py` a partir del **GTFS estático oficial** del transporte concesionado de
+Aguascalientes, que publica el Gobierno del Estado (CMOV) y distribuye el Hub de Datos de
+Transporte Público de Codeando México bajo **CC BY-SA 4.0**:
+
+- 48 rutas con su `route_color` real, 1 507 paradas, 92 trazos del operador (41 252 puntos).
+- Servicio por frecuencia, no por horarios: un intervalo por ruta.
+- 323 vehículos repartidos con `ceil(vuelta ÷ intervalo)`, y dos rutas sin servicio a propósito.
+- 2 alertas de servicio y 4 pares de itinerarios, escritos a mano sobre ids reales.
+
+Lo que el feed no publica —código de parada, accesibilidad, alertas, itinerarios, tarifa— se
+simula con semilla fija y queda declarado campo por campo en `assets/mock/DATASET.md`. Que el
+dataset alimente un simulador no es excusa para que un dato inventado parezca oficial.
 
 ### 4.3 Planificador
 
@@ -497,6 +515,11 @@ sentimos, no fue posible obtener la información en este momento".
   operador del sistema.
 - El verde se conserva porque es el color del sistema de transporte y da reconocimiento
   inmediato. La identidad (nombre, ícono, tipografía, layout) es propia.
+- **Atribución de los datos (enmienda de la fase 4a).** La pantalla "Acerca de" y
+  `assets/mock/LICENSE.txt` llevan: *Datos de transporte: Gobierno del Estado de
+  Aguascalientes (CMOV), vía el Hub de Datos de Transporte Público de Codeando México.
+  CC BY-SA 4.0.* CompartirIgual alcanza al dataset derivado, no al código. Atribuir una
+  fuente no es afiliarse a ella: el aviso de app independiente se queda tal cual.
 
 ---
 

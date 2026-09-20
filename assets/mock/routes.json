@@ -1,0 +1,386 @@
+[
+  {
+    "route_id": "R_01",
+    "route_short_name": "R01",
+    "route_long_name": "Vicente Guerrero — Margaritas",
+    "route_type": 3,
+    "route_color": "D166A6",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_02",
+    "route_short_name": "R02",
+    "route_long_name": "Lunaria — Centro (Calle Morelos)",
+    "route_type": 3,
+    "route_color": "BF0733",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_03",
+    "route_short_name": "R03",
+    "route_long_name": "La Ribera — UAA Sur",
+    "route_type": 3,
+    "route_color": "534108",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_04",
+    "route_short_name": "R04",
+    "route_long_name": "Jesús María — Terminal Sur",
+    "route_type": 3,
+    "route_color": "1125FA",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_05",
+    "route_short_name": "R05",
+    "route_long_name": "La Ribera — Vicente Guerrero",
+    "route_type": 3,
+    "route_color": "6D3160",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_06",
+    "route_short_name": "R06",
+    "route_long_name": "Terminal Sur — Jesús María",
+    "route_type": 3,
+    "route_color": "F21429",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_07",
+    "route_short_name": "R07",
+    "route_long_name": "Centro (Calle Morelos) — Las Palmas",
+    "route_type": 3,
+    "route_color": "834348",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_08",
+    "route_short_name": "R08",
+    "route_long_name": "Centro (Rivero y Gutiérrez) — UTMA",
+    "route_type": 3,
+    "route_color": "C4CBA6",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_09",
+    "route_short_name": "R09",
+    "route_long_name": "Terminal Sur — Los Laureles",
+    "route_type": 3,
+    "route_color": "6BC361",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_10N",
+    "route_short_name": "R10N",
+    "route_long_name": "Centro (Calle Morelos) — Paseos de Aguascalientes",
+    "route_type": 3,
+    "route_color": "AD7500",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_10S",
+    "route_short_name": "R10S",
+    "route_long_name": "Centro (Calle Rivero y Gtz.) — UAA Sur",
+    "route_type": 3,
+    "route_color": "F9E0E0",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_11",
+    "route_short_name": "R11",
+    "route_long_name": "Terminal Sur — Chichimeco",
+    "route_type": 3,
+    "route_color": "F7CA22",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_12",
+    "route_short_name": "R12",
+    "route_long_name": "Lunaria — Vicente Guerrero",
+    "route_type": 3,
+    "route_color": "FD79BB",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_14",
+    "route_short_name": "R14",
+    "route_long_name": "Vistabella — Vicente Guerrero",
+    "route_type": 3,
+    "route_color": "034DE2",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_16",
+    "route_short_name": "R16",
+    "route_long_name": "Hacienda Nueva — Vistas del Valle",
+    "route_type": 3,
+    "route_color": "EFEE73",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_18",
+    "route_short_name": "R18",
+    "route_long_name": "Lunaria — UAA",
+    "route_type": 3,
+    "route_color": "38FA7C",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_19",
+    "route_short_name": "R19",
+    "route_long_name": "Vistas de Oriente — Pocitos",
+    "route_type": 3,
+    "route_color": "AAB9EF",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_20N",
+    "route_short_name": "R20N",
+    "route_long_name": "Terminal Oriente Circuito",
+    "route_type": 3,
+    "route_color": "95508F",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_20S",
+    "route_short_name": "R20S",
+    "route_long_name": "Terminal Oriente Circuito",
+    "route_type": 3,
+    "route_color": "5F3C68",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_23",
+    "route_short_name": "R23",
+    "route_long_name": "Los Arquitos — Villa Montaña",
+    "route_type": 3,
+    "route_color": "18EBFE",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_24",
+    "route_short_name": "R24",
+    "route_long_name": "Vistas de Oriente — Los Negritos",
+    "route_type": 3,
+    "route_color": "63DF76",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_25",
+    "route_short_name": "R25",
+    "route_long_name": "Las Palmas — UTA",
+    "route_type": 3,
+    "route_color": "D4C304",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_27",
+    "route_short_name": "R27",
+    "route_long_name": "Terminal Sur Oriente — Vicente Guerrero",
+    "route_type": 3,
+    "route_color": "BAB026",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_28",
+    "route_short_name": "R28",
+    "route_long_name": "Chichimeco — Terminal Sur",
+    "route_type": 3,
+    "route_color": "AA5E05",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_29",
+    "route_short_name": "R29",
+    "route_long_name": "Lunaria — Centro (Calle Morelos)",
+    "route_type": 3,
+    "route_color": "7643D4",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_30",
+    "route_short_name": "R30",
+    "route_long_name": "Villa Montaña — Martínez Domínguez",
+    "route_type": 3,
+    "route_color": "2BAB46",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_33",
+    "route_short_name": "R33",
+    "route_long_name": "Terminal Sur — Jesús María",
+    "route_type": 3,
+    "route_color": "652391",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_34",
+    "route_short_name": "R34",
+    "route_long_name": "UPA — Villa Montaña",
+    "route_type": 3,
+    "route_color": "04C721",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_35",
+    "route_short_name": "R35",
+    "route_long_name": "Lunaria — UAA",
+    "route_type": 3,
+    "route_color": "4DB83D",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_36",
+    "route_short_name": "R36",
+    "route_long_name": "Centro (Mercado Terán) — Lunaria",
+    "route_type": 3,
+    "route_color": "8C1A1E",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_37",
+    "route_short_name": "R37",
+    "route_long_name": "UTMA — San Marcos",
+    "route_type": 3,
+    "route_color": "EEE050",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_38",
+    "route_short_name": "R38",
+    "route_long_name": "Vicente Guerrero — Paso Blanco",
+    "route_type": 3,
+    "route_color": "D03570",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_39",
+    "route_short_name": "R39",
+    "route_long_name": "Centro (Calle Morelos) — El Conejal",
+    "route_type": 3,
+    "route_color": "823253",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_40N",
+    "route_short_name": "R40N",
+    "route_long_name": "Terminal Oriente Circuito",
+    "route_type": 3,
+    "route_color": "4EEA6C",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_40S",
+    "route_short_name": "R40S",
+    "route_long_name": "Terminal Oriente Circuito",
+    "route_type": 3,
+    "route_color": "100234",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_41ALAMEDA",
+    "route_short_name": "R41ALAMEDA",
+    "route_long_name": "Alameda Terminal Oriente Circuito",
+    "route_type": 3,
+    "route_color": "001CF3",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_41PENAL",
+    "route_short_name": "R41PENAL",
+    "route_long_name": "Terminal Oriente Circuito",
+    "route_type": 3,
+    "route_color": "3FDE05",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_42",
+    "route_short_name": "R42",
+    "route_long_name": "Terminal Sur — Vistas del Valle",
+    "route_type": 3,
+    "route_color": "24AF6F",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_43N",
+    "route_short_name": "R43N",
+    "route_long_name": "Centro (Calle Morelos) — UTMA",
+    "route_type": 3,
+    "route_color": "A31EA4",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_43S",
+    "route_short_name": "R43S",
+    "route_long_name": "Centro (Calle Rivero y Gtz.) — San Antonio",
+    "route_type": 3,
+    "route_color": "C82447",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_45",
+    "route_short_name": "R45",
+    "route_long_name": "UAA — Terminal Sur Oriente",
+    "route_type": 3,
+    "route_color": "E514E2",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_46",
+    "route_short_name": "R46",
+    "route_long_name": "Calvillito — Vicente Guerrero",
+    "route_type": 3,
+    "route_color": "5197EE",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_47",
+    "route_short_name": "R47",
+    "route_long_name": "Clínica 10 — San Marcos",
+    "route_type": 3,
+    "route_color": "5321D4",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_48",
+    "route_short_name": "R48",
+    "route_long_name": "Vistas del Valle — Centro (Panteón de la Cruz)",
+    "route_type": 3,
+    "route_color": "A997EC",
+    "route_text_color": "000000"
+  },
+  {
+    "route_id": "R_50",
+    "route_short_name": "R50",
+    "route_long_name": "Chicahuales — UTA",
+    "route_type": 3,
+    "route_color": "AEB21D",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_50B",
+    "route_short_name": "R50B",
+    "route_long_name": "Jesús María — UTA",
+    "route_type": 3,
+    "route_color": "304934",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_51",
+    "route_short_name": "R51",
+    "route_long_name": "Casa Blanca — Ex Viñedos Guadalupe",
+    "route_type": 3,
+    "route_color": "2B64C2",
+    "route_text_color": "F0F0F0"
+  },
+  {
+    "route_id": "R_52",
+    "route_short_name": "R52",
+    "route_long_name": "Palomino — Lomas del Ajedrez",
+    "route_type": 3,
+    "route_color": "2D735B",
+    "route_text_color": "F0F0F0"
+  }
+]

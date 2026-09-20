@@ -30,14 +30,15 @@ enum RouteBadgeSize {
 /// La placa con el código de una ruta: "20", "31-A".
 ///
 /// Rectangular y sin radio a propósito, como en la sección 6.4 del spec: la
-/// señalética no redondea. El color de texto se elige por luminancia del
-/// fondo, que es lo que permite que una placa ámbar y una azul marino usen el
-/// mismo widget sin que ninguna quede ilegible.
+/// señalética no redondea. El color de texto se mide contra la placa, que es
+/// lo que permite que una placa ámbar y una azul marino usen el mismo widget
+/// sin que ninguna quede ilegible.
 class RouteBadge extends StatelessWidget {
   const RouteBadge({
     required this.shortName,
     required this.routeId,
     this.gtfsColor,
+    this.gtfsTextColor,
     this.size = RouteBadgeSize.medium,
     super.key,
   });
@@ -49,8 +50,12 @@ class RouteBadge extends StatelessWidget {
   /// color siempre.
   final String routeId;
 
-  /// `route_color` de GTFS, hexadecimal sin `#`. Casi siempre falta.
+  /// `route_color` de GTFS, hexadecimal sin `#`.
   final String? gtfsColor;
+
+  /// `route_text_color` de GTFS. Se respeta solo si es legible sobre la placa:
+  /// el feed oficial trae varias combinaciones que no llegan a 4.5:1.
+  final String? gtfsTextColor;
 
   final RouteBadgeSize size;
 
@@ -60,7 +65,10 @@ class RouteBadge extends StatelessWidget {
       routeId: routeId,
       gtfsColor: gtfsColor,
     );
-    final Color foreground = RoutePalette.onColor(background);
+    final Color foreground = RoutePalette.inkFor(
+      background,
+      gtfsTextColor: gtfsTextColor,
+    );
     final AppColors colors = context.colors;
 
     // En tema claro, los tonos brillantes se disuelven contra el fondo. La

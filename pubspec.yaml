@@ -34,8 +34,11 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # assets/mock/ se declara en la fase 4, cuando exista el dataset:
-  # un directorio de assets declarado y vacío rompe el build.
+  assets:
+    # El dataset del simulador, generado por tool/gtfs_to_mock.py desde el GTFS
+    # oficial de Aguascalientes. LICENSE.txt va dentro a propósito: CC BY-SA
+    # pide que la atribución viaje con los datos.
+    - assets/mock/
 
   fonts:
     - family: Barlow

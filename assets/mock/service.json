@@ -1,0 +1,341 @@
+{
+  "note": "Reparto de la flota simulada. vehicles = ceil(cycle_seconds / headway_seconds). Las rutas con active=false no tienen ningún vehículo a propósito: la pantalla 'esta ruta no tiene servicio ahora' necesita un caso que la dispare.",
+  "routes": [
+    {
+      "route_id": "R_01",
+      "active": true,
+      "vehicles": 8,
+      "cycle_seconds": 8850,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_02",
+      "active": true,
+      "vehicles": 3,
+      "cycle_seconds": 3264,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_03",
+      "active": true,
+      "vehicles": 10,
+      "cycle_seconds": 11041,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_04",
+      "active": true,
+      "vehicles": 9,
+      "cycle_seconds": 10290,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_05",
+      "active": true,
+      "vehicles": 8,
+      "cycle_seconds": 9450,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_06",
+      "active": true,
+      "vehicles": 9,
+      "cycle_seconds": 10050,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_07",
+      "active": true,
+      "vehicles": 6,
+      "cycle_seconds": 6157,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_08",
+      "active": true,
+      "vehicles": 5,
+      "cycle_seconds": 5130,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_09",
+      "active": true,
+      "vehicles": 11,
+      "cycle_seconds": 12330,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_10N",
+      "active": true,
+      "vehicles": 6,
+      "cycle_seconds": 6543,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_10S",
+      "active": true,
+      "vehicles": 6,
+      "cycle_seconds": 6556,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_11",
+      "active": true,
+      "vehicles": 9,
+      "cycle_seconds": 10650,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_12",
+      "active": true,
+      "vehicles": 7,
+      "cycle_seconds": 7530,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_14",
+      "active": true,
+      "vehicles": 6,
+      "cycle_seconds": 6210,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_16",
+      "active": true,
+      "vehicles": 8,
+      "cycle_seconds": 9126,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_18",
+      "active": true,
+      "vehicles": 7,
+      "cycle_seconds": 8370,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_19",
+      "active": true,
+      "vehicles": 9,
+      "cycle_seconds": 10470,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_20N",
+      "active": true,
+      "vehicles": 6,
+      "cycle_seconds": 6645,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_20S",
+      "active": true,
+      "vehicles": 6,
+      "cycle_seconds": 6645,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_23",
+      "active": true,
+      "vehicles": 9,
+      "cycle_seconds": 10410,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_24",
+      "active": true,
+      "vehicles": 8,
+      "cycle_seconds": 9570,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_25",
+      "active": true,
+      "vehicles": 7,
+      "cycle_seconds": 7710,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_27",
+      "active": true,
+      "vehicles": 7,
+      "cycle_seconds": 8370,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_28",
+      "active": true,
+      "vehicles": 11,
+      "cycle_seconds": 12210,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_29",
+      "active": true,
+      "vehicles": 4,
+      "cycle_seconds": 3795,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_30",
+      "active": true,
+      "vehicles": 10,
+      "cycle_seconds": 11370,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_33",
+      "active": true,
+      "vehicles": 8,
+      "cycle_seconds": 9412,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_34",
+      "active": true,
+      "vehicles": 9,
+      "cycle_seconds": 10590,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_35",
+      "active": true,
+      "vehicles": 7,
+      "cycle_seconds": 8370,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_36",
+      "active": true,
+      "vehicles": 3,
+      "cycle_seconds": 3411,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_37",
+      "active": true,
+      "vehicles": 9,
+      "cycle_seconds": 10331,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_38",
+      "active": true,
+      "vehicles": 7,
+      "cycle_seconds": 8010,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_39",
+      "active": true,
+      "vehicles": 5,
+      "cycle_seconds": 5570,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_40N",
+      "active": true,
+      "vehicles": 5,
+      "cycle_seconds": 5985,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_40S",
+      "active": true,
+      "vehicles": 5,
+      "cycle_seconds": 5985,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_41ALAMEDA",
+      "active": true,
+      "vehicles": 6,
+      "cycle_seconds": 6757,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_41PENAL",
+      "active": true,
+      "vehicles": 7,
+      "cycle_seconds": 7770,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_42",
+      "active": true,
+      "vehicles": 8,
+      "cycle_seconds": 8730,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_43N",
+      "active": true,
+      "vehicles": 6,
+      "cycle_seconds": 6470,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_43S",
+      "active": true,
+      "vehicles": 5,
+      "cycle_seconds": 4806,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_45",
+      "active": true,
+      "vehicles": 8,
+      "cycle_seconds": 9365,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_46",
+      "active": true,
+      "vehicles": 8,
+      "cycle_seconds": 8910,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_47",
+      "active": true,
+      "vehicles": 7,
+      "cycle_seconds": 7410,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_48",
+      "active": true,
+      "vehicles": 3,
+      "cycle_seconds": 3286,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_50",
+      "active": true,
+      "vehicles": 9,
+      "cycle_seconds": 9876,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_50B",
+      "active": false,
+      "vehicles": 0,
+      "cycle_seconds": 10590,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_51",
+      "active": true,
+      "vehicles": 3,
+      "cycle_seconds": 2657,
+      "headway_seconds": 1199
+    },
+    {
+      "route_id": "R_52",
+      "active": false,
+      "vehicles": 0,
+      "cycle_seconds": 2450,
+      "headway_seconds": 1199
+    }
+  ]
+}

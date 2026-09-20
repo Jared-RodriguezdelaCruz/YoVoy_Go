@@ -5,7 +5,7 @@ Plan de construcción de la v1. El **qué** y el **por qué** viven en
 terminado**. Las features propuestas encima del spec, con su justificación, están en
 [`FEATURES.md`](FEATURES.md).
 
-**Estado:** fases 1, 2 y 3 cerradas. Siguiente: fase 4a (dataset del simulador).
+**Estado:** fases 1, 2, 3 y 4a cerradas. Siguiente: fase 4b (`MockTransitRepository` y simulador).
 
 Regla de trabajo: **una fase por PR, y no se empieza la siguiente sin cerrar la anterior.** Las
 fases 1 a 9 son las de la sección 12 del spec. Los hitos marcados como **(extra)** no están en el
@@ -22,8 +22,8 @@ spec, pero sin ellos la app no es entregable.
 | — | **(extra)** Integración continua | 2 | ⏳ |
 | 3 | Design system | 2 | ✅ cerrada |
 | — | **(extra)** Identidad visual: ícono y splash | 3 | ⏳ |
-| 4a | Dataset del simulador | 2 | ⏳ siguiente |
-| 4b | `MockTransitRepository` y simulador | 2, 4a | ⏳ |
+| 4a | Dataset del simulador | 2 | ✅ cerrada |
+| 4b | `MockTransitRepository` y simulador | 2, 4a | ⏳ siguiente |
 | 5 | Mapa | 3, 4b | ⏳ |
 | 6 | Parada y ruta | 5 | ⏳ |
 | 7 | Planificador | 6 | ⏳ |
@@ -31,9 +31,9 @@ spec, pero sin ellos la app no es entregable.
 | 9 | Pulido: accesibilidad, rendimiento, los cuatro estados | 7, 8 | ⏳ |
 | — | **(extra)** Build de release firmado | 9 | ⏳ |
 
-Las fases 3 y 4 pueden avanzar en paralelo: ambas solo necesitan los modelos de la fase 2.
-La 4a (trazar las rutas) es la tarea más larga del proyecto; conviene empezarla antes de
-necesitarla.
+Las fases 3 y 4 pueden avanzar en paralelo: ambas solo necesitan los modelos de la fase 2. La 4a
+estaba marcada como la tarea más larga del proyecto porque suponía trazar las rutas a mano; dejó de
+serlo cuando apareció el GTFS oficial.
 
 ---
 
@@ -185,31 +185,73 @@ extraerlo con cuentagotas de las unidades o la app oficial, no inventarlo.
 
 ---
 
-## Fase 4a — Dataset del simulador
+## Fase 4a — Dataset del simulador ✅
 
 **Objetivo.** Datos que se parezcan a Aguascalientes, no a un laboratorio.
 
-**Entrega.** `assets/mock/` con `routes.json`, `stops.json`, `shapes.json`, `trips.json`,
-`stop_times.json`, `calendar.json`, `alerts.json` e `itineraries.json`, y la declaración de
-`assets/mock/` en el `pubspec.yaml` —hoy está deliberadamente sin declarar, porque un directorio
-de assets vacío rompe el build.
+**Entregado.** No se parecen a Aguascalientes: **son** Aguascalientes. Apareció el GTFS estático
+oficial del transporte concesionado —lo publica el Gobierno del Estado (CMOV) y lo distribuye el
+[Hub de Datos de Transporte Público de Codeando México](https://hdtp.codeandomexico.org/datos/mex-ags-ags)
+bajo CC BY-SA 4.0— y la fase dejó de ser cartografía para volverse un script de conversión.
+
+`tool/gtfs_to_mock.py` (Python de biblioteca estándar, cero dependencias, determinista) ·
+`tool/gtfs/mex-ags-ags.zip` con su [`SOURCE.md`](tool/gtfs/SOURCE.md) · `assets/mock/` con trece
+archivos, declarado en el `pubspec.yaml` · [`lib/core/models/frequency.dart`](lib/core/models/frequency.dart)
+· `test/core/models/mock_dataset_test.dart` con 24 verificaciones.
+
+| | Pedía el spec | Entregado |
+|---|---|---|
+| Rutas | 6 | **48**, con su color real |
+| Paradas | ~120 | **1 507** |
+| Trazos | trazados a mano sobre OSM | **92** del operador, 41 252 puntos |
+| Vehículos | 25 | **323**, repartidos por frecuencia |
+| Alertas | 2 | 2 |
+| Itinerarios | 4 pares | 4 pares |
+
+Peso: 2.8 MB en disco, **423 KB comprimidos** dentro del APK.
 
 **Tareas**
 
-- [ ] Seis rutas con su trazo sobre calles reales, tomado de OpenStreetMap.
-- [ ] ~120 paradas con nombre, código y accesibilidad.
-- [ ] Al menos una ruta **sin ningún vehículo activo**: la pantalla que dice "esta ruta no tiene
-      servicio ahora" es tan importante como la que muestra camiones.
-- [ ] Dos alertas de servicio con su periodo de actividad.
-- [ ] Cuatro pares origen-destino en `itineraries.json`: viaje directo, con un transbordo, con dos
-      transbordos y **caso sin resultados**.
-- [ ] Veinticinco vehículos repartidos entre las rutas con servicio.
+- [x] Las rutas con su trazo sobre calles reales. Vienen del operador, no de OpenStreetMap.
+- [x] Las paradas con nombre, código y accesibilidad. El nombre es del feed (normalizado); el
+      código y la accesibilidad están **simulados y declarados**, porque el feed no los publica.
+- [x] Rutas **sin ningún vehículo activo**: `R_50B` y `R_52`, marcadas en `service.json`.
+- [x] Dos alertas de servicio con su periodo: una vigente sin fin declarado y una ya vencida, para
+      probar que la vencida no se pinta.
+- [x] Cuatro pares origen-destino: directo, un transbordo, dos transbordos y **caso sin
+      resultados**, armados sobre viajes y trazos reales.
+- [x] Los vehículos repartidos entre las rutas con servicio: `ceil(vuelta ÷ intervalo)`, que es la
+      flota que esa frecuencia exige.
 
-**Cierre.** Los trazos se ven sobre calles, no cortando manzanas, y el dataset carga sin errores de
-parseo contra los modelos de la fase 2.
+**Cierre.** `dart analyze` en cero y **142 tests en verde** (111 + 24 del dataset + 4 de
+`Frequency` + 3 de la tinta de GTFS). `flutter build apk --debug` empaqueta los trece archivos.
 
-**Riesgo.** Es la tarea más lenta de todo el proyecto y no tiene atajo técnico. Conviene trazar con
-una herramienta de mapas y exportar, en vez de escribir coordenadas a mano.
+**Lo que hubo que decidir**
+
+1. **El feed completo, no seis rutas.** El spec pedía seis porque trazarlas a mano costaba semanas.
+   Con un script ese costo desaparece, y media ciudad en blanco no era una decisión de diseño sino
+   una limitación heredada.
+2. **Entra `Frequency` al modelo.** El feed no tiene horarios: tiene intervalos. Es una entidad
+   GTFS de primera clase, así que entra por la misma regla de la sección 3 que protege a las demás.
+   Sin ella no hay cómo repartir la flota ni dar "pasa cada 20 min" como respaldo.
+3. **El script va en Python y no en Dart.** Hacerlo en Dart obligaba a meter `archive` y `csv` en
+   `dev_dependencies`, y agregar paquetes fuera de la tabla de stack es el riesgo 3 de este
+   documento. Es herramienta de build, no código de app.
+
+**Dos cosas que encontró el test y no la vista**
+
+1. **Un `stop_id` con un espacio adelante.** El feed trae `" P684"` en dos filas de
+   `stop_times.txt`: dos viajes de la R-30 con una parada colgando. Ahora cada celda se recorta al
+   leerla.
+2. **El calendario venía vencido.** El feed declara vigencia `20230101`–`20251231`. Con esas fechas
+   `Calendar.runsOn(hoy)` da `false` siempre y la app diría que no hay servicio nunca, sin error ni
+   pantalla roja. La vigencia se abre al convertir, y un test lo vigila para el día que alguien
+   reimporte el feed.
+
+**Lo que trajo de regalo.** Los colores reales de las 48 rutas. Varios no son legibles con la tinta
+que el mismo feed declara —la R-08 es `#C4CBA6` con texto `#F0F0F0`, 1.5:1—, así que
+[`RoutePalette.inkFor`](lib/design/tokens/route_palette.dart) respeta la tinta del feed solo si pasa
+4.5:1. El feed manda en identidad, no en legibilidad.
 
 ---
 
@@ -225,7 +267,10 @@ esqueleto · panel de control en `/debug/simulator`.
 **Tareas**
 
 - [ ] Interfaz `TransitRepository` con los nueve métodos del contrato, tal cual.
-- [ ] `MockTransitRepository` leyendo los JSON de `assets/mock/`.
+- [ ] `MockTransitRepository` leyendo los JSON de `assets/mock/`. Son 2.8 MB: el parseo va fuera
+      del hilo de UI.
+- [ ] Flota según `service.json`: 323 vehículos repartidos por frecuencia, con `R_50B` y `R_52`
+      sin servicio. El panel de debug puede recortar el número para perfilar.
 - [ ] Movimiento: cada vehículo interpolado sobre los puntos de su `shape` a 20–40 km/h, con
       paradas de 15–30 s en cada `Stop`.
 - [ ] Cadencia de reporte de **30 s**, no por frame: es la cadencia real y obliga a la UI a
@@ -424,14 +469,16 @@ que les toca.
 | Proveedor de tiles, caché en disco y atribución | Fase 5 | Fuera de la tabla de stack de la sección 2 |
 | Paquete de ubicación y permisos | Fase 5 | Fuera de la tabla de stack; además necesita textos de permiso en es_MX en el manifest y el `Info.plist` |
 | `shared_preferences` o `drift` | Fase 8 | El spec pide elegir y justificar |
-| Fuente del trazado de las rutas | Fase 4a | OpenStreetMap a mano, salvo que aparezca el feed GTFS oficial |
+| ~~Fuente del trazado de las rutas~~ | ~~Fase 4a~~ | **Resuelta**: el GTFS oficial de CMOV, vía el Hub de Codeando México, CC BY-SA 4.0. Ver [`tool/gtfs/SOURCE.md`](tool/gtfs/SOURCE.md) |
 
 ---
 
 ## Riesgos del proyecto
 
-1. **Trazar seis rutas a mano** (fase 4a) es la tarea más larga y la que menos se parece a
-   programar. Si se deja para el final, bloquea las fases 5 a 7 completas.
+1. ~~**Trazar seis rutas a mano** (fase 4a).~~ **Se cayó.** Apareció el GTFS oficial y el trazado
+   dejó de ser trabajo manual. A cambio entra un riesgo nuevo y más chico: el dataset pasó de 6
+   rutas a 48, así que el presupuesto de rendimiento de la fase 5 se prueba contra la ciudad
+   completa desde el primer día. Es mejor así.
 2. **El presupuesto de 60 fps** se gana o se pierde en la fase 5. Interpolación con un solo
    `Ticker`, clustering y filtrado por viewport no son optimizaciones tardías: son el diseño.
 3. **Agregar paquetes fuera de la tabla de stack** sin discutirlo. Tres decisiones ya lo requieren

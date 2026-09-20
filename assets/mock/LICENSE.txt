@@ -1,0 +1,28 @@
+Datos de transporte de Aguascalientes
+=====================================
+
+Los archivos JSON de este directorio son una obra derivada del GTFS estático
+del transporte público concesionado de Aguascalientes.
+
+Fuente original
+    Gobierno del Estado de Aguascalientes
+    Coordinación General de Movilidad (CMOV)
+    https://www.aguascalientes.gob.mx/cmov
+
+Distribuido por
+    Hub de Datos de Transporte Público — Codeando México
+    https://hdtp.codeandomexico.org/datos/mex-ags-ags
+
+Licencia de la fuente y de esta obra derivada
+    Creative Commons Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0)
+    https://creativecommons.org/licenses/by-sa/4.0/deed.es
+
+La licencia CompartirIgual alcanza a estos datos, no al código de la app.
+
+Atribución que debe aparecer en la app
+    Datos de transporte: Gobierno del Estado de Aguascalientes (CMOV), vía el
+    Hub de Datos de Transporte Público de Codeando México. CC BY-SA 4.0.
+
+Yo Voy Go es una app independiente. No tiene afiliación con la Coordinación
+General de Movilidad ni con el operador del sistema, y no integra la Tarjeta
+YoVoy. Atribuir una fuente de datos no es afiliarse a ella.
