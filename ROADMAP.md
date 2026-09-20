@@ -5,7 +5,7 @@ Plan de construcción de la v1. El **qué** y el **por qué** viven en
 terminado**. Las features propuestas encima del spec, con su justificación, están en
 [`FEATURES.md`](FEATURES.md).
 
-**Estado:** fase 1 cerrada. Siguiente: fase 2 (modelos GTFS).
+**Estado:** fases 1, 2 y 3 cerradas. Siguiente: fase 4a (dataset del simulador).
 
 Regla de trabajo: **una fase por PR, y no se empieza la siguiente sin cerrar la anterior.** Las
 fases 1 a 9 son las de la sección 12 del spec. Los hitos marcados como **(extra)** no están en el
@@ -18,11 +18,11 @@ spec, pero sin ellos la app no es entregable.
 | # | Fase | Depende de | Estado |
 |---|---|---|---|
 | 1 | Base: proyecto, dependencias, análisis estricto, estructura, router | — | ✅ cerrada |
-| 2 | Modelos GTFS | 1 | ⏳ siguiente |
+| 2 | Modelos GTFS | 1 | ✅ cerrada |
 | — | **(extra)** Integración continua | 2 | ⏳ |
-| 3 | Design system | 2 | ⏳ |
+| 3 | Design system | 2 | ✅ cerrada |
 | — | **(extra)** Identidad visual: ícono y splash | 3 | ⏳ |
-| 4a | Dataset del simulador | 2 | ⏳ |
+| 4a | Dataset del simulador | 2 | ⏳ siguiente |
 | 4b | `MockTransitRepository` y simulador | 2, 4a | ⏳ |
 | 5 | Mapa | 3, 4b | ⏳ |
 | 6 | Parada y ruta | 5 | ⏳ |
@@ -78,34 +78,42 @@ reescrito.
 
 ---
 
-## Fase 2 — Modelos GTFS
+## Fase 2 — Modelos GTFS ✅
 
 **Objetivo.** Las entidades de datos, calcadas de GTFS, para que el día que llegue el feed oficial
 la app no se refactorice.
 
-**Entrega.** `lib/core/models/` con un archivo por entidad (freezed + `json_serializable`) y
-`test/core/models/` con su round-trip.
+**Entregado.** `lib/core/models/` con un archivo por entidad y
+[`models.dart`](lib/core/models/models.dart) como único import · `converters/` con los cuatro
+converters · `test/core/models/` con el round-trip de cada modelo.
 
 **Tareas**
 
-- [ ] Estáticas: `Agency`, `Route`, `Trip`, `Stop`, `StopTime`, `Shape`, `Calendar`.
-- [ ] Tiempo real: `VehiclePosition`, `StopTimeUpdate`, `ServiceAlert`.
-- [ ] Derivadas de presentación: `Arrival`, `Itinerary`, `Leg`.
-- [ ] Enums: `EtaConfidence`, `OccupancyStatus`, `Weekday`, tipo de `Leg`.
-- [ ] `snake_case` en el JSON y `camelCase` en Dart, mapeado con `@JsonKey`.
-- [ ] Converters propios: `LatLng` ↔ `{lat, lon}`, `Duration`, `DateTime`, y las horas de GTFS
-      —que admiten `25:30:00` para viajes que cruzan la medianoche y revientan un parseo ingenuo.
-- [ ] Resolver cómo conviven `EtaConfidence` (de dónde viene el dato: en vivo, programado,
-      desconocido) y el `DataFreshness` que ya existe en
-      [`lib/core/config/freshness.dart:12`](lib/core/config/freshness.dart) (qué tan viejo es).
-      Son ejes distintos y no deben colapsarse en uno.
-- [ ] Round-trip JSON por modelo, incluyendo los campos que faltan en la vida real: `bearing`
-      nulo, `eta` nula, `color` ausente.
+- [x] Estáticas: `Agency`, `TransitRoute`, `Trip`, `Stop`, `StopTime`, `Shape`, `Calendar`.
+- [x] Tiempo real: `VehiclePosition`, `StopTimeUpdate`, `ServiceAlert` (con `ActivePeriod`).
+- [x] Derivadas de presentación: `Arrival`, `Itinerary`, `Leg`.
+- [x] Enums: `EtaConfidence`, `OccupancyStatus`, `Weekday`, `LegType`, más
+      `WheelchairBoarding`, `AlertCause` y `AlertEffect`.
+- [x] `snake_case` en el JSON y `camelCase` en Dart, mapeado con `@JsonKey`.
+- [x] Converters propios: `LatLng` ↔ `{lat, lon}`, `Duration` en segundos, `DateTime` en epoch,
+      fecha `YYYYMMDD` y las horas de GTFS, que admiten `25:30:00`.
+- [x] `EtaConfidence` (origen del dato) y `DataFreshness` (edad del dato) siguen siendo ejes
+      distintos. `Arrival` carga los dos y expone `showsNumericEta`, que es donde vive la regla.
+- [x] Round-trip JSON por modelo, con los campos que faltan en la vida real: `bearing` nulo, `eta`
+      nula, `color` ausente, `shape` sin puntos.
 
-**Cierre.** Ningún modelo inventado fuera de GTFS. `build_runner` corre sin conflictos y
-`dart analyze` queda en cero.
+**Cierre.** `dart analyze` en cero y 59 tests en verde al terminar la fase.
 
-**Riesgos.** El converter de `Shape.points` y las horas mayores a 24:00:00 son las dos trampas.
+**Tres decisiones que quedaron tomadas**
+
+1. **La clase se llama `TransitRoute`, no `Route`.** `Route<T>` ya existe en `flutter/material.dart`
+   y un modelo con ese nombre obligaría a escribir `hide Route` en cada archivo de UI. El JSON
+   sigue siendo GTFS literal, que es lo que protege la regla de la sección 3 del spec.
+2. **`build.yaml` con `explicit_to_json: true`.** Sin eso, `toJson()` de un itinerario devuelve los
+   tramos como objetos Dart en vez de mapas, y el round-trip solo funciona si pasa por
+   `jsonEncode`. Lo encontró el test del itinerario, no una revisión a ojo.
+3. **Las horas de GTFS son `Duration`, no `DateTime`.** `25:30:00` es válido y significa la 1:30 de
+   la madrugada del mismo día de servicio.
 
 ---
 
@@ -128,42 +136,52 @@ la app no se refactorice.
 
 ---
 
-## Fase 3 — Design system
+## Fase 3 — Design system ✅
 
 **Objetivo.** Señalética de transporte sobre Material 3. La línea de ruta es el objeto gráfico
 protagonista y la expresividad se gasta solo en el tiempo real.
 
-**Entrega.** `lib/design/tokens/` (colores, tipografía, espaciado, motion) · `lib/design/theme.dart`
-· `lib/design/components/` con los ocho componentes de la sección 6.6 del spec · pantalla de
-galería en debug.
+**Entregado.** `lib/design/tokens/` (color, tipografía, espaciado, motion, paleta de rutas y
+contraste) · [`lib/design/theme.dart`](lib/design/theme.dart) · `lib/design/components/` con los
+ocho componentes · galería en `/debug/gallery` · cuatro imágenes de referencia en
+`test/design/goldens/`.
 
 **Tareas**
 
-- [ ] Tokens de superficie, contorno y texto, más los semánticos de tiempo real (`live`, `stale`,
-      `unknown`, `alert`), que **no** reutilizan el verde de marca: un color, un significado.
-- [ ] Paleta curada de doce tonos para rutas sin `color` en GTFS, asignada con hash determinista
-      desde el `routeId` —la misma ruta, el mismo color entre sesiones— y con contraste mínimo
-      4.5:1 contra la superficie.
-- [ ] Tipografía: los seis roles de la sección 6.3 sobre Barlow y Barlow Semi Condensed, ya
-      empaquetadas, con `FontFeature.tabularFigures()` en números de ruta y ETAs.
-- [ ] Temas claro y oscuro, oscuro por defecto. Sustituye el `ThemeData.dark()` provisional de
-      [`lib/app/app.dart:24`](lib/app/app.dart).
-- [ ] Escala de espaciado de 4 y radios con jerarquía (0 placas, 8 chips, 16 cards, 28 hoja).
-      Sin sombras: la jerarquía se resuelve con superficie y borde.
-- [ ] Los ocho componentes: `RouteBadge`, `EtaChip`, `FreshnessIndicator`, `StopTile`, `RouteLine`,
+- [x] Tokens de superficie, contorno y texto, más los semánticos de tiempo real, que **no**
+      reutilizan el verde de marca. Verificado por test en los dos temas.
+- [x] Paleta de doce tonos para rutas sin `color`, asignada con un FNV-1a determinista desde el
+      `routeId` —`String.hashCode` no sirve: cambia entre ejecuciones— y con contraste mínimo
+      4.5:1 contra la superficie oscura.
+- [x] Tipografía: los seis roles de la sección 6.3 sobre Barlow y Barlow Semi Condensed, con
+      `FontFeature.tabularFigures()` en números de ruta y ETAs.
+- [x] Temas claro y oscuro, oscuro por defecto. Sustituyen el `ThemeData` provisional de
+      [`lib/app/app.dart`](lib/app/app.dart).
+- [x] Escala de espaciado de 4 y radios con jerarquía (0 placas, 8 chips, 16 cards, 28 hoja). Sin
+      sombras.
+- [x] Los ocho componentes: `RouteBadge`, `EtaChip`, `FreshnessIndicator`, `StopTile`, `RouteLine`,
       `VehicleMarker`, `EmptyState`, `ErrorState`.
-- [ ] Galería en `/debug/gallery` con cada componente en **todos** sus estados. La ruta ya está
-      prevista en [`lib/app/router.dart:61`](lib/app/router.dart).
-- [ ] Tests de widget: `EtaChip` con ETA nula, en vivo, vieja y desconocida; `RouteBadge`
-      ajustando el color de texto por luminancia; `VehicleMarker` degradando a círculo cuando
-      `bearing` es nulo.
+- [x] Galería en `/debug/gallery`, montada solo bajo `kDebugMode`, con interruptor de tema y de
+      escala de texto hasta 200 %. Se llega con un botón desde el placeholder del mapa.
+- [x] Tests de widget: `EtaChip` en sus cuatro estados, `RouteBadge` eligiendo tinta por contraste,
+      `VehicleMarker` sin `bearing`, y el motion anulado cuando el sistema pide reducir animaciones.
 
-**Cierre.** `EtaChip` renderiza el estado desconocido igual de bien que el conocido —es el
-componente más importante de la app—. Contraste y toque verificados en ambos temas, y la galería
-sigue legible con el texto al 200 %.
+**Cierre.** `EtaChip` renderiza el estado desconocido igual de bien que el conocido y nunca muestra
+minutos con el dato vencido. 111 tests en verde y `dart analyze` en cero.
 
-**Decisión pendiente.** El verde institucional real. Hoy `#00854A` es un placeholder y el spec
-pide extraerlo con cuentagotas de las unidades o la app oficial, no inventarlo.
+**Tres cosas que encontraron los tests, no la vista**
+
+1. **Ni el texto blanco ni el negro pasan 4.5:1 sobre media paleta si se elige por un umbral de
+   luminancia.** Ahora [`Contrast.bestOn`](lib/design/tokens/contrast.dart) mide las dos tintas y se
+   queda con la mejor.
+2. **En tema claro, los tonos brillantes se disuelven contra el fondo.** En vez de apagar toda la
+   paleta —y perder lo que distingue a cada ruta— la placa se pone un contorno de 1 px, y solo
+   cuando hace falta.
+3. **La placa se estiraba de lado a lado dentro de un `Wrap`.** Un `Container` con `alignment` crece
+   hasta el ancho que le den. Lo delató la imagen de referencia de la paleta.
+
+**Decisión pendiente.** El verde institucional real. Hoy `#00854A` es un placeholder y el spec pide
+extraerlo con cuentagotas de las unidades o la app oficial, no inventarlo.
 
 ---
 

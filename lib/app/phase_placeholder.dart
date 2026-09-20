@@ -11,6 +11,7 @@ class PhasePlaceholder extends StatelessWidget {
     required this.specSection,
     required this.phase,
     this.detail,
+    this.action,
     super.key,
   });
 
@@ -26,6 +27,9 @@ class PhasePlaceholder extends StatelessWidget {
 
   /// Contexto extra, por ejemplo el parámetro de path recibido.
   final String? detail;
+
+  /// Un control opcional al pie, para el andamio de desarrollo.
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +53,10 @@ class PhasePlaceholder extends StatelessWidget {
               if (detail != null) ...<Widget>[
                 const SizedBox(height: 12),
                 Text(detail!, style: textTheme.bodySmall),
+              ],
+              if (action != null) ...<Widget>[
+                const SizedBox(height: 24),
+                action!,
               ],
             ],
           ),

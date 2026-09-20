@@ -34,6 +34,9 @@ final class AppRoute {
 
   /// Ajustes, como en la sección 8.6 del spec.
   static const AppRoute settings = AppRoute._('settings', '/settings');
+
+  /// Galería del design system. Solo se monta en builds de debug.
+  static const AppRoute gallery = AppRoute._('gallery', '/debug/gallery');
 }
 
 /// Nombres de los parámetros de path.

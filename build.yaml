@@ -1,0 +1,12 @@
+# Opciones de generación de código.
+#
+# `explicit_to_json` hace que los modelos anidados —los tramos de un
+# itinerario, el periodo de una alerta— se serialicen a mapas de verdad. Sin
+# esto, `toJson()` devuelve el objeto Dart tal cual y solo funciona si pasa por
+# `jsonEncode`, lo que rompe cualquier round-trip.
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          explicit_to_json: true

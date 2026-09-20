@@ -22,8 +22,12 @@ solo explica cómo trabajar en el repo.
 
 Datos simulados de punta a punta (`MockTransitRepository`). Cero integraciones con APIs externas.
 
-**Fase 1 cerrada** (base: dependencias, análisis estricto, estructura y router). Siguiente: fase 2,
-modelos GTFS.
+**Fases 1, 2 y 3 cerradas**: base y router, modelos GTFS, y el design system con sus ocho
+componentes. Siguiente: fase 4a, el dataset del simulador.
+
+La app ya se ve: en builds de debug, el botón del mapa abre `/debug/gallery`, la galería con cada
+componente en todos sus estados, con interruptor de tema y escala de texto hasta 200 %. Sin
+dispositivo a la mano, las mismas piezas están fotografiadas en `test/design/goldens/`.
 
 El plan completo —las nueve fases con sus entregables, tareas y criterios de cierre, más las
 decisiones que siguen abiertas— vive en [`ROADMAP.md`](ROADMAP.md). Una fase por PR, y no se
@@ -88,6 +92,16 @@ dart analyze     # incluye las reglas de riverpod_lint
 flutter test
 ```
 
+Las imágenes de referencia de `test/design/goldens/` son parte de `flutter test`. Si cambia un
+componente a propósito, se regeneran:
+
+```bash
+flutter test --update-goldens
+```
+
+Son una foto, no una aserción de comportamiento: si alguna sale en rojo por un cambio de versión de
+Flutter o de máquina, se regeneran y se revisan a ojo.
+
 `dart analyze` debe salir en cero. Nota: `flutter analyze` **no** ejecuta `riverpod_lint` — ese
 plugin usa el sistema nuevo del analizador (`analysis_server_plugin`, declarado en
 `analysis_options.yaml`), que solo corre bajo `dart analyze`. Usa `dart analyze` como compuerta.
@@ -110,6 +124,10 @@ plugin usa el sistema nuevo del analizador (`analysis_server_plugin`, declarado 
 
 No se agregan paquetes fuera de esta tabla sin discutirlo antes, como pide la
 sección 2 del spec.
+
+`build.yaml` fija `explicit_to_json: true` para `json_serializable`: sin eso, los modelos anidados
+—los tramos de un itinerario— no se serializan a mapas y el round-trip solo funciona si pasa por
+`jsonEncode`.
 
 ### Riverpod: solo la API generada
 
@@ -140,11 +158,14 @@ lib/
     phase_placeholder.dart     andamio temporal de las pantallas por construir
   core/
     config/freshness.dart      umbrales de frescura
-    models/                    modelos GTFS compartidos (fase 2)
+    models/                    modelos GTFS + converters, con models.dart de barril
     data/                      TransitRepository + mock/ + remote/ (fase 4)
     utils/
   design/
-    tokens/  components/       design system (fase 3)
+    theme.dart                 temas claro y oscuro sobre Material 3
+    tokens/                    color, tipografía, espaciado, motion, paleta de rutas, contraste
+    components/                los ocho componentes compartidos
+    gallery/                   galería de debug, montada solo bajo kDebugMode
   features/
     map/ stop/ route/ planner/ favorites/ settings/
       application/             providers, casos de uso, modelos de vista
@@ -173,6 +194,7 @@ Reglas que se revisan en cada PR:
 | `/planner` | `planner` | Planificador |
 | `/favorites` | `favorites` | Favoritos |
 | `/settings` | `settings` | Ajustes |
+| `/debug/gallery` | `gallery` | Galería del design system (solo en debug) |
 
 ---
 

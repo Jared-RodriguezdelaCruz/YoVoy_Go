@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../design/theme.dart';
 import 'router.dart';
 
 /// Raíz de la app: router, locale y tema.
@@ -21,11 +22,11 @@ class YoVoyGoApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      // TODO(fase 3): reemplazar por los temas de design/theme.dart, como en la
-      // sección 6 del spec (design system).
-      // El oscuro es el default de la app; el claro es obligatorio.
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
+      // El oscuro es el default de la app; el claro es obligatorio, como dice
+      // la sección 6.2 del spec: el mapa de día se usa más.
+      // TODO(fase 8): que el modo salga de ajustes en vez de estar fijo.
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark,
     );
   }
