@@ -2,18 +2,20 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/routes.dart';
 import '../../../core/clock/clock_provider.dart';
 import '../../../core/data/transit_network.dart';
 import '../../../core/location/location_service.dart';
 import '../../../core/models/models.dart';
+import '../../../core/transit/vehicle_interpolator.dart';
 import '../../../design/components/components.dart';
 import '../../../design/tokens/colors.dart';
 import '../../../design/tokens/spacing.dart';
 import '../../../design/tokens/typography.dart';
 import '../application/leave_now.dart';
 import '../application/map_providers.dart';
-import '../application/vehicle_interpolator.dart';
 
 /// Las tres alturas de la hoja, como en la sección 8.1 del spec.
 abstract final class SheetStops {
@@ -309,6 +311,7 @@ class _NearbyStopTile extends ConsumerWidget {
     final AsyncValue<List<Arrival>> arrivals = ref.watch(
       stopArrivalsProvider(stop.id),
     );
+    final TransitNetwork? network = ref.watch(transitNetworkProvider).value;
     final String distance =
         'a ${_meters(nearby.meters)} · ${nearby.walk.inMinutes.clamp(1, 99)} '
         'min a pie';
@@ -320,6 +323,7 @@ class _NearbyStopTile extends ConsumerWidget {
         arrivals: value,
         distanceLabel: distance,
         accessibility: stop.wheelchairBoarding,
+        routeOf: network?.route,
         onTap: () => ref
             .read(mapSelectionStateProvider.notifier)
             .select(StopSelected(stop.id)),
@@ -354,12 +358,29 @@ class _StopContent extends ConsumerWidget {
 
     return _DetailHeader(
       child: switch (arrivals) {
-        AsyncData<List<Arrival>>(:final List<Arrival> value) => StopTile(
-          name: stop.name,
-          code: stop.code,
-          arrivals: value,
-          accessibility: stop.wheelchairBoarding,
-          maxArrivals: 12,
+        AsyncData<List<Arrival>>(:final List<Arrival> value) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            StopTile(
+              name: stop.name,
+              code: stop.code,
+              arrivals: value,
+              accessibility: stop.wheelchairBoarding,
+              maxArrivals: 12,
+              routeOf: network?.route,
+              // Con doce arribos el enlace de abajo queda fuera de la
+              // pantalla: la tarjeta entera también abre la parada.
+              onTap: () => context.pushNamed(
+                AppRoute.stop.name,
+                pathParameters: <String, String>{AppParams.stopId: stop.id},
+              ),
+            ),
+            _OpenLink(
+              label: 'Ver parada',
+              route: AppRoute.stop,
+              params: <String, String>{AppParams.stopId: stop.id},
+            ),
+          ],
         ),
         AsyncError<List<Arrival>>() => ErrorState(
           title: 'No se pudieron cargar los arribos de ${stop.name}',
@@ -492,6 +513,11 @@ class _VehicleContentState extends ConsumerState<_VehicleContent> {
               vehicleProgress: progress,
               dataAge: age,
             ),
+          _OpenLink(
+            label: 'Ver ruta',
+            route: AppRoute.route,
+            params: <String, String>{AppParams.routeId: vehicle.routeId},
+          ),
         ],
       ),
     );
@@ -573,6 +599,11 @@ class _RouteContent extends ConsumerWidget {
               ),
             ),
           ],
+          _OpenLink(
+            label: 'Ver ruta',
+            route: AppRoute.route,
+            params: <String, String>{AppParams.routeId: route.id},
+          ),
         ],
       ),
     );
@@ -581,40 +612,30 @@ class _RouteContent extends ConsumerWidget {
 
 // -- Piezas ------------------------------------------------------------------
 
-/// El estado de carga: la forma del contenido real, no un spinner centrado
-/// (sección 9).
-class SheetSkeleton extends StatelessWidget {
-  const SheetSkeleton({this.lines = 3, super.key});
+/// El paso de la hoja a la pantalla completa de la parada o de la ruta.
+class _OpenLink extends StatelessWidget {
+  const _OpenLink({
+    required this.label,
+    required this.route,
+    required this.params,
+  });
 
-  final int lines;
+  final String label;
+  final AppRoute route;
+  final Map<String, String> params;
 
   @override
   Widget build(BuildContext context) {
-    final Color block = context.colors.surfaceSunken;
-
-    Widget bar(double widthFactor, double height) => FractionallySizedBox(
+    return Align(
       alignment: Alignment.centerLeft,
-      widthFactor: widthFactor,
-      child: Container(
-        height: height,
-        decoration: BoxDecoration(
-          color: block,
-          borderRadius: AppRadius.chipRadius,
+      child: Padding(
+        padding: const EdgeInsets.only(top: Spacing.sm),
+        child: TextButton.icon(
+          onPressed: () =>
+              context.pushNamed(route.name, pathParameters: params),
+          icon: const Icon(Icons.arrow_forward, size: 18),
+          label: Text(label),
         ),
-      ),
-    );
-
-    return Semantics(
-      label: 'Cargando',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          bar(0.55, 22),
-          for (int i = 1; i < lines; i++) ...<Widget>[
-            const SizedBox(height: Spacing.sm),
-            bar(i.isOdd ? 0.85 : 0.7, 16),
-          ],
-        ],
       ),
     );
   }

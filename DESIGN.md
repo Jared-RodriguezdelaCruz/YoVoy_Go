@@ -170,6 +170,25 @@ Una limitación que queda: las etiquetas del fondo usan la fuente del sistema, p
 
 ---
 
+## La parada y la ruta
+
+**La parada se lee como el letrero del paradero.** El nombre va grande, en el ancho semi condensado
+de los datos. Debajo, el código y cuántas rutas pasan. Luego los arribos, con el `EtaChip` grande:
+el número es lo que se busca con la vista. Las alertas van como una franja con un filo en `alert`,
+no como una tarjeta roja. Avisan sin empujar los camiones fuera de la pantalla.
+
+**La ruta es la tira, puesta de pie.** Es el riesgo de la fase 6. La lista de paradas no lleva
+viñetas: una línea en el color de la ruta baja por el margen, cada parada es una marca (hueca en
+medio, llena en las terminales) y cada camión es el mismo bloque rectangular de `RouteStrip`,
+dibujado **entre** la parada por la que pasó y la siguiente. La regla de la luz no cambia: con dato
+vigente el bloque lleva halo; con el dato vencido el halo se va, el bloque se vuelve gris y el tramo
+de delante se puntea. Así la firma deja de ser un componente suelto y se vuelve una pantalla.
+
+El sentido se elige por su destino, "Hacia Margaritas", en el índigo de marca. La estrella de
+favorito va en **cantera**: la decidió el usuario.
+
+---
+
 ## Lo que se descartó, y por qué
 
 - **Neón cian sobre negro con cristal esmerilado.** Es el default de "futurista" y el
@@ -191,5 +210,5 @@ flutter run          # y de ahí al ícono de la esquina del mapa → "Ver el de
 
 `/debug/gallery` monta cada componente en todos sus estados, con interruptor de tema y escala de
 texto hasta 200 %. Sin dispositivo, las mismas piezas están fotografiadas en
-`test/design/goldens/`, y el mapa en `test/features/map/goldens/` —con la hora fija para que la
-flota salga igual—. Se regeneran con `flutter test --update-goldens`.
+`test/design/goldens/`, y el mapa, la parada y la ruta en `test/features/{map,stop,route}/goldens/`
+—con la hora fija para que la flota salga igual—. Se regeneran con `flutter test --update-goldens`.

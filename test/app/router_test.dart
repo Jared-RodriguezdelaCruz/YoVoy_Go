@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yovoy_go/app/app.dart';
+import 'package:yovoy_go/app/phase_placeholder.dart';
 import 'package:yovoy_go/app/router.dart';
 import 'package:yovoy_go/app/routes.dart';
 import 'package:yovoy_go/core/data/mock/mock_dataset.dart';
@@ -12,6 +13,7 @@ import 'package:yovoy_go/core/data/transit_repository_provider.dart';
 import 'package:yovoy_go/core/location/location_service.dart';
 import 'package:yovoy_go/features/map/application/basemap_style.dart';
 import 'package:yovoy_go/features/map/presentation/map_screen.dart';
+import 'package:yovoy_go/features/route/presentation/route_screen.dart';
 import 'package:yovoy_go/features/settings/presentation/settings_screen.dart';
 import 'package:yovoy_go/features/stop/presentation/stop_screen.dart';
 
@@ -112,8 +114,40 @@ void main() {
     container.read(appRouterProvider).go(AppPaths.stop('123'));
     await settle(tester);
 
+    // 123 no existe en el dataset: la pantalla lo dice con el código que
+    // le llegó por el path, que es lo que este test revisa.
     expect(find.byType(StopScreen), findsOneWidget);
-    expect(find.text('stopId: 123'), findsOneWidget);
+    expect(find.text('Esta parada no existe'), findsOneWidget);
+    expect(find.textContaining('el código 123'), findsOneWidget);
+
+    await finish(tester);
+  });
+
+  testWidgets('una parada real ya no es un placeholder', (
+    WidgetTester tester,
+  ) async {
+    await pumpApp(tester);
+
+    container.read(appRouterProvider).go(AppPaths.stop('P090'));
+    await settle(tester);
+
+    expect(find.text('Leche San Marcos'), findsOneWidget);
+    expect(find.byType(PhasePlaceholder), findsNothing);
+
+    await finish(tester);
+  });
+
+  testWidgets('la ruta recibe su parámetro de path', (
+    WidgetTester tester,
+  ) async {
+    await pumpApp(tester);
+
+    container.read(appRouterProvider).go(AppPaths.route('R_01'));
+    await settle(tester);
+
+    expect(find.byType(RouteScreen), findsOneWidget);
+    expect(find.textContaining('Margaritas'), findsWidgets);
+    expect(find.byType(PhasePlaceholder), findsNothing);
 
     await finish(tester);
   });

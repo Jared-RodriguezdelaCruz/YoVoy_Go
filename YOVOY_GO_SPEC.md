@@ -60,6 +60,7 @@ verse mejor, es comportarse mejor cuando los datos son malos** — que es siempr
 | Navegación | `go_router` |
 | Mapa | `flutter_map` + tiles vectoriales con `flutter_map_vector_tiles`, sobre OpenFreeMap (esquema OpenMapTiles, sin llave). Estilos propios generados desde los tokens; caché en disco del mismo paquete (§7). *Acordado en la fase 5* |
 | Ubicación | `geolocator`, solo permiso "mientras se usa". *Acordado en la fase 5* |
+| Persistencia local | `shared_preferences`, detrás de `FavoritesStore`. Guarda listas de ids; no hace falta una base de datos. *Acordado en la fase 6* |
 | Geometría | `latlong2` |
 | Formato | `intl` + `flutter_localizations` (locale `es_MX`) |
 | Tipografía | **Barlow**, **Barlow Semi Condensed** y **Barlow Condensed** empaquetadas en `assets/fonts/` (OFL). Sin paquete adicional |
@@ -522,7 +523,8 @@ o mostrar las rutas que sí pasan cerca del origen).
 ### 8.5 Favoritos
 
 Paradas y rutas guardadas, persistidas localmente (`shared_preferences` o `drift` — elige
-y justifica). Los favoritos de parada muestran ETA en vivo directamente en la lista.
+y justifica). **Elegido en la fase 6: `shared_preferences`**, porque lo que se guarda son listas
+de ids. Los favoritos de parada muestran ETA en vivo directamente en la lista.
 
 ### 8.6 Ajustes
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/models/arrival.dart';
 import '../../core/models/enums.dart';
+import '../../core/models/transit_route.dart';
 import '../tokens/colors.dart';
 import '../tokens/spacing.dart';
 import '../tokens/typography.dart';
@@ -24,6 +25,7 @@ class StopTile extends StatelessWidget {
     this.onTap,
     this.onToggleFavorite,
     this.maxArrivals = 3,
+    this.routeOf,
     super.key,
   });
 
@@ -45,6 +47,11 @@ class StopTile extends StatelessWidget {
 
   /// Cuántos arribos se muestran antes de resumir el resto.
   final int maxArrivals;
+
+  /// La ruta de un arribo, para pintar la placa con su color oficial. Sin
+  /// ella la placa usa el color derivado del id, y la misma ruta saldría de
+  /// otro color que en el resto de la app.
+  final TransitRoute? Function(String routeId)? routeOf;
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +100,10 @@ class StopTile extends StatelessWidget {
                 ...visible.map(
                   (Arrival arrival) => Padding(
                     padding: const EdgeInsets.only(bottom: Spacing.sm),
-                    child: _ArrivalRow(arrival: arrival),
+                    child: _ArrivalRow(
+                      arrival: arrival,
+                      route: routeOf?.call(arrival.routeId),
+                    ),
                   ),
                 ),
               if (hidden > 0)
@@ -190,7 +200,8 @@ class _Header extends StatelessWidget {
                 : 'Guardar en favoritos',
             icon: Icon(
               isFavorite ? Icons.star : Icons.star_border,
-              color: isFavorite ? colors.brand : colors.textSecondary,
+              // Cantera: el favorito lo decidió el usuario, no el sistema.
+              color: isFavorite ? colors.cantera : colors.textSecondary,
             ),
           ),
       ],
@@ -199,9 +210,10 @@ class _Header extends StatelessWidget {
 }
 
 class _ArrivalRow extends StatelessWidget {
-  const _ArrivalRow({required this.arrival});
+  const _ArrivalRow({required this.arrival, required this.route});
 
   final Arrival arrival;
+  final TransitRoute? route;
 
   @override
   Widget build(BuildContext context) {
@@ -218,6 +230,8 @@ class _ArrivalRow extends StatelessWidget {
     final Widget badge = RouteBadge(
       shortName: arrival.routeShortName,
       routeId: arrival.routeId,
+      gtfsColor: route?.color,
+      gtfsTextColor: route?.textColor,
       size: RouteBadgeSize.small,
     );
     final Widget headsign = Text(
@@ -227,8 +241,12 @@ class _ArrivalRow extends StatelessWidget {
       style: AppTypography.body.copyWith(color: colors.textPrimary),
     );
 
+    // Una sola frase para el lector de pantalla: "ruta R20N a Centro, llega
+    // en 4 minutos, dato en vivo". La placa, el destino y el chip por
+    // separado serían tres paradas del dedo para una sola respuesta.
     return Semantics(
-      label: 'Ruta ${arrival.routeShortName} a ${arrival.headsign}',
+      label: arrivalAnnouncement(arrival),
+      excludeSemantics: true,
       child: stacked
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,3 +274,8 @@ class _ArrivalRow extends StatelessWidget {
     );
   }
 }
+
+/// El anuncio completo de un arribo, como pide la sección 11 del spec.
+String arrivalAnnouncement(Arrival arrival) =>
+    'Ruta ${arrival.routeShortName} a ${arrival.headsign}, '
+    '${EtaChip.describeArrival(arrival)}';

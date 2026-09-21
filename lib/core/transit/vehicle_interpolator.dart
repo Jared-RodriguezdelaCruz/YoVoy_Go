@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../../../core/models/models.dart';
+import '../models/models.dart';
 
 /// Un vehículo listo para dibujarse en un instante dado.
 @immutable

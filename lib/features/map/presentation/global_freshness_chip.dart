@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/clock/clock_provider.dart';
+import '../../../core/transit/vehicle_interpolator.dart';
 import '../../../design/components/freshness_indicator.dart';
 import '../application/map_providers.dart';
-import '../application/vehicle_interpolator.dart';
 
 /// Qué tan fresco es el dato del mapa entero: "En vivo", "Hace 2 min", "Sin
 /// señal". Visible siempre, arriba (sección 8.1).

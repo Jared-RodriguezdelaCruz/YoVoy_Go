@@ -8,6 +8,7 @@ import '../../../../core/clock/clock_provider.dart';
 import '../../../../core/config/freshness.dart';
 import '../../../../core/data/transit_network.dart';
 import '../../../../core/models/models.dart';
+import '../../../../core/transit/vehicle_interpolator.dart';
 import '../../../../design/components/vehicle_marker.dart';
 import '../../../../design/tokens/colors.dart';
 import '../../../../design/tokens/motion.dart';
@@ -15,7 +16,6 @@ import '../../../../design/tokens/route_palette.dart';
 import '../../../../design/tokens/typography.dart';
 import '../../application/map_providers.dart';
 import '../../application/screen_clusterer.dart';
-import '../../application/vehicle_interpolator.dart';
 import '../map_hit_test.dart';
 
 /// Los camiones y las paradas, dibujados con **un solo** `CustomPainter`.

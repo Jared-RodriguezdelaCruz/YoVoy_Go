@@ -89,6 +89,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                 _StopTileSection(),
                 _RouteLineSection(),
                 _VehicleMarkerSection(),
+                _AlertBannerSection(),
                 _StatesSection(),
               ],
             ),
@@ -817,6 +818,44 @@ class _StatesSection extends StatelessWidget {
             title: 'No se pudo cargar la parada',
             message: 'Revisa tu conexión y vuelve a intentar.',
             onRetry: () {},
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AlertBannerSection extends StatelessWidget {
+  const _AlertBannerSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const _Section(
+      title: 'AlertBanner',
+      note:
+          'Un aviso del operador arriba de los arribos. Un filo, no una tarjeta '
+          'roja: avisa sin empujar los camiones fuera de la pantalla.',
+      child: Column(
+        children: <Widget>[
+          AlertBanner(
+            header: 'Desvío en López Mateos por obra',
+            effect: AlertEffect.detour,
+            description:
+                'La ruta no entra a López Mateos entre Aguascalientes y '
+                'Chávez hasta nuevo aviso. Toma la parada de Héroes.',
+          ),
+          SizedBox(height: Spacing.md),
+          AlertBanner(
+            header: 'Parada movida por la Feria de San Marcos',
+            effect: AlertEffect.stopMoved,
+            description:
+                'Durante la feria la parada se recorre una cuadra al norte.',
+            initiallyExpanded: true,
+          ),
+          SizedBox(height: Spacing.md),
+          AlertBanner(
+            header: 'Sin servicio el 16 de septiembre por el desfile',
+            effect: AlertEffect.noService,
           ),
         ],
       ),

@@ -5,9 +5,9 @@ Plan de construcción de la v1. El **qué** y el **por qué** viven en
 terminado**. Las features propuestas encima del spec, con su justificación, están en
 [`FEATURES.md`](FEATURES.md).
 
-**Estado:** fases 1 a 5 cerradas, más el repintado de la marca. La app ya enseña la ciudad: el mapa
-con la flota en vivo es la pantalla de inicio. Siguiente: fase 6, parada y ruta. Pendiente heredado:
-medir los fps en un teléfono real de gama media-baja.
+**Estado:** fases 1 a 5 cerradas, más el repintado de la marca. De la fase 6 están hechas las dos
+pantallas —parada y ruta— y los favoritos guardados; faltan sus cinco features de `FEATURES.md`.
+Pendiente heredado: medir los fps en un teléfono real de gama media-baja.
 
 La dirección visual completa —de dónde salió cada color, la regla que los organiza y la firma de la
 app— vive en [`DESIGN.md`](DESIGN.md).
@@ -30,7 +30,7 @@ spec, pero sin ellos la app no es entregable.
 | 4a | Dataset del simulador | 2 | ✅ cerrada |
 | 4b | `MockTransitRepository` y simulador | 2, 4a | ✅ cerrada |
 | 5 | Mapa | 3, 4b | ✅ cerrada · fps en hardware pendiente |
-| 6 | Parada y ruta | 5 | ⏳ siguiente |
+| 6 | Parada y ruta | 5 | 🟡 pantallas hechas · faltan sus 5 features |
 | 7 | Planificador | 6 | ⏳ |
 | 8 | Favoritos y ajustes | 6 | ⏳ |
 | 9 | Pulido: accesibilidad, rendimiento, los cuatro estados | 7, 8 | ⏳ |
@@ -168,7 +168,7 @@ ocho componentes · galería en `/debug/gallery` · cuatro imágenes de referenc
 - [x] Los ocho componentes: `RouteBadge`, `EtaChip`, `FreshnessIndicator`, `StopTile`, `RouteLine`,
       `VehicleMarker`, `EmptyState`, `ErrorState`.
 - [x] Galería en `/debug/gallery`, montada solo bajo `kDebugMode`, con interruptor de tema y de
-      escala de texto hasta 200 %. Se llega con un botón desde el placeholder del mapa.
+      escala de texto hasta 200 %. Se llega desde el ícono de debug en la esquina del mapa.
 - [x] Tests de widget: `EtaChip` en sus cuatro estados, `RouteBadge` eligiendo tinta por contraste,
       `VehicleMarker` sin `bearing`, y el motion anulado cuando el sistema pide reducir animaciones.
 
@@ -329,7 +329,7 @@ esqueleto · panel de control en `/debug/simulator`.
 implementación está activa: el único import de una concreta fuera de `core/data/` es el del panel
 de debug, que existe precisamente para inspeccionarla.
 
-**Cómo verlo.** `/debug/simulator`, desde el segundo botón del placeholder del mapa: la flota
+**Cómo verlo.** `/debug/simulator`, desde el ícono de debug en la esquina del mapa: la flota
 reportando en vivo, los que se quedaron sin señal, y los controles para subir la latencia, forzar
 errores y apagar los GPS. Los botones **Perfecto** y **Hostil** son los dos extremos.
 
@@ -456,26 +456,69 @@ acepta otra familia.
 
 ---
 
-## Fase 6 — Parada y ruta
+## Fase 6 — Parada y ruta 🟡
 
 **Objetivo.** Las dos pantallas que responden "qué rutas pasan por aquí" y "dónde viene mi camión".
 
-**Entrega.** `lib/features/stop/` y `lib/features/route/`, sustituyendo sus placeholders.
+**Entrega.** `lib/features/stop/` y `lib/features/route/`, sustituyendo sus placeholders. Más
+`lib/features/favorites/data/` y `application/`, porque el botón de favorito necesitaba dónde
+guardar, y `lib/core/transit/`, a donde se mudaron los providers en vivo que ya comparten tres
+pantallas.
+
+**Decisión que se acordó antes de empezar:** los favoritos se guardan desde ya con
+**`shared_preferences ^2.5`** (oficial de Flutter, BSD-3), detrás de una interfaz `FavoritesStore`.
+Una lista de ids no pide una base de datos. Con esto queda resuelta la decisión de persistencia que
+el spec dejaba para la fase 8.
 
 **Tareas**
 
-- [ ] Detalle de parada, como en la sección 8.2 del spec: nombre y código, arribos ordenados por
+- [x] Detalle de parada, como en la sección 8.2 del spec: nombre y código, arribos ordenados por
       ETA, cada fila con `RouteBadge`, destino y `EtaChip`; botón de favorito; pull-to-refresh;
       alertas de servicio activas arriba.
-- [ ] Detalle de ruta, como en la sección 8.3: trazo completo arriba, paradas en secuencia abajo,
+- [x] Detalle de ruta, como en la sección 8.3: trazo completo arriba, paradas en secuencia abajo,
       posición de los vehículos activos entre paradas, selector de sentido. Si la ruta no tiene
       vehículos, decirlo explícitamente en vez de mostrar una lista vacía.
-- [ ] Los cuatro estados en ambas pantallas, con skeleton en vez de spinner centrado.
-- [ ] `Semantics`: un ETA se anuncia completo, "ruta 20, llega en 4 minutos, dato en vivo".
-- [ ] Tests de los providers de `application/` con repositorio falso inyectado por `override`.
+- [x] Los cuatro estados en ambas pantallas, con skeleton en vez de spinner centrado.
+- [x] `Semantics`: un ETA se anuncia completo, "ruta 20, llega en 4 minutos, dato en vivo".
+- [x] Tests de los providers de `application/` con repositorio falso inyectado por `override`.
 
-**Cierre.** Ningún widget llama al repositorio directamente; todo pasa por un provider de
-`application/`.
+**Pendiente para cerrarla: las cinco features de `FEATURES.md` que el catálogo le asigna.** Modo
+paradero, frecuencia como respaldo, ocupación, accesibilidad como filtro y mostrar confiabilidad.
+El plan de esta tanda salió de la lista de tareas de arriba, que no las nombra, y se quedaron
+fuera. El modo paradero pide además decidir un paquete para que la pantalla no se apague.
+
+**Cierre de las pantallas.** Ningún widget llama al repositorio: todo pasa por un provider de
+`application/`. `dart analyze` en cero y **286 tests en verde** (44 nuevos), incluidos el modo
+hostil y el texto al 200 % en las dos pantallas. Cuatro imágenes de referencia nuevas en
+`test/features/stop/goldens/` y `test/features/route/goldens/`, y una de `AlertBanner`. Visto en el
+emulador Pixel 8: mapa → parada → favorito, que sigue marcado después de matar la app → ruta.
+
+**Cómo verlo.** En el mapa, toca una parada cercana y luego su tarjeta: se abre la parada. Toca un
+arribo: se abre su ruta. Desde un camión o una ruta buscada, "Ver ruta".
+
+**Lo que se decidió en el camino**
+
+1. **La ruta es la tira, puesta de pie.** La lista de paradas no lleva viñetas: es `RouteStrip` en
+   vertical, en el color de la ruta. Los camiones son los mismos bloques, dibujados **entre** la
+   parada por la que pasaron y la siguiente. Con el dato vencido se apagan igual que en la tira.
+2. **El sentido se nombra por su destino**, "Hacia Margaritas", no "ida" y "vuelta".
+3. **Las alertas de una parada son también las de sus rutas.** El desvío de la R03 no nombra
+   Héroes de Chapultepec, pero a quien espera la R03 ahí le importa.
+4. **"No existe" no se reintenta.** Riverpod 3 reintenta los providers que fallan; una parada que
+   no existe se quedaba cargando diez veces. `StopNotFound` y `RouteNotFound` salen de la regla.
+5. **Los providers en vivo se mudaron a `lib/core/transit/`.** El mapa los sigue importando desde
+   `map_providers.dart`, que los reexporta.
+
+**Lo que encontraron el emulador y los goldens**
+
+- La misma ruta salía de **dos colores**: en la hoja del mapa, `StopTile` pintaba la placa con el
+  color derivado del id, y la pantalla de parada con el oficial del GTFS. `StopTile` ahora recibe
+  la ruta y usa el oficial.
+- En la hoja del mapa, "Ver parada" quedaba debajo de doce arribos. Ahora la tarjeta entera abre la
+  parada.
+- El selector de sentido salía en el turquesa de fábrica de Material. Va en el índigo de marca.
+- La estrella de favorito iba en índigo; `colors.dart` reserva **cantera** para lo que el usuario
+  decidió. Corregido también en `StopTile`.
 
 ---
 

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:yovoy_go/core/models/models.dart';
-import 'package:yovoy_go/features/map/application/vehicle_interpolator.dart';
+import 'package:yovoy_go/core/transit/vehicle_interpolator.dart';
 
 /// El interpolador: que los camiones no se teletransporten, y que tampoco
 /// inventen por dónde anduvieron.

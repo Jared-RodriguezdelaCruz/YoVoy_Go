@@ -73,7 +73,7 @@ class EtaChip extends StatelessWidget {
     };
 
     return Semantics(
-      label: _semanticLabel(freshness),
+      label: _semanticLabel(),
       excludeSemantics: true,
       child: Container(
         constraints: const BoxConstraints(minWidth: 64),
@@ -136,14 +136,38 @@ class EtaChip extends StatelessWidget {
 
   /// El anuncio completo para lectores de pantalla, como pide la sección 11
   /// del spec: nunca un número suelto sin su contexto.
-  String _semanticLabel(DataFreshness freshness) {
-    if (!showsNumericEta) {
+  String _semanticLabel() {
+    final String text = describe(
+      eta: eta,
+      confidence: confidence,
+      dataAge: dataAge,
+      scheduledTimeLabel: scheduledTimeLabel,
+    );
+    // Sin número, el chip solo abre la frase y va con mayúscula; con número
+    // se anuncia igual que siempre, "llega en 4 minutos".
+    return showsNumericEta ? text : text[0].toUpperCase() + text.substring(1);
+  }
+
+  /// Lo que un lector de pantalla dice de un ETA: "llega en 4 minutos, dato
+  /// en vivo". Es público para que una fila que junta placa, destino y chip
+  /// lo anuncie en una sola frase.
+  static String describe({
+    required Duration? eta,
+    required EtaConfidence confidence,
+    required Duration dataAge,
+    String? scheduledTimeLabel,
+  }) {
+    final bool numeric =
+        eta != null &&
+        confidence != EtaConfidence.unknown &&
+        Freshness.allowsNumericEta(Freshness.classify(dataAge));
+    if (!numeric) {
       if (scheduledTimeLabel != null) {
-        return 'Sin dato en vivo. Horario programado a las $scheduledTimeLabel';
+        return 'sin dato en vivo, horario programado a las $scheduledTimeLabel';
       }
-      return 'Sin señal de este camión';
+      return 'sin señal de este camión';
     }
-    final int minutes = eta!.inMinutes;
+    final int minutes = eta.inMinutes;
     final String tiempo = minutes <= 0
         ? 'está llegando'
         : 'llega en $minutes ${minutes == 1 ? 'minuto' : 'minutos'}';
@@ -152,6 +176,17 @@ class EtaChip extends StatelessWidget {
         : 'dato ${FreshnessCopy.label(dataAge)}';
     return '$tiempo, $origen';
   }
+
+  /// [describe] para un arribo ya armado.
+  static String describeArrival(
+    Arrival arrival, {
+    String? scheduledTimeLabel,
+  }) => describe(
+    eta: arrival.eta,
+    confidence: arrival.confidence,
+    dataAge: arrival.dataAge,
+    scheduledTimeLabel: scheduledTimeLabel,
+  );
 }
 
 /// Tamaños del chip.

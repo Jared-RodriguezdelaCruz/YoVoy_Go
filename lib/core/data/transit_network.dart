@@ -65,6 +65,27 @@ class TransitNetwork {
     ];
   }
 
+  /// Los ids de las rutas que pasan por una parada, en el orden de la red.
+  ///
+  /// El índice se arma la primera vez que se pide: el mapa no lo necesita, y
+  /// son 8 000 horarios por recorrer.
+  Set<String> routesForStop(String stopId) =>
+      _routesByStop[stopId] ?? const <String>{};
+
+  late final Map<String, Set<String>> _routesByStop = () {
+    final Map<String, Set<String>> index = <String, Set<String>>{};
+    for (final MapEntry<String, List<String>> entry in _stopIdsByTrip.entries) {
+      final Trip? trip = _tripsById[entry.key];
+      if (trip == null) {
+        continue;
+      }
+      for (final String stopId in entry.value) {
+        index.putIfAbsent(stopId, () => <String>{}).add(trip.routeId);
+      }
+    }
+    return index;
+  }();
+
   /// Las paradas de un viaje en el orden en que las recorre.
   List<Stop> stopsForTrip(String tripId) => <Stop>[
     for (final String id in _stopIdsByTrip[tripId] ?? const <String>[])

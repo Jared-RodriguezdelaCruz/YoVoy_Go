@@ -27,7 +27,10 @@ OpenFreeMap, sin llave ni cuenta.
 **Fases 1 a 5 cerradas**, más el repintado de la marca: base y router, modelos GTFS, el design
 system, el dataset —48 rutas y 1 507 paradas de Aguascalientes—, el simulador con 323 camiones
 moviéndose sobre trazos reales, y **el mapa**: la pantalla de inicio con la flota en vivo, la red de
-rutas, "¿Ya me voy?", la búsqueda única y las paradas cercanas. Siguiente: fase 6, parada y ruta.
+rutas, "¿Ya me voy?", la búsqueda única y las paradas cercanas. De la fase 6 ya están **la parada
+y la ruta**: los arribos por ETA con las alertas arriba, la estrella que se guarda en el teléfono, y
+la ruta con su trazo y sus camiones entre paradas. Faltan las cinco features que `FEATURES.md` le
+asigna a esa fase.
 
 **El color institucional es índigo `#3A3578`, no verde.** Se extrajo con cuentagotas de la app
 oficial y de la Tarjeta Soluciones YoVoy, como pedía el spec. La dirección visual completa está en
@@ -37,7 +40,8 @@ La app corre en emulador (Pixel 8, API 36). En builds de debug, el ícono de la 
 lleva a dos pantallas: `/debug/gallery`, la galería con cada componente en todos sus estados, con
 interruptor de tema y escala de texto hasta 200 %; y `/debug/simulator`, el panel del simulador,
 donde se le sube la latencia, se fuerzan errores y se apagan los GPS. Sin dispositivo a la mano, el
-mapa está fotografiado en `test/features/map/goldens/` y los componentes en `test/design/goldens/`.
+mapa, la parada y la ruta están fotografiados en `test/features/{map,stop,route}/goldens/` y los
+componentes en `test/design/goldens/`.
 Falta probarla en hardware real: un emulador no dice nada sobre fps.
 
 El plan completo —las nueve fases con sus entregables, tareas y criterios de cierre, más las
@@ -191,6 +195,7 @@ plugin usa el sistema nuevo del analizador (`analysis_server_plugin`, declarado 
 | Navegación | `go_router` | 18.0.1 |
 | Mapa | `flutter_map` + `flutter_map_vector_tiles` | 8.3.2 / 2.9.0 |
 | Ubicación | `geolocator` | 14.0.0 |
+| Favoritos | `shared_preferences` | 2.5.5 |
 | Geometría | `latlong2` | 0.10.1 |
 | Formato | `intl` + `flutter_localizations` (`es_MX`) | 0.20.3 / SDK |
 | Lint | `flutter_lints` + `riverpod_lint` | 6.0.0 / 3.1.9 |
@@ -238,11 +243,13 @@ lib/
     lifecycle/                 primer plano o segundo plano: sin sondeo en segundo plano
     location/                  geolocator detrás de una interfaz
     perf/                      contador de cuadros, solo con FRAME_STATS
+    transit/                   la red, la flota, los arribos y las alertas: lo que comparten
+                               el mapa, la parada y la ruta
     utils/
   design/
     theme.dart                 temas claro y oscuro sobre Material 3
     tokens/                    color, tipografía, espaciado, motion, paleta de rutas, contraste
-    components/                los ocho componentes compartidos
+    components/                los componentes compartidos
     gallery/                   galería de debug, montada solo bajo kDebugMode
   features/
     debug/                     panel del simulador, solo bajo kDebugMode

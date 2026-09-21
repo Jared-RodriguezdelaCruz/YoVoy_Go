@@ -96,6 +96,38 @@ void main() {
       matchesGoldenFile('goldens/empty_and_error.png'),
     );
   });
+
+  testWidgets('el aviso de servicio, cerrado y abierto', (
+    WidgetTester tester,
+  ) async {
+    await _pumpSheet(
+      tester,
+      size: const Size(560, 560),
+      title: 'AlertBanner',
+      child: const Column(
+        children: <Widget>[
+          AlertBanner(
+            header: 'Desvío en López Mateos por obra',
+            effect: AlertEffect.detour,
+            description: 'La ruta no entra a López Mateos hasta nuevo aviso.',
+          ),
+          SizedBox(height: Spacing.md),
+          AlertBanner(
+            header: 'Parada movida por la Feria de San Marcos',
+            effect: AlertEffect.stopMoved,
+            description:
+                'Durante la feria la parada se recorre una cuadra al norte.',
+            initiallyExpanded: true,
+          ),
+        ],
+      ),
+    );
+
+    await expectLater(
+      find.byKey(_sheetKey),
+      matchesGoldenFile('goldens/alert_banner.png'),
+    );
+  });
 }
 
 const Key _sheetKey = Key('golden-sheet');
