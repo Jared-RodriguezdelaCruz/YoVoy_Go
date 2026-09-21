@@ -5,8 +5,9 @@ Plan de construcción de la v1. El **qué** y el **por qué** viven en
 terminado**. Las features propuestas encima del spec, con su justificación, están en
 [`FEATURES.md`](FEATURES.md).
 
-**Estado:** fases 1, 2, 3, 4a y 4b cerradas, más el repintado de la marca. Siguiente: fase 5, el
-mapa.
+**Estado:** fases 1 a 5 cerradas, más el repintado de la marca. La app ya enseña la ciudad: el mapa
+con la flota en vivo es la pantalla de inicio. Siguiente: fase 6, parada y ruta. Pendiente heredado:
+medir los fps en un teléfono real de gama media-baja.
 
 La dirección visual completa —de dónde salió cada color, la regla que los organiza y la firma de la
 app— vive en [`DESIGN.md`](DESIGN.md).
@@ -28,8 +29,8 @@ spec, pero sin ellos la app no es entregable.
 | — | **(extra)** Identidad visual: ícono y splash | 3 | ⏳ |
 | 4a | Dataset del simulador | 2 | ✅ cerrada |
 | 4b | `MockTransitRepository` y simulador | 2, 4a | ✅ cerrada |
-| 5 | Mapa | 3, 4b | ⏳ siguiente |
-| 6 | Parada y ruta | 5 | ⏳ |
+| 5 | Mapa | 3, 4b | ✅ cerrada · fps en hardware pendiente |
+| 6 | Parada y ruta | 5 | ⏳ siguiente |
 | 7 | Planificador | 6 | ⏳ |
 | 8 | Favoritos y ajustes | 6 | ⏳ |
 | 9 | Pulido: accesibilidad, rendimiento, los cuatro estados | 7, 8 | ⏳ |
@@ -348,40 +349,98 @@ cede y el valor se queda entero.
 
 ---
 
-## Fase 5 — Mapa
+## Fase 5 — Mapa ✅
 
 **Objetivo.** La pantalla de inicio, con presupuesto de **60 fps con 40 vehículos visibles** en un
 Android de gama media-baja, y nunca por debajo de 30.
 
-**Entrega.** `lib/features/map/` completa, sustituyendo el placeholder de
-[`lib/features/map/presentation/map_screen.dart`](lib/features/map/presentation/map_screen.dart).
+**Entrega.** `lib/features/map/` completa, sustituyendo el placeholder. Más `lib/core/location/`,
+`lib/core/lifecycle/`, `lib/core/clock/` y `lib/core/perf/`, que la pantalla necesitó y que las
+siguientes fases van a reusar.
+
+**Decisiones que se acordaron antes de empezar**
+
+| Decisión | Elección |
+|---|---|
+| Fondo de mapa | **OpenFreeMap** (esquema OpenMapTiles), vectorial, sin llave ni límites, con `flutter_map_vector_tiles ^2.9.0` (BSD-3). El paquete trae caché en disco —50 MB, 14 días—, así que no hizo falta otro. Atribución visible: "© OpenMapTiles © OpenStreetMap" |
+| Ubicación | **`geolocator ^14`** (MIT). Solo "mientras se usa"; nada en segundo plano |
 
 **Tareas**
 
-- [ ] Tiles con tema oscuro personalizado: calles desaturadas, POIs ocultos, etiquetas al mínimo.
-      El mapa es fondo; las rutas son el contenido.
-- [ ] Caché de tiles en disco: el usuario está en la calle con datos limitados.
-- [ ] Capa de rutas con `RouteLine`: trazo grueso, saturado, con halo, ancho según el zoom.
-- [ ] Simplificación de shapes con Douglas-Peucker según el zoom.
-- [ ] Interpolación de marcadores a lo largo de la ventana de 30 s con **un solo `Ticker`
-      compartido** para todos, no un `AnimationController` por vehículo.
-- [ ] Clustering arriba de 30 marcadores visibles y filtrado por viewport antes de construirlos.
-- [ ] `RepaintBoundary` alrededor de la capa de marcadores.
-- [ ] Hoja inferior arrastrable en tres posiciones (120 px / 45 % / 90 %) con superficie sólida.
-      **Prohibido `BackdropFilter` sobre el mapa**: cada instancia fuerza un `saveLayer` por frame.
-- [ ] Barra de búsqueda flotante con `SafeArea`, FAB de ubicación y chip de frescura global,
-      con un solo pulso por pantalla.
-- [ ] Tocar parada abre su detalle en la hoja; tocar vehículo abre callout con ruta, destino y
-      próxima parada.
-- [ ] Pausar todo polling cuando la app pasa a background (`AppLifecycleState`).
-- [ ] Medir fps con 40 vehículos en `--profile` y dejar el número anotado en el PR.
+- [x] Tiles con tema oscuro personalizado: calles desaturadas, POIs ocultos, etiquetas al mínimo.
+      Los dos estilos salen de los tokens con `tool/map_styles.py`, y un test falla si se separan
+      de `colors.dart`.
+- [x] Caché de tiles en disco: la del paquete, que además deja ver sin red lo ya visitado.
+- [x] Capa de rutas: la red entera como grabado apagado al 30 %, y **la ruta elegida encendida**
+      con su grosor por zoom y su halo.
+- [x] Simplificación de shapes por zoom: la de `PolylineLayer`, que ya es Douglas-Peucker. Las
+      polilíneas se reconstruyen por banda de zoom, no en cada cuadro del pellizco.
+- [x] Interpolación de marcadores a lo largo de la ventana de 30 s con **un solo `Ticker`** para
+      toda la flota, y un solo `CustomPainter`.
+- [x] Clustering arriba de 30 marcadores visibles y filtrado por viewport antes de dibujar.
+- [x] `RepaintBoundary` alrededor de la capa de marcadores.
+- [x] Hoja inferior en tres posiciones (120 px / 45 % / 90 %) con `LitSurface`. **Sin
+      `BackdropFilter`**, y un test que lo vigila.
+- [x] Barra de búsqueda flotante con `SafeArea`, FAB de ubicación y chip de frescura global con el
+      único pulso de la pantalla.
+- [x] Tocar parada abre su detalle en la hoja; tocar vehículo abre `RouteStrip` con ruta, destino
+      y próxima parada.
+- [x] Pausar el stream de vehículos y el refresco de arribos en segundo plano, con test.
+- [x] Medir fps en `--profile`. Números abajo; el de hardware real sigue pendiente.
 
-**Decisiones pendientes, ambas fuera de la tabla de stack de la sección 2 del spec.** Proveedor de
-tiles y su atribución —además del paquete de caché en disco—, y el paquete de ubicación para el FAB
-de "mi ubicación". Ninguno se agrega sin acordarlo.
+**Features de `FEATURES.md` que entraron aquí:** "¿Ya me voy?" y "Búsqueda única".
 
-**Riesgo.** El presupuesto de rendimiento se gana o se pierde aquí. Arreglarlo en la fase 9 es
-mucho más caro que hacerlo bien ahora.
+**Cierre.** `dart analyze` en cero y **242 tests en verde** (59 nuevos), incluidos los del modo
+hostil y el texto al 200 %. Tres imágenes de referencia nuevas en `test/features/map/goldens/`.
+Visto en el emulador Pixel 8 API 36 con tiles reales, ubicación simulada y el permiso concedido.
+
+**Cómo verlo.** Es la pantalla de inicio. Toca un camión: su ruta se enciende y abajo sale la
+tira. Escribe `20` en la búsqueda. En debug, el ícono de la esquina lleva a la galería y al
+simulador; en el simulador, **Hostil** apaga la tira de los camiones que pierden señal.
+
+**Rendimiento medido** con `--dart-define=FRAME_STATS=true` en profile, en el emulador:
+
+| Momento | fps | build p90 | raster p90 | peor cuadro |
+|---|---|---|---|---|
+| En reposo, con la flota animándose | 59 | 2.4 ms | 17.4 ms | 42 ms |
+| Arrastrando el mapa | 43–55 | 10.9–17.5 ms | 17.1–17.4 ms | 72 ms |
+
+**El número del emulador no vale como número de gama media-baja**: su GPU es emulada. Lo que sí es
+señal es el **build p90 de 17.5 ms al arrastrar**, que es trabajo del hilo de UI y se va a notar en
+un teléfono lento. Sospechosos, en orden: el recorte y reproyección de las 92 polilíneas en cada
+cuadro, la colisión de etiquetas del fondo vectorial y la reconstrucción de las capas cuando cambia
+la cámara. Se mide primero en hardware y se optimiza con el perfilador en la mano, no a ojo.
+
+**Cuatro decisiones**
+
+1. **Un método más en el contrato: `getNetwork()`.** El mapa necesitaba los 92 trazos de golpe y
+   saber qué paradas recorre cada viaje. Pedirlos uno por uno habría multiplicado la latencia y las
+   fallas; en GTFS la parte estática es un solo zip, así que pedirla entera es lo realista. Quedó
+   anotado en la sección 4.1 del spec.
+2. **Un camión que pierde señal no desaparece del mapa.** Se queda en su último lugar, se apaga y
+   a los 3 minutos se vuelve gris y sin flecha. Solo se olvida a los 10 minutos. Es la regla de la
+   sección 9: el dato viejo se marca, no se borra.
+3. **Los toques no usan un widget por camión.** La capa anota en cada cuadro dónde dibujó cada
+   cosa, y el `onTap` del mapa pregunta ahí. El mapa conserva sus gestos y no hay 40 detectores
+   peleando por ellos.
+4. **El reloj es un provider.** Todo lo que calcula una edad o un "sal en 6 min" pregunta a
+   `clockProvider`. Así las imágenes de referencia del mapa salen iguales cada vez.
+
+**Lo que encontraron los tests y el emulador, no la vista**
+
+- `StopTile` se desbordaba **38–52 px** en un teléfono de 412 px en cuanto llevaba distancia: el
+  código, la distancia y el ícono no cabían en fila. La galería nunca lo mostró porque ahí la
+  distancia era corta.
+- El manifest principal **no tenía permiso de `INTERNET`**: solo lo traían los de debug y profile.
+  El build de release se habría quedado sin mapa.
+- Con la hoja al 90 %, **la barra de búsqueda le tapaba el borde** en un Pixel 8. Ahora la hoja se
+  detiene justo debajo.
+- "¿Ya me voy?" decía "Vas tarde" por el primer camión de la lista aunque el segundo sí se
+  alcanzaba. Ahora elige el primero que se alcanza a pie.
+
+**Pendiente.** Medir en un Android real de gama media-baja con `FRAME_STATS`, y optimizar el build
+al arrastrar si pasa de 16 ms. Las etiquetas del fondo usan la fuente del sistema: el paquete no
+acepta otra familia.
 
 ---
 
@@ -518,8 +577,8 @@ que les toca.
 | Decisión | Se vuelve bloqueante en | Nota |
 |---|---|---|
 | ~~Verde institucional real~~ | ~~Fase 3~~ | **Resuelta**: no era verde. Índigo `#3A3578`, extraído de la app oficial y de la Tarjeta Soluciones YoVoy el 20 de septiembre de 2026. Ver [`DESIGN.md`](DESIGN.md) |
-| Proveedor de tiles, caché en disco y atribución | Fase 5 | Fuera de la tabla de stack de la sección 2 |
-| Paquete de ubicación y permisos | Fase 5 | Fuera de la tabla de stack; además necesita textos de permiso en es_MX en el manifest y el `Info.plist` |
+| ~~Proveedor de tiles, caché en disco y atribución~~ | ~~Fase 5~~ | **Resuelta**: OpenFreeMap con `flutter_map_vector_tiles`, que trae su propia caché en disco. Atribución visible sobre la hoja |
+| ~~Paquete de ubicación y permisos~~ | ~~Fase 5~~ | **Resuelta**: `geolocator`, solo "mientras se usa", con los textos en es_MX en el manifest y el `Info.plist` |
 | `shared_preferences` o `drift` | Fase 8 | El spec pide elegir y justificar |
 | ~~Fuente del trazado de las rutas~~ | ~~Fase 4a~~ | **Resuelta**: el GTFS oficial de CMOV, vía el Hub de Codeando México, CC BY-SA 4.0. Ver [`tool/gtfs/SOURCE.md`](tool/gtfs/SOURCE.md) |
 
@@ -532,6 +591,9 @@ que les toca.
    rutas a 48, así que el presupuesto de rendimiento de la fase 5 se prueba contra la ciudad
    completa desde el primer día. Es mejor así.
 2. **El presupuesto de 60 fps** se gana o se pierde en la fase 5. Interpolación con un solo
-   `Ticker`, clustering y filtrado por viewport no son optimizaciones tardías: son el diseño.
-3. **Agregar paquetes fuera de la tabla de stack** sin discutirlo. Tres decisiones ya lo requieren
-   y cada una se acuerda antes de instalarse.
+   `Ticker`, clustering y filtrado por viewport no son optimizaciones tardías: son el diseño. **Ya
+   están**, y en el emulador el reposo va a 59 fps; al arrastrar baja a 43–55 con un build p90 de
+   17.5 ms. Sigue abierto hasta medirlo en un teléfono real.
+3. **Agregar paquetes fuera de la tabla de stack** sin discutirlo. De las tres decisiones que lo
+   requerían, dos se acordaron y se instalaron en la fase 5 (`flutter_map_vector_tiles` y
+   `geolocator`); queda `shared_preferences` o `drift` para la fase 8.

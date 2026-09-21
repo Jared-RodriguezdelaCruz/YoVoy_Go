@@ -194,7 +194,11 @@ class _RouteStripPainter extends CustomPainter {
       final bool passed = x <= busX;
       canvas
         ..drawCircle(Offset(x, y), _dot + 2, Paint()..color = surface)
-        ..drawCircle(Offset(x, y), _dot, Paint()..color = passed ? past : ahead);
+        ..drawCircle(
+          Offset(x, y),
+          _dot,
+          Paint()..color = passed ? past : ahead,
+        );
     }
 
     if (lit) {

@@ -1,6 +1,9 @@
 import 'package:latlong2/latlong.dart';
 
 import '../models/models.dart';
+import 'transit_network.dart';
+
+export 'transit_network.dart';
 
 /// El contrato de datos de la app, tal cual lo fija la sección 4.1 del spec.
 ///
@@ -12,6 +15,14 @@ import '../models/models.dart';
 /// activa.** Ningún widget importa una implementación concreta; todo pasa por
 /// `transitRepositoryProvider`.
 abstract interface class TransitRepository {
+  /// La red estática completa, en una sola llamada.
+  ///
+  /// No estaba entre los nueve métodos originales de la sección 4.1: se agregó
+  /// en la fase 5, cuando el mapa necesitó los 92 trazos de golpe y saber qué
+  /// paradas recorre cada viaje. En GTFS la parte estática es un solo zip, así
+  /// que pedirla entera es lo realista.
+  Future<TransitNetwork> getNetwork();
+
   /// Todas las rutas del sistema.
   Future<List<TransitRoute>> getRoutes();
 

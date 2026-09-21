@@ -13,8 +13,10 @@ dependencies:
     sdk: flutter
 
   flutter_map: ^8.3.2
+  flutter_map_vector_tiles: ^2.9.0
   flutter_riverpod: ^3.4.3
   freezed_annotation: ^3.1.0
+  geolocator: ^14.0.0
   go_router: ^18.0.1
   intl: ^0.20.3
   json_annotation: ^4.12.0
@@ -38,6 +40,7 @@ flutter:
     # El dataset del simulador, generado por tool/gtfs_to_mock.py desde el GTFS
     # oficial de Aguascalientes. LICENSE.txt va dentro a propósito: CC BY-SA
     # pide que la atribución viaje con los datos.
+    - assets/map/
     - assets/mock/
 
   fonts:

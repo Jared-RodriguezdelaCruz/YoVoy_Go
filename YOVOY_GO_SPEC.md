@@ -58,7 +58,8 @@ verse mejor, es comportarse mejor cuando los datos son malos** — que es siempr
 | Estado | **Riverpod 3 con generación de código** (`@riverpod`) |
 | Modelos | `freezed` + `json_serializable` |
 | Navegación | `go_router` |
-| Mapa | `flutter_map` + MapLibre/tiles vectoriales (§7) |
+| Mapa | `flutter_map` + tiles vectoriales con `flutter_map_vector_tiles`, sobre OpenFreeMap (esquema OpenMapTiles, sin llave). Estilos propios generados desde los tokens; caché en disco del mismo paquete (§7). *Acordado en la fase 5* |
+| Ubicación | `geolocator`, solo permiso "mientras se usa". *Acordado en la fase 5* |
 | Geometría | `latlong2` |
 | Formato | `intl` + `flutter_localizations` (locale `es_MX`) |
 | Tipografía | **Barlow**, **Barlow Semi Condensed** y **Barlow Condensed** empaquetadas en `assets/fonts/` (OFL). Sin paquete adicional |
@@ -158,6 +159,7 @@ Un número inventado es peor que un "no sé".
 
 ```dart
 abstract interface class TransitRepository {
+  Future<TransitNetwork> getNetwork();
   Future<List<Route>> getRoutes();
   Future<Route> getRoute(String routeId);
   Future<Shape> getShape(String shapeId);
@@ -169,6 +171,12 @@ abstract interface class TransitRepository {
   Future<List<Itinerary>> planTrip({required LatLng from, required LatLng to, DateTime? departAt});
 }
 ```
+
+**`getNetwork()` se agregó en la fase 5.** Devuelve la red estática completa —rutas, viajes,
+trazos, paradas y qué paradas recorre cada viaje— en una sola llamada. El mapa necesita los 92
+trazos de golpe; pedirlos uno por uno multiplicaría la latencia y las fallas simuladas por cada
+trazo. En GTFS la parte estática se descarga de una vez, en un solo zip, así que pedirla entera
+es lo que hará también el repositorio real.
 
 Dos implementaciones: `MockTransitRepository` y `RemoteTransitRepository`.
 

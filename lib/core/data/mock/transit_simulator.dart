@@ -121,8 +121,7 @@ class TransitSimulator {
     final _Track track = _Track.build(
       points: shape.points,
       stops: stops,
-      dwellSeconds:
-          (config.minDwell.inSeconds + config.maxDwell.inSeconds) / 2,
+      dwellSeconds: (config.minDwell.inSeconds + config.maxDwell.inSeconds) / 2,
     );
     _tracks[shapeId] = track;
     return track;
@@ -135,8 +134,7 @@ class TransitSimulator {
   /// Es lo que obliga a la UI a interpolar y lo que hace visible la frescura.
   List<VehiclePosition> positionsAt(DateTime now, {String? routeId}) {
     final DateTime reportedAt = lastReportBefore(now);
-    final double elapsed =
-        reportedAt.difference(epoch).inMilliseconds / 1000.0;
+    final double elapsed = reportedAt.difference(epoch).inMilliseconds / 1000.0;
 
     final List<VehiclePosition> positions = <VehiclePosition>[];
     for (final _SimVehicle vehicle in _vehicles) {
@@ -220,9 +218,7 @@ class TransitSimulator {
                 .round(),
       );
     }
-    return Duration(
-      seconds: ((arrival - seconds) / sim.speedFactor).round(),
-    );
+    return Duration(seconds: ((arrival - seconds) / sim.speedFactor).round());
   }
 
   bool _hasLostSignal(_SimVehicle vehicle, double elapsed) {
@@ -462,7 +458,6 @@ double _bearing(LatLng from, LatLng to) {
   final double lat1 = from.latitude * pi / 180;
   final double lat2 = to.latitude * pi / 180;
   final double y = sin(dLon) * cos(lat2);
-  final double x =
-      cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+  final double x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
   return (atan2(y, x) * 180 / pi + 360) % 360;
 }

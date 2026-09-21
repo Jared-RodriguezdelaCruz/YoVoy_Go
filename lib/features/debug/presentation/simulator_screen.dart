@@ -77,28 +77,22 @@ class SimulatorScreen extends ConsumerWidget {
               label: 'Llamadas con error',
               value: config.errorRate,
               display: '${(config.errorRate * 100).round()} %',
-              onChanged: (double value) => _update(
-                ref,
-                config.copyWith(errorRate: value),
-              ),
+              onChanged: (double value) =>
+                  _update(ref, config.copyWith(errorRate: value)),
             ),
             _Slider(
               label: 'Vehículos que pierden señal',
               value: config.signalLossRate,
               display: '${(config.signalLossRate * 100).round()} %',
-              onChanged: (double value) => _update(
-                ref,
-                config.copyWith(signalLossRate: value),
-              ),
+              onChanged: (double value) =>
+                  _update(ref, config.copyWith(signalLossRate: value)),
             ),
             _Slider(
               label: 'Reportes sin dirección',
               value: config.missingBearingRate,
               display: '${(config.missingBearingRate * 100).round()} %',
-              onChanged: (double value) => _update(
-                ref,
-                config.copyWith(missingBearingRate: value),
-              ),
+              onChanged: (double value) =>
+                  _update(ref, config.copyWith(missingBearingRate: value)),
             ),
             _Slider(
               label: 'Latencia máxima',
@@ -115,10 +109,8 @@ class SimulatorScreen extends ConsumerWidget {
               label: 'Ruido del GPS',
               value: config.gpsNoiseMaxMeters / 50,
               display: '${config.gpsNoiseMaxMeters.round()} m',
-              onChanged: (double value) => _update(
-                ref,
-                config.copyWith(gpsNoiseMaxMeters: value * 50),
-              ),
+              onChanged: (double value) =>
+                  _update(ref, config.copyWith(gpsNoiseMaxMeters: value * 50)),
             ),
             const SizedBox(height: Spacing.xl),
             LitSurface(

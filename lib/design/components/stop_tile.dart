@@ -146,25 +146,18 @@ class _Header extends StatelessWidget {
               const SizedBox(height: 2),
               Row(
                 children: <Widget>[
-                  if (code != null)
-                    Text(
-                      code!,
-                      style: AppTypography.caption.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                  if (code != null && distanceLabel != null)
-                    Text(
-                      ' · ',
-                      style: AppTypography.caption.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                  if (distanceLabel != null)
-                    Text(
-                      distanceLabel!,
-                      style: AppTypography.caption.copyWith(
-                        color: colors.textSecondary,
+                  // Un solo texto que puede partirse en dos líneas: el código,
+                  // la distancia y el ícono no caben en fila en un teléfono
+                  // de 360 dp, y ninguno de los tres se puede recortar.
+                  if (code != null || distanceLabel != null)
+                    Flexible(
+                      child: Text(
+                        <String>[?code, ?distanceLabel].join(' · '),
+                        style: AppTypography.caption.copyWith(
+                          color: colors.textSecondary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   if (accessibility ==

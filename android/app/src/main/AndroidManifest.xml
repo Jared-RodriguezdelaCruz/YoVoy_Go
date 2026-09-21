@@ -1,4 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Tiles del mapa de fondo (OpenFreeMap). Sin esto, el build de release
+         se queda sin mapa: debug y profile lo traen por su cuenta. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- "Mi ubicación" y las paradas cercanas. Solo mientras la app se usa:
+         nada de ubicación en segundo plano. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <application
         android:label="Yo Voy Go"
         android:name="${applicationName}"

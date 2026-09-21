@@ -88,7 +88,9 @@ void main() {
 
     test('la agencia es una y es la del estado', () async {
       final List<dynamic> rows = await loadList('agency.json');
-      final Agency agency = Agency.fromJson(rows.single as Map<String, dynamic>);
+      final Agency agency = Agency.fromJson(
+        rows.single as Map<String, dynamic>,
+      );
 
       expect(agency.timezone, 'America/Mexico_City');
     });
@@ -396,14 +398,11 @@ void main() {
     });
 
     test('el par sin resultados apunta lejos de la red', () {
-      final Map<String, dynamic> vacio =
-          pares.firstWhere(
-                (dynamic p) =>
-                    ((p as Map<String, dynamic>)['itineraries']
-                            as List<dynamic>)
-                        .isEmpty,
-              )
-              as Map<String, dynamic>;
+      final Map<String, dynamic> vacio = pares.firstWhere(
+        (dynamic p) =>
+            ((p as Map<String, dynamic>)['itineraries'] as List<dynamic>)
+                .isEmpty,
+      ) as Map<String, dynamic>;
       final Map<String, dynamic> destino = vacio['to'] as Map<String, dynamic>;
 
       expect(destino['lon'] as double, lessThan(minLon));

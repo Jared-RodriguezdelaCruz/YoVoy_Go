@@ -137,6 +137,39 @@ Sin versalitas, sin ALL CAPS, y los números siempre con `FontFeature.tabularFig
 
 ---
 
+## El mapa: un grabado que se enciende
+
+Cuarenta y ocho rutas a color pleno son un plato de espagueti, y eso es lo que enseñan casi todas
+las apps de transporte. Aquí **la red en reposo es un grabado apagado**: delgada y al 30 %. Se ve
+que la ciudad tiene rutas, pero ninguna grita. **Solo los camiones van a color pleno.**
+
+Al tocar un camión o buscar una ruta, **esa ruta se enciende** —su grosor según el zoom, su halo,
+su color completo— y todo lo demás baja: la red al 15 %, los camiones de otras rutas al 40 %. Es la
+misma metáfora que `LitSurface` y `RouteStrip`: la luz marca lo que estás mirando. Y el callout del
+camión **es** la tira: ruta, destino, próxima parada y su luz, que se apaga si el dato venció.
+
+El fondo sale de los tokens, no de un tema ajeno:
+
+| Capa | Oscuro | Claro |
+|---|---|---|
+| Suelo | `surface` `#0E1016` | `surface` `#F5F6FA` |
+| Agua | `#0B0F1E`, sunken hacia el índigo | `#DADDEB` |
+| Calles menores / mayores | `#191C27` / `outline` `#2A2E3D` | `#FFFFFF` con borde `#E7E9F2` |
+| Etiquetas | solo colonias y calles mayores, `textSecondary` al 70 % | igual |
+| POIs, íconos, números de casa | ninguno | ninguno |
+
+El suelo del mapa es exactamente la superficie de la app: la hoja inferior sale del mapa, no se
+pega encima. Un test lo vigila.
+
+Los grupos de camiones van en los tonos de la superficie, con el número en `textPrimary`. Son un
+resumen, no un protagonista: la primera versión llevaba anillo índigo y pesaba más que los camiones
+que resumía.
+
+Una limitación que queda: las etiquetas del fondo usan la fuente del sistema, porque
+`flutter_map_vector_tiles` no acepta otra familia.
+
+---
+
 ## Lo que se descartó, y por qué
 
 - **Neón cian sobre negro con cristal esmerilado.** Es el default de "futurista" y el
@@ -153,9 +186,10 @@ Sin versalitas, sin ALL CAPS, y los números siempre con `FontFeature.tabularFig
 ## Cómo verlo
 
 ```bash
-flutter run          # y de ahí al botón "Ver el design system"
+flutter run          # y de ahí al ícono de la esquina del mapa → "Ver el design system"
 ```
 
 `/debug/gallery` monta cada componente en todos sus estados, con interruptor de tema y escala de
 texto hasta 200 %. Sin dispositivo, las mismas piezas están fotografiadas en
-`test/design/goldens/` y se regeneran con `flutter test --update-goldens`.
+`test/design/goldens/`, y el mapa en `test/features/map/goldens/` —con la hora fija para que la
+flota salga igual—. Se regeneran con `flutter test --update-goldens`.

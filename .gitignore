@@ -50,3 +50,6 @@ app.*.map.json
 # Código generado por build_runner (se reconstruye con `dart run build_runner build`)
 *.freezed.dart
 *.g.dart
+
+# Diferencias que escribe flutter test cuando falla un golden.
+test/**/failures/

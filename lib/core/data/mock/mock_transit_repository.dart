@@ -70,18 +70,37 @@ class MockTransitRepository implements TransitRepository {
 
   // -- El contrato ----------------------------------------------------------
 
+  /// La red se arma una vez: sus índices no cambian mientras la app vive.
+  late final TransitNetwork _network = TransitNetwork(
+    routes: _dataset.routes,
+    trips: _dataset.trips,
+    shapes: _dataset.shapes,
+    stops: _dataset.stops,
+    stopIdsByTrip: <String, List<String>>{
+      for (final Trip trip in _dataset.trips)
+        trip.id: <String>[
+          for (final StopTime time in _dataset.stopTimesForTrip(trip.id))
+            time.stopId,
+        ],
+    },
+  );
+
+  @override
+  Future<TransitNetwork> getNetwork() => _call('la red', () => _network);
+
   @override
   Future<List<TransitRoute>> getRoutes() =>
       _call('las rutas', () => _dataset.routes);
 
   @override
-  Future<TransitRoute> getRoute(String routeId) => _call('la ruta $routeId', () {
-    final TransitRoute? route = _dataset.route(routeId);
-    if (route == null) {
-      throw StateError('no existe la ruta $routeId');
-    }
-    return route;
-  });
+  Future<TransitRoute> getRoute(String routeId) =>
+      _call('la ruta $routeId', () {
+        final TransitRoute? route = _dataset.route(routeId);
+        if (route == null) {
+          throw StateError('no existe la ruta $routeId');
+        }
+        return route;
+      });
 
   @override
   Future<Shape> getShape(String shapeId) => _call('el trazo $shapeId', () {
@@ -93,24 +112,26 @@ class MockTransitRepository implements TransitRepository {
   });
 
   @override
-  Future<List<Stop>> getStopsNear(
-    LatLng center, {
-    double radiusMeters = 500,
-  }) => _call('las paradas cercanas', () {
-    final List<({Stop stop, double distance})> near =
-        <({Stop stop, double distance})>[];
-    for (final Stop stop in _dataset.stops) {
-      final double distance = _meters(center, stop.position);
-      if (distance <= radiusMeters) {
-        near.add((stop: stop, distance: distance));
-      }
-    }
-    near.sort(
-      (({Stop stop, double distance}) a, ({Stop stop, double distance}) b) =>
-          a.distance.compareTo(b.distance),
-    );
-    return <Stop>[for (final ({Stop stop, double distance}) row in near) row.stop];
-  });
+  Future<List<Stop>> getStopsNear(LatLng center, {double radiusMeters = 500}) =>
+      _call('las paradas cercanas', () {
+        final List<({Stop stop, double distance})> near =
+            <({Stop stop, double distance})>[];
+        for (final Stop stop in _dataset.stops) {
+          final double distance = _meters(center, stop.position);
+          if (distance <= radiusMeters) {
+            near.add((stop: stop, distance: distance));
+          }
+        }
+        near.sort(
+          (
+            ({Stop stop, double distance}) a,
+            ({Stop stop, double distance}) b,
+          ) => a.distance.compareTo(b.distance),
+        );
+        return <Stop>[
+          for (final ({Stop stop, double distance}) row in near) row.stop,
+        ];
+      });
 
   @override
   Future<List<Stop>> getStopsForRoute(String routeId) =>
@@ -233,8 +254,7 @@ class MockTransitRepository implements TransitRepository {
       final ({VehiclePosition vehicle, Duration eta})? closest = best;
       if (closest != null) {
         final Duration age = closest.vehicle.ageAt(now);
-        final bool expired =
-            Freshness.classify(age) == DataFreshness.unknown;
+        final bool expired = Freshness.classify(age) == DataFreshness.unknown;
         arrivals.add(
           Arrival(
             routeId: route.id,
@@ -243,9 +263,7 @@ class MockTransitRepository implements TransitRepository {
             // Con el dato vencido no se manda un número que después haya que
             // esconder: el arribo dice que no sabe.
             eta: expired ? null : closest.eta,
-            confidence: expired
-                ? EtaConfidence.unknown
-                : EtaConfidence.live,
+            confidence: expired ? EtaConfidence.unknown : EtaConfidence.live,
             dataAge: age,
             vehicleId: closest.vehicle.vehicleId,
             occupancyStatus: closest.vehicle.occupancyStatus,
@@ -257,8 +275,7 @@ class MockTransitRepository implements TransitRepository {
       // Sin vehículo: queda la frecuencia. Media frecuencia es la espera
       // esperada de quien llega al azar a un paradero.
       final Frequency? frequency = _dataset.frequency(entry.value.id);
-      final bool running =
-          frequency != null && frequency.coversTime(timeOfDay);
+      final bool running = frequency != null && frequency.coversTime(timeOfDay);
       arrivals.add(
         Arrival(
           routeId: route.id,
@@ -267,9 +284,7 @@ class MockTransitRepository implements TransitRepository {
           eta: running
               ? Duration(seconds: frequency.headway.inSeconds ~/ 2)
               : null,
-          confidence: running
-              ? EtaConfidence.scheduled
-              : EtaConfidence.unknown,
+          confidence: running ? EtaConfidence.scheduled : EtaConfidence.unknown,
           // Un horario no envejece: su edad es cero, y por eso el chip lo
           // muestra sin advertencia de frescura.
           dataAge: Duration.zero,

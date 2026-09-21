@@ -20,22 +20,25 @@ solo explica cómo trabajar en el repo.
 
 ## Estado
 
-Simulación de punta a punta (`MockTransitRepository`) sobre **datos reales**. Cero integraciones con
-APIs externas: el GTFS oficial está empaquetado, no se descarga.
+Simulación de punta a punta (`MockTransitRepository`) sobre **datos reales**. El GTFS oficial está
+empaquetado, no se descarga. Lo único que sale a la red son los tiles del mapa de fondo, de
+OpenFreeMap, sin llave ni cuenta.
 
-**Fases 1, 2, 3, 4a y 4b cerradas**, más el repintado de la marca: base y router, modelos GTFS, el
-design system, el dataset —48 rutas y 1 507 paradas de Aguascalientes— y el simulador, con 323
-camiones moviéndose sobre trazos reales. Siguiente: fase 5, el mapa.
+**Fases 1 a 5 cerradas**, más el repintado de la marca: base y router, modelos GTFS, el design
+system, el dataset —48 rutas y 1 507 paradas de Aguascalientes—, el simulador con 323 camiones
+moviéndose sobre trazos reales, y **el mapa**: la pantalla de inicio con la flota en vivo, la red de
+rutas, "¿Ya me voy?", la búsqueda única y las paradas cercanas. Siguiente: fase 6, parada y ruta.
 
 **El color institucional es índigo `#3A3578`, no verde.** Se extrajo con cuentagotas de la app
 oficial y de la Tarjeta Soluciones YoVoy, como pedía el spec. La dirección visual completa está en
 [`DESIGN.md`](DESIGN.md).
 
-La app corre en emulador (Pixel 8, API 36). En builds de debug, el placeholder del mapa lleva a dos
-pantallas: `/debug/gallery`, la galería con cada componente en todos sus estados, con interruptor de
-tema y escala de texto hasta 200 %; y `/debug/simulator`, el panel del simulador, donde se ve la
-flota reportando y se le sube la latencia, se fuerzan errores y se apagan los GPS. Sin dispositivo a la mano, las mismas piezas están fotografiadas en
-`test/design/goldens/`. Falta probarla en hardware real: un emulador no dice nada sobre fps.
+La app corre en emulador (Pixel 8, API 36). En builds de debug, el ícono de la esquina del mapa
+lleva a dos pantallas: `/debug/gallery`, la galería con cada componente en todos sus estados, con
+interruptor de tema y escala de texto hasta 200 %; y `/debug/simulator`, el panel del simulador,
+donde se le sube la latencia, se fuerzan errores y se apagan los GPS. Sin dispositivo a la mano, el
+mapa está fotografiado en `test/features/map/goldens/` y los componentes en `test/design/goldens/`.
+Falta probarla en hardware real: un emulador no dice nada sobre fps.
 
 El plan completo —las nueve fases con sus entregables, tareas y criterios de cierre, más las
 decisiones que siguen abiertas— vive en [`ROADMAP.md`](ROADMAP.md); la dirección visual, en
@@ -186,7 +189,8 @@ plugin usa el sistema nuevo del analizador (`analysis_server_plugin`, declarado 
 | Codegen | `riverpod_generator`, `freezed`, `json_serializable`, `build_runner` | 4.0.9 / 4.0.2 / 6.14.1 / 2.16.1 |
 | Modelos | `freezed_annotation` + `json_annotation` | 3.1.0 / 4.12.0 |
 | Navegación | `go_router` | 18.0.1 |
-| Mapa | `flutter_map` | 8.3.2 |
+| Mapa | `flutter_map` + `flutter_map_vector_tiles` | 8.3.2 / 2.9.0 |
+| Ubicación | `geolocator` | 14.0.0 |
 | Geometría | `latlong2` | 0.10.1 |
 | Formato | `intl` + `flutter_localizations` (`es_MX`) | 0.20.3 / SDK |
 | Lint | `flutter_lints` + `riverpod_lint` | 6.0.0 / 3.1.9 |
@@ -230,6 +234,10 @@ lib/
     config/freshness.dart      umbrales de frescura
     models/                    modelos GTFS + converters, con models.dart de barril
     data/                      TransitRepository + mock/ (dataset y simulador) + remote/
+    clock/                     el reloj como provider, para fijar la hora en tests
+    lifecycle/                 primer plano o segundo plano: sin sondeo en segundo plano
+    location/                  geolocator detrás de una interfaz
+    perf/                      contador de cuadros, solo con FRAME_STATS
     utils/
   design/
     theme.dart                 temas claro y oscuro sobre Material 3
@@ -244,10 +252,12 @@ lib/
       data/                    solo si la feature tiene fuentes propias
 assets/
   fonts/                       Barlow en sus tres anchos (OFL)
+  map/                         estilos del mapa de fondo, generados desde los tokens
   mock/                        dataset del simulador, generado (CC BY-SA 4.0)
 test/                          espeja la estructura de lib/
 tool/
   gtfs_to_mock.py              convierte el GTFS oficial en assets/mock/
+  map_styles.py                genera assets/map/ con los colores de colors.dart
   gtfs/mex-ags-ags.zip         el feed, versionado para reproducir sin red
 ```
 
@@ -308,7 +318,9 @@ nunca.
 
 ## Capa de datos
 
-Una sola interfaz, `TransitRepository`, con dos implementaciones. Ninguna capa superior sabe cuál
+Una sola interfaz, `TransitRepository`, con dos implementaciones. Son los nueve métodos de la
+sección 4.1 del spec más `getNetwork()`, que entró en la fase 5: la red estática entera en una
+llamada, como se descarga un GTFS. Ninguna capa superior sabe cuál
 está activa; la selección es por flag de compilación:
 
 ```bash
@@ -327,6 +339,33 @@ afirmar dónde va un camión. Encima de eso van las fallas de la sección 4.2 de
 200–1500 ms, ~5 % de llamadas con excepción, ruido GPS de 5–20 m, ~10 % de vehículos que se quedan
 sin señal minutos enteros y ~15 % de reportes sin dirección. Todo se ajusta en vivo desde
 `/debug/simulator`.
+
+---
+
+## Mapa
+
+El fondo es vectorial, de [OpenFreeMap](https://openfreemap.org) (esquema OpenMapTiles), con dos
+estilos propios —oscuro y claro— que genera `tool/map_styles.py` desde los tokens de color. Sin
+POIs, sin íconos, casi sin etiquetas: **el mapa es fondo y las rutas son el contenido.** Los tiles
+se guardan en disco (50 MB, 14 días), así que lo ya visitado se ve sin red. Sin red y sin caché, el
+mapa se queda con la superficie lisa y las rutas encima: no se rompe.
+
+```bash
+python tool/map_styles.py        # regenera assets/map/ tras mover un color
+```
+
+La ubicación usa solo el permiso **"mientras se usa la app"**. Si se niega, el mapa se queda en el
+centro de Aguascalientes y el botón dice por qué y qué hacer.
+
+Para medir fps, en un build de profile:
+
+```bash
+flutter run --profile --dart-define=FRAME_STATS=true
+adb logcat -s flutter | grep "\[cuadros\]"
+```
+
+Cada 10 s sale una línea con fps, percentiles de build y raster, y el peor cuadro. Los números del
+emulador están en [`ROADMAP.md`](ROADMAP.md); los de un teléfono real, pendientes.
 
 ---
 
@@ -354,6 +393,9 @@ del Estado de Aguascalientes (CMOV), distribuido por el Hub de Datos de Transpor
 Codeando México, bajo **CC BY-SA 4.0**. La atribución completa está en
 [`assets/mock/LICENSE.txt`](assets/mock/LICENSE.txt) y aparece en la pantalla "Acerca de".
 CompartirIgual alcanza a los datos, no al código.
+
+El mapa de fondo es © OpenMapTiles © colaboradores de OpenStreetMap (ODbL), servido por
+OpenFreeMap. La atribución va visible sobre el mapa, siempre.
 
 Atribuir una fuente no es afiliarse a ella: el aviso de app independiente sigue en pie.
 

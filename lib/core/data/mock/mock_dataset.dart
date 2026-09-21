@@ -206,7 +206,8 @@ class MockDataset {
           PrecookedTrip.fromJson(row as Map<String, dynamic>),
       ],
       service: <RouteService>[
-        for (final dynamic row in map('service.json')['routes'] as List<dynamic>)
+        for (final dynamic row
+            in map('service.json')['routes'] as List<dynamic>)
           RouteService.fromJson(row as Map<String, dynamic>),
       ],
     );

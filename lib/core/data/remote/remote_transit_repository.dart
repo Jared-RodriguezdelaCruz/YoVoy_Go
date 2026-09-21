@@ -20,6 +20,13 @@ class RemoteTransitRepository implements TransitRepository {
   final String baseUrl;
 
   @override
+  Future<TransitNetwork> getNetwork() {
+    // TODO(api): GET /gtfs.zip del feed estático, descomprimido y cacheado en
+    // disco; revalidar con `feed_info.txt` y no más de una vez al día.
+    throw UnimplementedError('getNetwork: no hay API real todavía');
+  }
+
+  @override
   Future<List<TransitRoute>> getRoutes() {
     // TODO(api): GET /gtfs/routes.txt del feed estático, cacheado en disco.
     throw UnimplementedError('getRoutes: no hay API real todavía');

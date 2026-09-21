@@ -55,7 +55,10 @@ pequeño, de dónde sale el cálculo: "7 min a pie a Bonanza · Ruta 20 llega en
 **Necesita.** Ubicación del usuario, parada objetivo, ETA con su confianza. La velocidad a pie se
 asume en 4.5 km/h y el margen de holgura es configurable en ajustes.
 
-**Fase 5.** Se apoya en `Freshness.classify`
+**Fase 5 — construida** en `lib/features/map/application/leave_now.dart`. Elige el primer
+camión que se alcanza caminando, no el primero de la lista, y camina con un 30 % de rodeo sobre la
+línea recta. Con solo horario da una hora de reloj ("Sal 7:12 para el horario"), nunca una cuenta
+regresiva. Se apoya en `Freshness.classify`
 ([`lib/core/config/freshness.dart`](lib/core/config/freshness.dart)): si la clasificación es
 `unknown`, esta tarjeta **no** calcula cuenta regresiva. Esa es la regla que la hace confiable.
 
@@ -197,7 +200,9 @@ saber qué estás buscando.
 escribes `Plaza` y salen destinos. Los resultados vienen agrupados por tipo, con el grupo más
 probable arriba.
 
-**Fase 5.**
+**Fase 5 — construida** en `lib/features/map/application/search_index.dart`. "20" encuentra la
+R20N y la R20S, y "1" la R01, porque así se dicen las rutas en voz alta. Sin acentos ni
+mayúsculas. Con el dataset real, "Plaza" da paradas primero y "Chicahuales" da un destino.
 
 ---
 
@@ -229,8 +234,8 @@ les cierre la puerta:
 
 | Feature | Fase | Depende de |
 |---|---|---|
-| Búsqueda única | 5 | Dataset |
-| ¿Ya me voy? | 5 | Ubicación |
+| Búsqueda única | 5 ✅ | Dataset |
+| ¿Ya me voy? | 5 ✅ | Ubicación |
 | Modo paradero | 6 | Detalle de parada |
 | Frecuencia como respaldo | 6 | `Frequency` del dataset ✅ |
 | Ocupación | 6 | `occupancyStatus` |

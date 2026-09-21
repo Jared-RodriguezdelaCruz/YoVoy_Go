@@ -554,11 +554,7 @@ void main() {
           ]) {
         await pumpComponent(
           tester,
-          RouteStrip(
-            stops: paradas,
-            vehicleProgress: 0.3,
-            dataAge: caso.age,
-          ),
+          RouteStrip(stops: paradas, vehicleProgress: 0.3, dataAge: caso.age),
         );
 
         expect(find.text(caso.copy), findsOneWidget);
@@ -578,9 +574,7 @@ void main() {
       );
 
       expect(
-        tester
-            .getSemantics(find.byType(RouteStrip))
-            .label,
+        tester.getSemantics(find.byType(RouteStrip)).label,
         allOf(contains('Bonanza'), contains('Sin señal'), contains('Centro')),
       );
     });

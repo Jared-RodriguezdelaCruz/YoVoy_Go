@@ -39,10 +39,7 @@ final class AppRoute {
   static const AppRoute gallery = AppRoute._('gallery', '/debug/gallery');
 
   /// Panel de control del simulador. Solo en builds de debug.
-  static const AppRoute simulator = AppRoute._(
-    'simulator',
-    '/debug/simulator',
-  );
+  static const AppRoute simulator = AppRoute._('simulator', '/debug/simulator');
 }
 
 /// Nombres de los parámetros de path.

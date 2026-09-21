@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../clock/clock_provider.dart';
 import 'mock/mock_dataset.dart';
 import 'mock/mock_transit_repository.dart';
 import 'mock/simulator_config.dart';
@@ -54,6 +55,7 @@ Future<TransitRepository> transitRepository(Ref ref) async {
   final MockTransitRepository repository = MockTransitRepository(
     dataset: dataset,
     config: ref.read(simulatorSettingsProvider),
+    clock: ref.watch(clockProvider),
   );
 
   // Los cambios del panel de debug entran en caliente. Reconstruir el

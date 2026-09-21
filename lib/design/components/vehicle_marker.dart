@@ -30,6 +30,54 @@ class VehicleMarker extends StatelessWidget {
   /// Con dato viejo el marcador se apaga: mismo lugar, menos peso visual.
   final bool isStale;
 
+  /// La geometría del marcador, sin widget.
+  ///
+  /// La capa del mapa dibuja toda la flota con un solo `CustomPainter` (un
+  /// widget por camión cuesta frames con 40 en pantalla), y llama aquí para
+  /// que el camión del mapa y el de la galería sean exactamente el mismo.
+  static void paintMarker(
+    Canvas canvas, {
+    required Offset center,
+    required double radius,
+    required Color color,
+    required Color haloColor,
+    required Color contentColor,
+    double? bearing,
+  }) {
+    // Halo: mantiene el marcador visible sobre cualquier tile.
+    canvas
+      ..drawCircle(center, radius, Paint()..color = haloColor)
+      ..drawCircle(center, radius - 2, Paint()..color = color);
+
+    final double? heading = bearing;
+    if (heading == null) {
+      // Sin dirección: un punto sólido. No se inventa hacia dónde va.
+      canvas.drawCircle(center, radius * 0.28, Paint()..color = contentColor);
+      return;
+    }
+
+    // Con dirección: un triángulo apuntando al rumbo reportado.
+    final double angle = (heading - 90) * math.pi / 180;
+    final double tip = radius * 0.62;
+    final double back = radius * 0.42;
+
+    Offset at(double distance, double offsetAngle) =>
+        center +
+        Offset(
+          math.cos(angle + offsetAngle) * distance,
+          math.sin(angle + offsetAngle) * distance,
+        );
+
+    final Path arrow = Path()
+      ..moveTo(at(tip, 0).dx, at(tip, 0).dy)
+      ..lineTo(at(back, 2.5).dx, at(back, 2.5).dy)
+      ..lineTo(at(back * 0.45, math.pi).dx, at(back * 0.45, math.pi).dy)
+      ..lineTo(at(back, -2.5).dx, at(back, -2.5).dy)
+      ..close();
+
+    canvas.drawPath(arrow, Paint()..color = contentColor);
+  }
+
   @override
   Widget build(BuildContext context) {
     final AppColors colors = context.colors;
@@ -68,43 +116,15 @@ class _VehicleMarkerPainter extends CustomPainter {
   final double? bearing;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final Offset center = size.center(Offset.zero);
-    final double radius = size.shortestSide / 2;
-
-    // Halo: mantiene el marcador visible sobre cualquier tile.
-    canvas
-      ..drawCircle(center, radius, Paint()..color = haloColor)
-      ..drawCircle(center, radius - 2, Paint()..color = color);
-
-    final double? heading = bearing;
-    if (heading == null) {
-      // Sin dirección: un punto sólido. No se inventa hacia dónde va.
-      canvas.drawCircle(center, radius * 0.28, Paint()..color = contentColor);
-      return;
-    }
-
-    // Con dirección: un triángulo apuntando al rumbo reportado.
-    final double angle = (heading - 90) * math.pi / 180;
-    final double tip = radius * 0.62;
-    final double back = radius * 0.42;
-
-    Offset at(double distance, double offsetAngle) =>
-        center +
-        Offset(
-          math.cos(angle + offsetAngle) * distance,
-          math.sin(angle + offsetAngle) * distance,
-        );
-
-    final Path arrow = Path()
-      ..moveTo(at(tip, 0).dx, at(tip, 0).dy)
-      ..lineTo(at(back, 2.5).dx, at(back, 2.5).dy)
-      ..lineTo(at(back * 0.45, math.pi).dx, at(back * 0.45, math.pi).dy)
-      ..lineTo(at(back, -2.5).dx, at(back, -2.5).dy)
-      ..close();
-
-    canvas.drawPath(arrow, Paint()..color = contentColor);
-  }
+  void paint(Canvas canvas, Size size) => VehicleMarker.paintMarker(
+    canvas,
+    center: size.center(Offset.zero),
+    radius: size.shortestSide / 2,
+    color: color,
+    haloColor: haloColor,
+    contentColor: contentColor,
+    bearing: bearing,
+  );
 
   @override
   bool shouldRepaint(_VehicleMarkerPainter oldDelegate) =>

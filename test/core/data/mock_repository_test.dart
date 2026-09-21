@@ -133,9 +133,8 @@ void main() {
         config: const SimulatorConfig(gpsNoiseMinMeters: 5),
       );
 
-      for (final VehiclePosition vehicle in simulator
-          .positionsAt(martes)
-          .take(40)) {
+      for (final VehiclePosition vehicle
+          in simulator.positionsAt(martes).take(40)) {
         final Trip trip = dataset.trip(vehicle.tripId)!;
         final Shape shape = dataset.shape(trip.shapeId!)!;
 
@@ -263,10 +262,7 @@ void main() {
           .first;
 
       expect(primera, isNotEmpty);
-      expect(
-        primera.every((VehiclePosition v) => v.routeId == 'R_01'),
-        isTrue,
-      );
+      expect(primera.every((VehiclePosition v) => v.routeId == 'R_01'), isTrue);
     });
 
     test('solo emite las alertas vigentes', () async {
@@ -291,9 +287,7 @@ void main() {
     test('con vehículo en vivo hay minutos y se pueden mostrar', () async {
       final MockTransitRepository repo = build();
 
-      final List<Arrival> arribos = await repo.getArrivals(
-        paradaConServicio(),
-      );
+      final List<Arrival> arribos = await repo.getArrivals(paradaConServicio());
 
       expect(arribos, isNotEmpty);
       final Arrival primero = arribos.first;
@@ -314,9 +308,7 @@ void main() {
         now: martes.add(const Duration(minutes: 7)),
       );
 
-      final List<Arrival> arribos = await repo.getArrivals(
-        paradaConServicio(),
-      );
+      final List<Arrival> arribos = await repo.getArrivals(paradaConServicio());
       final Iterable<Arrival> conVehiculo = arribos.where(
         (Arrival a) => a.vehicleId != null,
       );
@@ -330,33 +322,34 @@ void main() {
       }
     });
 
-    test('sin vehículo queda la frecuencia, y se dice que es programada', () async {
-      // R_52 no tiene servicio a propósito: es el caso en el que la app tiene
-      // que responder con la frecuencia en vez de callarse.
-      final MockTransitRepository repo = build();
-      final Trip trip = dataset
-          .tripsForRoute('R_52')
-          .firstWhere((Trip t) => t.serviceId == 'ES');
-      final String parada = dataset.stopTimesForTrip(trip.id).first.stopId;
+    test(
+      'sin vehículo queda la frecuencia, y se dice que es programada',
+      () async {
+        // R_52 no tiene servicio a propósito: es el caso en el que la app tiene
+        // que responder con la frecuencia en vez de callarse.
+        final MockTransitRepository repo = build();
+        final Trip trip = dataset
+            .tripsForRoute('R_52')
+            .firstWhere((Trip t) => t.serviceId == 'ES');
+        final String parada = dataset.stopTimesForTrip(trip.id).first.stopId;
 
-      final List<Arrival> arribos = await repo.getArrivals(parada);
-      final Arrival sinVehiculo = arribos.firstWhere(
-        (Arrival a) => a.routeId == 'R_52',
-      );
+        final List<Arrival> arribos = await repo.getArrivals(parada);
+        final Arrival sinVehiculo = arribos.firstWhere(
+          (Arrival a) => a.routeId == 'R_52',
+        );
 
-      expect(sinVehiculo.vehicleId, isNull);
-      expect(sinVehiculo.confidence, EtaConfidence.scheduled);
-      // Un horario no envejece: su edad es cero y el chip no lo marca viejo.
-      expect(sinVehiculo.dataAge, Duration.zero);
-      expect(sinVehiculo.showsNumericEta, isTrue);
-    });
+        expect(sinVehiculo.vehicleId, isNull);
+        expect(sinVehiculo.confidence, EtaConfidence.scheduled);
+        // Un horario no envejece: su edad es cero y el chip no lo marca viejo.
+        expect(sinVehiculo.dataAge, Duration.zero);
+        expect(sinVehiculo.showsNumericEta, isTrue);
+      },
+    );
 
     test('los arribos vienen ordenados por cercanía', () async {
       final MockTransitRepository repo = build();
 
-      final List<Arrival> arribos = await repo.getArrivals(
-        paradaConServicio(),
-      );
+      final List<Arrival> arribos = await repo.getArrivals(paradaConServicio());
 
       Duration previo = Duration.zero;
       for (final Arrival arribo in arribos) {
@@ -437,9 +430,9 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      final MockTransitRepository repo =
-          await container.read(transitRepositoryProvider.future)
-              as MockTransitRepository;
+      final MockTransitRepository repo = await container.read(
+        transitRepositoryProvider.future,
+      ) as MockTransitRepository;
 
       expect(repo.config.errorRate, const SimulatorConfig().errorRate);
 
