@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes.dart';
 import '../../../core/clock/clock_provider.dart';
 import '../../../core/data/transit_network.dart';
+import '../../../core/history/history_providers.dart';
 import '../../../core/location/location_service.dart';
 import '../../../core/models/models.dart';
 import '../../../core/transit/vehicle_interpolator.dart';
@@ -14,6 +15,8 @@ import '../../../design/components/components.dart';
 import '../../../design/tokens/colors.dart';
 import '../../../design/tokens/spacing.dart';
 import '../../../design/tokens/typography.dart';
+import '../../favorites/application/favorites_providers.dart';
+import '../../favorites/presentation/saved_stop_tile.dart';
 import '../application/accessibility_filter.dart';
 import '../application/leave_now.dart';
 import '../application/map_providers.dart';
@@ -171,16 +174,55 @@ class _HomeContent extends ConsumerWidget {
     final bool accessibleOnly =
         ref.watch(accessibleOnlyProvider).value ?? false;
 
+    // Lo del usuario manda sobre lo cercano: si guardó una parada o si la
+    // toma siempre a esta hora, está arriba y no hay que buscarla.
+    final List<String> favorites =
+        ref.watch(favoriteStopsProvider).value?.take(3).toList() ??
+        const <String>[];
+    final List<String> learned = <String>[
+      for (final String stopId in ref.watch(learnedStopIdsProvider))
+        if (!favorites.contains(stopId)) stopId,
+    ];
+    // Una parada no se repite dentro de la misma hoja: si ya está arriba, se
+    // cae de "cercanas", que es la lista genérica.
+    final Set<String> shown = <String>{...favorites, ...learned};
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         const _LeaveNowCard(),
         const SizedBox(height: Spacing.xl),
-        Text(
-          accessibleOnly ? 'Paradas accesibles cercanas' : 'Paradas cercanas',
-          style: AppTypography.title.copyWith(color: colors.textPrimary),
-        ),
-        const SizedBox(height: Spacing.md),
+        if (favorites.isNotEmpty) ...<Widget>[
+          const SectionTitle('Tus favoritos'),
+          for (final String stopId in favorites)
+            Padding(
+              padding: const EdgeInsets.only(bottom: Spacing.md),
+              child: SavedStopTile(stopId: stopId),
+            ),
+          const SizedBox(height: Spacing.lg),
+        ],
+        if (learned.isNotEmpty) ...<Widget>[
+          const SectionTitle('A esta hora sueles tomar'),
+          for (final String stopId in learned)
+            Padding(
+              padding: const EdgeInsets.only(bottom: Spacing.md),
+              child: SavedStopTile(
+                stopId: stopId,
+                label: 'a esta hora sueles tomar',
+                onHide: () =>
+                    ref.read(hiddenSuggestionsProvider.notifier).hide(stopId),
+              ),
+            ),
+          const SizedBox(height: Spacing.lg),
+        ],
+        if (nearby.value?.every((NearbyStop s) => shown.contains(s.stop.id)) !=
+            true) ...<Widget>[
+          Text(
+            accessibleOnly ? 'Paradas accesibles cercanas' : 'Paradas cercanas',
+            style: AppTypography.title.copyWith(color: colors.textPrimary),
+          ),
+          const SizedBox(height: Spacing.md),
+        ],
         switch (nearby) {
           AsyncData<List<NearbyStop>>(:final List<NearbyStop> value)
               when value.isEmpty =>
@@ -202,10 +244,11 @@ class _HomeContent extends ConsumerWidget {
           AsyncData<List<NearbyStop>>(:final List<NearbyStop> value) => Column(
             children: <Widget>[
               for (final NearbyStop stop in value)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: Spacing.md),
-                  child: _NearbyStopTile(nearby: stop),
-                ),
+                if (!shown.contains(stop.stop.id))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: Spacing.md),
+                    child: _NearbyStopTile(nearby: stop),
+                  ),
             ],
           ),
           AsyncError<List<NearbyStop>>() => ErrorState(

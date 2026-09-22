@@ -12,6 +12,7 @@ import '../../../design/tokens/colors.dart';
 import '../../../design/tokens/route_palette.dart';
 import '../../../design/tokens/spacing.dart';
 import '../../../design/tokens/typography.dart';
+import '../../favorites/application/favorites_providers.dart';
 import '../application/route_providers.dart';
 import '../application/vehicle_placement.dart';
 import 'route_minimap.dart';
@@ -106,10 +107,25 @@ class _RouteBody extends ConsumerWidget {
       280,
     );
 
+    final bool isFavorite =
+        ref.watch(favoriteRoutesProvider).value?.contains(route.id) ?? false;
+
     return CustomScrollView(
       slivers: <Widget>[
         SliverToBoxAdapter(
           child: _TopBar(
+            trailing: IconButton(
+              tooltip: isFavorite
+                  ? 'Quitar de favoritos'
+                  : 'Guardar en favoritos',
+              onPressed: () =>
+                  ref.read(favoriteRoutesProvider.notifier).toggle(route.id),
+              icon: Icon(
+                isFavorite ? Icons.star : Icons.star_border,
+                // Cantera: el favorito lo decidió el usuario, no el sistema.
+                color: isFavorite ? colors.cantera : colors.textSecondary,
+              ),
+            ),
             title: Row(
               children: <Widget>[
                 RouteBadge(
@@ -362,9 +378,10 @@ class _DirectionPicker extends StatelessWidget {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({this.title});
+  const _TopBar({this.title, this.trailing});
 
   final Widget? title;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -381,6 +398,7 @@ class _TopBar extends StatelessWidget {
           ),
           const SizedBox(width: Spacing.xs),
           if (title != null) Expanded(child: title!),
+          ?trailing,
         ],
       ),
     );

@@ -5,8 +5,8 @@ Plan de construcción de la v1. El **qué** y el **por qué** viven en
 terminado**. Las features propuestas encima del spec, con su justificación, están en
 [`FEATURES.md`](FEATURES.md).
 
-**Estado:** fases 1 a 7 cerradas, más el repintado de la marca. Siguiente: fase 8, favoritos y
-ajustes. Pendiente heredado: medir los fps en un teléfono real de gama media-baja.
+**Estado:** fases 1 a 8 cerradas, más el repintado de la marca. Siguiente: fase 9, pulido.
+Pendiente heredado: medir los fps en un teléfono real de gama media-baja.
 
 La dirección visual completa —de dónde salió cada color, la regla que los organiza y la firma de la
 app— vive en [`DESIGN.md`](DESIGN.md).
@@ -31,8 +31,8 @@ spec, pero sin ellos la app no es entregable.
 | 5 | Mapa | 3, 4b | ✅ cerrada · fps en hardware pendiente |
 | 6 | Parada y ruta | 5 | ✅ cerrada |
 | 7 | Planificador | 6 | ✅ cerrada |
-| 8 | Favoritos y ajustes | 6 | ⏳ siguiente |
-| 9 | Pulido: accesibilidad, rendimiento, los cuatro estados | 7, 8 | ⏳ |
+| 8 | Favoritos y ajustes | 6 | ✅ cerrada |
+| 9 | Pulido: accesibilidad, rendimiento, los cuatro estados | 7, 8 | ⏳ siguiente |
 | — | **(extra)** Build de release firmado | 9 | ⏳ |
 
 Las fases 3 y 4 pueden avanzar en paralelo: ambas solo necesitan los modelos de la fase 2. La 4a
@@ -652,23 +652,92 @@ la respuesta correcta es "no encontré ruta".
 
 ---
 
-## Fase 8 — Favoritos y ajustes
+## Fase 8 — Favoritos y ajustes ✅
 
 **Objetivo.** Que la app recuerde lo que al usuario le importa y se pueda configurar.
 
-**Entrega.** `lib/features/favorites/` con su capa `data/` propia, y `lib/features/settings/`.
+**Entrega.** `lib/features/favorites/` y `lib/features/settings/` completas, más `lib/core/history/`,
+que es donde vive lo que este teléfono ha visto, y `lib/core/cache/`, que mide y borra los tiles.
+
+**Decisiones que se acordaron antes de empezar:**
+
+- **"Lo prometido" es lo que esta app dijo.** Una observación es la diferencia entre el ETA que la
+  app mostró y el momento en que el camión pasó de verdad. Es literalmente lo que reclama la
+  feature 4 —ninguna app te dice si cumplió— y no necesita tocar la capa de datos: se observa con
+  lo que la pantalla ya está pidiendo.
+- **Lo aprendido vive en la hoja del mapa**, arriba de "Paradas cercanas", como dice `FEATURES.md`:
+  no es un widget aparte, es el orden de la lista.
+- **"Tamaño de texto" es una escala propia de la app**, multiplicada por la del sistema y topada en
+  200 %: sirve a quien no quiere agrandar todo el teléfono, y el tope es el piso de la sección 11.
+- **`path_provider` sube a dependencia directa** —ya venía como transitiva del mapa— para que
+  "limpiar caché" borre de verdad y diga cuántos MB liberó.
 
 **Tareas**
 
-- [ ] Persistencia local de paradas y rutas favoritas.
-- [ ] Los favoritos de parada muestran ETA en vivo directamente en la lista.
-- [ ] Ajustes: tema claro/oscuro/sistema, reducir animaciones, tamaño de texto, limpiar caché.
-- [ ] Pantalla "Acerca de" con el aviso que exige la sección 10 del spec: app independiente, sin
+- [x] Persistencia local de paradas y rutas favoritas.
+- [x] Los favoritos de parada muestran ETA en vivo directamente en la lista.
+- [x] Ajustes: tema claro/oscuro/sistema, reducir animaciones, tamaño de texto, limpiar caché.
+- [x] Pantalla "Acerca de" con el aviso que exige la sección 10 del spec: app independiente, sin
       afiliación con CMOV ni con el operador del sistema.
-- [ ] Panel de control del simulador accesible solo en builds de debug.
+- [x] Panel de control del simulador accesible solo en builds de debug, ahora desde Ajustes.
+- [x] **Confiabilidad observada, la parte que faltaba** (`FEATURES.md`, feature 4): el cálculo.
+      `ReliabilityCopy` existe desde la fase 6 y nunca se había visto en pantalla.
+- [x] **Mis rutas aprendidas** (feature 2): la hoja encabeza con lo que sueles tomar a esa hora.
 
 **Decisión ya tomada en la fase 6:** `shared_preferences`, porque lo que se guarda son listas de
-ids. Si "Mis rutas aprendidas" pide consultas sobre el historial, se revisa aquí.
+ids. **Se revisó aquí y se sostiene**: una observación es una línea corta, el historial está topado
+en 500 arribos y 300 usos, y la única pregunta que se hace —"todo lo de esta ruta en esta parada"—
+se responde leyendo la lista completa. Una base de datos para eso sería un paquete a cambio de nada.
+
+**Cierre.** `dart analyze` en cero y **438 tests en verde** (56 nuevos en la fase), con texto al
+200 % en favoritos, ajustes y "Acerca de". Imágenes de referencia nuevas en
+`test/features/settings/goldens/`. Se regeneraron las del mapa y la ruta: el menú ⋮ y la estrella
+de ruta son nuevos. `PhasePlaceholder` se borró: ya no quedaba ninguna pantalla por construir.
+
+**Cómo verlo.** El menú ⋮ de la barra del mapa lleva a Favoritos y a Ajustes. Para ver la
+confiabilidad sin esperar media hora frente a una parada, el panel del simulador trae **"Sembrar
+historial"**, solo en debug: llena el historial y la hoja del mapa, y se borra desde Ajustes con el
+mismo botón que lo de verdad.
+
+**Lo que se decidió en el camino**
+
+1. **La promesa no se reescribe.** Se hace una vez por camión y parada, y solo si el camión viene a
+   más de 2 minutos: prometer "30 segundos" y acertar no demuestra puntualidad. Si se actualizara
+   con cada refresco, la promesa siempre se cumpliría y la nota sería un adorno.
+2. **Sin señal no se inventa un retraso.** Una promesa cuyo camión lleva 3 minutos sin reportar se
+   tira sin anotar nada. Es el mismo criterio del ETA numérico: un dato viejo no fecha nada.
+3. **Solo se juzga con `current_stop_sequence`.** La parada más cercana en línea recta alcanza para
+   dibujar un camión en el mapa, no para decidir que ya pasó y guardar una observación.
+4. **La franja horaria se guarda pero no parte el cálculo** de la confiabilidad: con cinco
+   observaciones mínimas, partir por franja dejaría la nota callada para siempre. La franja sí pesa
+   en lo aprendido, que es donde la hora importa.
+5. **Lo aprendido decae a la mitad cada dos semanas** y pide un par de usos recientes en la misma
+   franja para aparecer. Con menos, adivina en voz alta.
+6. **"Fijar" no es un concepto nuevo**: es la estrella. Una sugerencia se fija volviéndola favorita
+   y se calla con "No me la muestres". Los favoritos manuales van arriba y no se repiten abajo.
+7. **Una sola entrada nueva en el mapa.** El menú de debug se volvió el menú de la app, con las
+   herramientas dentro de `kDebugMode`: dos botones más —estrella y engrane— no caben con el texto
+   del sistema al 200 %, que es donde esa barra ya se desbordó una vez.
+8. **Borrar el historial no borra los favoritos**, y el diálogo lo dice: una cosa la eligió el
+   usuario y la otra la dedujo la app.
+
+**Lo que encontraron las pruebas y el emulador**
+
+- **Los chips de Material se pintan de verde.** `ChoiceChip` trae su propio color de selección
+  (`secondaryContainer`) y la marca es índigo: los de ajustes llevan la paleta de la app, como el
+  chip de "Solo accesibles".
+- **Una lista perezosa no construye lo que no se ve**, y los tests de "Acerca de" y de la hoja lo
+  descubrieron: hay que desplazar antes de buscar el texto de hasta abajo.
+- El panel del simulador tenía una prueba que toca un slider por su texto; el bloque nuevo lo había
+  empujado fuera de la pantalla. La siembra de historial se fue al final del panel.
+- **"Limpiar caché" borraba una carpeta vacía, y solo se vio en el emulador.** La capa del mapa abre
+  su caché al montarse, y la ruta venía de un provider asíncrono que todavía no había respondido: se
+  quedaba con la carpeta del paquete para siempre. Ahora se le pasa la **función** que resuelve la
+  carpeta, que es justo lo que el paquete pide, y el `StyleReader` usa la misma. Verificado en el
+  emulador: la carpeta de la app se llena y el botón libera lo que dice.
+- **La misma parada salía dos veces en la hoja**, arriba como favorita y otra vez en "Paradas
+  cercanas". Lo de arriba se cae de la lista genérica, y si no queda ninguna, la sección no se pinta
+  en vez de decir "no hay paradas a 600 m", que sería mentira.
 
 ---
 
@@ -715,7 +784,7 @@ locales: ninguna necesita servidor. Dónde entra cada una:
 | 5 | Búsqueda única · ¿Ya me voy? |
 | 6 ✅ | Modo paradero · Frecuencia como respaldo · Ocupación · Accesibilidad como filtro · Mostrar confiabilidad |
 | 7 ✅ | Modo viaje · el interruptor de accesibilidad del planificador |
-| 8 | Mis rutas aprendidas · Calcular confiabilidad |
+| 8 ✅ | Mis rutas aprendidas · Calcular confiabilidad |
 | 9 | Offline con fecha |
 
 No cambian el orden de las fases ni sus criterios de cierre: se construyen dentro de la pantalla

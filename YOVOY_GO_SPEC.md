@@ -60,7 +60,8 @@ verse mejor, es comportarse mejor cuando los datos son malos** — que es siempr
 | Navegación | `go_router` |
 | Mapa | `flutter_map` + tiles vectoriales con `flutter_map_vector_tiles`, sobre OpenFreeMap (esquema OpenMapTiles, sin llave). Estilos propios generados desde los tokens; caché en disco del mismo paquete (§7). *Acordado en la fase 5* |
 | Ubicación | `geolocator`, solo permiso "mientras se usa". *Acordado en la fase 5* |
-| Persistencia local | `shared_preferences`, detrás de `FavoritesStore`. Guarda listas de ids; no hace falta una base de datos. *Acordado en la fase 6* |
+| Persistencia local | `shared_preferences`, detrás de `FavoritesStore`, `SettingsStore` y `HistoryStore`. Guarda listas de ids y de líneas cortas, topadas; no hace falta una base de datos. *Acordado en la fase 6, revisado y sostenido en la fase 8 con el historial ya construido* |
+| Carpetas del sistema | `path_provider`, solo para saber dónde vive la caché de tiles y poder borrarla desde Ajustes. *Acordado en la fase 8* |
 | Pantalla encendida | `wakelock_plus`, detrás de `ScreenAwake`. Solo en el modo paradero y en el modo viaje, y se suelta en segundo plano. *Acordado en la fase 6; el modo viaje, en la fase 7* |
 | Geometría | `latlong2` |
 | Formato | `intl` + `flutter_localizations` (locale `es_MX`) |
@@ -531,6 +532,12 @@ de ids. Los favoritos de parada muestran ETA en vivo directamente en la lista.
 
 Tema (claro/oscuro/sistema), reducir animaciones, tamaño de texto, limpiar caché, acerca de.
 En build de debug: panel de control del simulador (§4.2).
+
+**Construido en la fase 8.** El tamaño de texto es una escala propia de la app que se multiplica
+por la del sistema y se topa en el 200 % de §11. "Reducir animaciones" inyecta `disableAnimations`
+en el `MediaQuery` de la raíz, así que lo obedece todo el árbol sin tocar pantalla por pantalla.
+"Limpiar caché" borra la carpeta de tiles que la app le indica al mapa, y dice cuánto liberó;
+"Borrar el historial" olvida lo observado y lo aprendido, y **no toca los favoritos**.
 
 ---
 

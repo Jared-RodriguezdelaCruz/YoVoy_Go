@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yovoy_go/app/app.dart';
-import 'package:yovoy_go/app/phase_placeholder.dart';
 import 'package:yovoy_go/app/router.dart';
 import 'package:yovoy_go/app/routes.dart';
 import 'package:yovoy_go/core/data/mock/mock_dataset.dart';
@@ -127,7 +126,7 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('una parada real ya no es un placeholder', (
+  testWidgets('una parada real muestra su letrero', (
     WidgetTester tester,
   ) async {
     await pumpApp(tester);
@@ -136,7 +135,7 @@ void main() {
     await settle(tester);
 
     expect(find.text('Leche San Marcos'), findsOneWidget);
-    expect(find.byType(PhasePlaceholder), findsNothing);
+    expect(find.byType(StopScreen), findsOneWidget);
 
     await finish(tester);
   });
@@ -151,7 +150,6 @@ void main() {
 
     expect(find.byType(RouteScreen), findsOneWidget);
     expect(find.textContaining('Margaritas'), findsWidgets);
-    expect(find.byType(PhasePlaceholder), findsNothing);
 
     await finish(tester);
   });

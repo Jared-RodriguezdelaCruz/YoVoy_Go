@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_map_vector_tiles/flutter_map_vector_tiles.dart' as vt;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/cache/tile_cache.dart';
+
 part 'basemap_style.g.dart';
 
 /// Los estilos del mapa de fondo, generados por `tool/map_styles.py` a partir
@@ -27,6 +29,10 @@ Future<vt.Style?> basemapStyle(Ref ref, Brightness brightness) async {
     final vt.Style style = await vt.StyleReader(
       uri: 'asset://${BasemapAssets.forBrightness(brightness)}',
       logger: kDebugMode ? const vt.Logger.console() : const vt.Logger.noop(),
+      // El estilo sale de un asset, pero lo que declara —las fuentes de
+      // tiles y los sprites— sí se baja y se guarda. Va a la carpeta de la
+      // app para que "limpiar caché" en ajustes lo alcance.
+      cachePath: tileCacheFolder,
     ).read();
     ref.onDispose(style.dispose);
     return style;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +9,8 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes.dart';
 import '../../../core/data/not_found.dart';
 import '../../../core/device/screen_awake.dart';
+import '../../../core/history/history_providers.dart';
+import '../../../core/history/observation.dart';
 import '../../../core/lifecycle/app_lifecycle_provider.dart';
 import '../../../core/models/models.dart';
 import '../../../design/components/components.dart';
@@ -60,6 +64,25 @@ class _RideScreenState extends ConsumerState<RideScreen> {
 
   void _exit() =>
       context.canPop() ? context.pop() : context.goNamed(AppRoute.map.name);
+
+  /// "Ya me subí": fija el camión y, de paso, lo aprende.
+  ///
+  /// Es la señal más fuerte de las tres: aquí no hay duda de que el usuario
+  /// tomó esta ruta en esta parada.
+  void _board(RideWaiting view, String vehicleId) {
+    _ride.board(vehicleId);
+    if (view.leg.fromStopId case final String stopId) {
+      unawaited(
+        ref
+            .read(usageLogProvider.notifier)
+            .record(
+              stopId: stopId,
+              kind: UseKind.ride,
+              routeId: view.leg.route?.id,
+            ),
+      );
+    }
+  }
 
   /// Vibra y lo anuncia, una sola vez por tramo.
   void _alert(RideView view) {
@@ -148,7 +171,7 @@ class _RideScreenState extends ConsumerState<RideScreen> {
                             ),
                             RideWaiting() => _Waiting(
                               view: value,
-                              onBoard: (String id) => _ride.board(id),
+                              onBoard: (String id) => _board(value, id),
                             ),
                             RideOnBoard() => _OnBoard(
                               view: value,

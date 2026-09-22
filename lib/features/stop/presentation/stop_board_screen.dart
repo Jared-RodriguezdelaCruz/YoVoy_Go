@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +7,9 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes.dart';
 import '../../../core/config/freshness.dart';
 import '../../../core/device/screen_awake.dart';
+import '../../../core/history/history_providers.dart';
+import '../../../core/history/observation.dart';
+import '../../../core/history/stop_observer.dart';
 import '../../../core/lifecycle/app_lifecycle_provider.dart';
 import '../../../core/models/models.dart';
 import '../../../core/transit/live_providers.dart';
@@ -39,6 +44,13 @@ class _StopBoardScreenState extends ConsumerState<StopBoardScreen> {
   void initState() {
     super.initState();
     _awake.keepOn();
+    // Quedarse a esperar aquí pesa más que abrir el detalle: esto es una
+    // parada de verdad, no curiosidad.
+    unawaited(
+      ref
+          .read(usageLogProvider.notifier)
+          .record(stopId: widget.stopId, kind: UseKind.board),
+    );
   }
 
   @override
@@ -60,6 +72,9 @@ class _StopBoardScreenState extends ConsumerState<StopBoardScreen> {
     ref.listen(appInForegroundProvider, (bool? _, bool visible) {
       visible ? _awake.keepOn() : _awake.release();
     });
+    // Aquí es donde mejor se observa si el camión llegó cuando se dijo: el
+    // usuario está parado frente a la parada, mirando.
+    ref.watch(stopObserverProvider(widget.stopId));
 
     final ThemeData theme = Theme.of(context);
     final AppColors colors = maxContrastColors(

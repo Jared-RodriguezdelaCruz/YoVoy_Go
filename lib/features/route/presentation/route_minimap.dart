@@ -4,6 +4,7 @@ import 'package:flutter_map_vector_tiles/flutter_map_vector_tiles.dart' as vt;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/cache/tile_cache.dart';
 import '../../../core/config/freshness.dart';
 import '../../../core/location/location_service.dart';
 import '../../../design/components/components.dart';
@@ -101,6 +102,7 @@ class _RouteMinimapState extends ConsumerState<RouteMinimap> {
                     tileProviders: basemap.providers,
                     rasterSources: basemap.rasterSources,
                     sprites: basemap.sprites,
+                    cachePath: tileCacheFolder,
                   ),
                 if (path.length >= 2)
                   PolylineLayer(

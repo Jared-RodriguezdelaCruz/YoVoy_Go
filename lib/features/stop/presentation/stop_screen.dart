@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
 import '../../../core/data/transit_network.dart';
+import '../../../core/history/history_providers.dart';
+import '../../../core/history/observation.dart';
+import '../../../core/history/stop_observer.dart';
 import '../../../core/models/models.dart';
 import '../../../core/transit/live_providers.dart';
 import '../../../core/transit/reliability.dart';
@@ -20,15 +25,36 @@ import '../application/stop_providers.dart';
 /// Se lee como el letrero del paradero: el nombre grande, lo que avisa el
 /// operador debajo y los camiones por orden de llegada. Cada fila abre su
 /// ruta.
-class StopScreen extends ConsumerWidget {
+class StopScreen extends ConsumerStatefulWidget {
   const StopScreen({required this.stopId, super.key});
 
   final String stopId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StopScreen> createState() => _StopScreenState();
+}
+
+class _StopScreenState extends ConsumerState<StopScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Abrir una parada es la señal más barata de "aquí espero seguido": de
+    // esto sale "a esta hora sueles tomar", sin que el usuario mantenga nada.
+    unawaited(
+      ref
+          .read(usageLogProvider.notifier)
+          .record(stopId: widget.stopId, kind: UseKind.detail),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String stopId = widget.stopId;
     final AppColors colors = context.colors;
     final AsyncValue<Stop> stop = ref.watch(stopDetailProvider(stopId));
+    // Mientras la parada esté abierta se mira si los camiones cumplen lo que
+    // la app prometió. No cuesta una petición más: ya se están pidiendo.
+    ref.watch(stopObserverProvider(stopId));
 
     return Scaffold(
       backgroundColor: colors.surface,

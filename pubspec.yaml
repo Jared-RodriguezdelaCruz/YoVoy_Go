@@ -21,6 +21,9 @@ dependencies:
   intl: ^0.20.3
   json_annotation: ^4.12.0
   latlong2: ^0.10.1
+  # Solo para saber dónde vive la caché de tiles y poder borrarla desde
+  # ajustes. Ya venía como dependencia transitiva del mapa.
+  path_provider: ^2.1.6
   riverpod_annotation: ^4.0.7
   shared_preferences: ^2.5.5
   wakelock_plus: ^1.8.0

@@ -57,6 +57,10 @@ final class AppRoute {
   /// Ajustes, como en la sección 8.6 del spec.
   static const AppRoute settings = AppRoute._('settings', '/settings');
 
+  /// "Acerca de": el aviso de app independiente de la sección 10 y la
+  /// atribución de los datos.
+  static const AppRoute about = AppRoute._('about', '/settings/about');
+
   /// Galería del design system. Solo se monta en builds de debug.
   static const AppRoute gallery = AppRoute._('gallery', '/debug/gallery');
 
@@ -84,4 +88,7 @@ abstract final class AppPaths {
   static String route(String routeId) => '/route/$routeId';
   static String plannerOption(int index) => '/planner/option/$index';
   static String ride(int index) => '/planner/option/$index/ride';
+  static const String favorites = '/favorites';
+  static const String settings = '/settings';
+  static const String about = '/settings/about';
 }

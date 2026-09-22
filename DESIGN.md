@@ -239,6 +239,27 @@ botón de cada paso queda abajo, al alcance del pulgar.
 
 ---
 
+## Lo que el teléfono recuerda
+
+**El cálido es de lo tuyo.** `cantera` pinta la estrella de un favorito y nada más: lo que el
+usuario decidió se ve distinto de lo que el sistema reporta. Un favorito y una sugerencia usan la
+**misma fila del mapa** (`StopTile`, con sus arribos en vivo): guardar una parada no la convierte en
+otra cosa, solo la sube.
+
+**Lo aprendido se anuncia en voz baja.** La sección dice "A esta hora sueles tomar" y cada fila
+repite la razón en su línea chica, junto al código del poste. La app no presume que adivinó: dice
+por qué está ahí y ofrece callarse. Con poco historial la sección no existe —ni un hueco ni un
+"todavía no sé"—, igual que la nota de confiabilidad calla con menos de cinco observaciones. **El
+silencio es el estado por defecto de todo lo que la app deduce.**
+
+**Ajustes no inventa controles.** Tema y tamaño de texto son chips con la paleta de la app —el chip
+de Material se pinta solo de verde y aquí la marca es índigo—; el resto son filas con su ícono, su
+verbo y una línea que dice qué va a pasar: cuántos MB se liberan, cuántas observaciones se borran, y
+que nada de eso salió nunca del teléfono. "Acerca de" es la única pantalla donde el aviso de app
+independiente se lee completo, en cuerpo de texto y no en letra chica.
+
+---
+
 ## Lo que se descartó, y por qué
 
 - **Neón cian sobre negro con cristal esmerilado.** Es el default de "futurista" y el

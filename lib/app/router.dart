@@ -12,6 +12,7 @@ import '../features/planner/presentation/itinerary_screen.dart';
 import '../features/planner/presentation/planner_screen.dart';
 import '../features/planner/presentation/ride_screen.dart';
 import '../features/route/presentation/route_screen.dart';
+import '../features/settings/presentation/about_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/stop/presentation/stop_board_screen.dart';
 import '../features/stop/presentation/stop_screen.dart';
@@ -89,6 +90,12 @@ GoRouter appRouter(Ref ref) {
         name: AppRoute.settings.name,
         builder: (BuildContext context, GoRouterState state) =>
             const SettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.about.path,
+        name: AppRoute.about.name,
+        builder: (BuildContext context, GoRouterState state) =>
+            const AboutScreen(),
       ),
       // Rutas de debug: existen solo mientras se construye la app.
       if (kDebugMode)

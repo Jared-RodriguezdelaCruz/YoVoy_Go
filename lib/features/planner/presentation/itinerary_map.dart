@@ -4,6 +4,7 @@ import 'package:flutter_map_vector_tiles/flutter_map_vector_tiles.dart' as vt;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/cache/tile_cache.dart';
 import '../../../core/location/location_service.dart';
 import '../../../core/models/models.dart';
 import '../../../design/components/components.dart';
@@ -96,6 +97,7 @@ class _ItineraryMapState extends ConsumerState<ItineraryMap> {
                     tileProviders: basemap.providers,
                     rasterSources: basemap.rasterSources,
                     sprites: basemap.sprites,
+                    cachePath: tileCacheFolder,
                   ),
                 PolylineLayer(
                   polylines: <Polyline>[

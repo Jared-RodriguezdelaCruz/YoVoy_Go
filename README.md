@@ -24,7 +24,7 @@ Simulación de punta a punta (`MockTransitRepository`) sobre **datos reales**. E
 empaquetado, no se descarga. Lo único que sale a la red son los tiles del mapa de fondo, de
 OpenFreeMap, sin llave ni cuenta.
 
-**Fases 1 a 7 cerradas**, más el repintado de la marca: base y router, modelos GTFS, el design
+**Fases 1 a 8 cerradas**, más el repintado de la marca: base y router, modelos GTFS, el design
 system, el dataset —48 rutas y 1 507 paradas de Aguascalientes—, el simulador con 323 camiones
 moviéndose sobre trazos reales, y **el mapa**: la pantalla de inicio con la flota en vivo, la red de
 rutas, "¿Ya me voy?", la búsqueda única y las paradas cercanas. Y **la parada y la ruta**: los
@@ -34,14 +34,17 @@ enorme y la pantalla encendida; el filtro "Solo accesibles"; y la ruta con su tr
 entre paradas. Y **el planificador**: origen y destino con "mi ubicación" y búsqueda, las opciones
 ordenadas por sencillez antes que por minutos, el detalle con su línea de tiempo y su mapa, un "no
 encontré ruta" que dice qué sí pasa cerca, y el **modo viaje**, que sigue al camión en el que vas y
-avisa dos paradas antes de bajarte. Siguiente: fase 8, favoritos y ajustes.
+avisa dos paradas antes de bajarte. Y lo que hace que la app **recuerde**: favoritos de paradas y
+rutas con su ETA en vivo, ajustes —tema, tamaño de texto, animaciones, limpiar caché—, "Acerca de"
+con el aviso de app independiente, la hoja del mapa encabezada por lo que sueles tomar a esa hora, y
+la confiabilidad observada, que ya tiene historial que leer. Siguiente: fase 9, pulido.
 
 **El color institucional es índigo `#3A3578`, no verde.** Se extrajo con cuentagotas de la app
 oficial y de la Tarjeta Soluciones YoVoy, como pedía el spec. La dirección visual completa está en
 [`DESIGN.md`](DESIGN.md).
 
-La app corre en emulador (Pixel 8, API 36). En builds de debug, el ícono de la esquina del mapa
-lleva a dos pantallas: `/debug/gallery`, la galería con cada componente en todos sus estados, con
+La app corre en emulador (Pixel 8, API 36). El menú ⋮ de la barra del mapa lleva a Favoritos y a
+Ajustes; en builds de debug lleva además a dos pantallas: `/debug/gallery`, la galería con cada componente en todos sus estados, con
 interruptor de tema y escala de texto hasta 200 %; y `/debug/simulator`, el panel del simulador,
 donde se le sube la latencia, se fuerzan errores y se apagan los GPS. Sin dispositivo a la mano, el
 mapa, la parada y la ruta están fotografiados en `test/features/{map,stop,route}/goldens/` y los
@@ -239,9 +242,10 @@ lib/
     app.dart                   MaterialApp.router, locale es_MX, tema
     router.dart                go_router como provider keepAlive
     routes.dart                nombres y paths, sin strings sueltos
-    phase_placeholder.dart     andamio temporal de las pantallas por construir
   core/
+    cache/                     la carpeta de tiles del mapa: medirla y borrarla
     config/freshness.dart      umbrales de frescura
+    history/                   lo que este teléfono vio: promesas cumplidas y uso propio
     models/                    modelos GTFS + converters, con models.dart de barril
     data/                      TransitRepository + mock/ (dataset y simulador) + remote/
     device/                    la pantalla encendida del modo paradero y del modo viaje
@@ -292,8 +296,9 @@ Reglas que se revisan en cada PR:
 | `/planner` | `planner` | Planificador; la petición va en la query: `?from=here&to=P606&at=8:30` |
 | `/planner/option/:option` | `plannerOption` | Detalle de un itinerario, con la misma query |
 | `/planner/option/:option/ride` | `ride` | Modo viaje |
-| `/favorites` | `favorites` | Favoritos |
+| `/favorites` | `favorites` | Favoritos: paradas con ETA en vivo y rutas |
 | `/settings` | `settings` | Ajustes |
+| `/settings/about` | `about` | Acerca de: el aviso de app independiente y la atribución |
 | `/debug/gallery` | `gallery` | Galería del design system (solo en debug) |
 | `/debug/simulator` | `simulator` | Panel del simulador (solo en debug) |
 

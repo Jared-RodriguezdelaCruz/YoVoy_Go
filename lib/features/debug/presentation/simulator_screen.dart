@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
+import '../../../core/clock/clock_provider.dart';
 import '../../../core/data/mock/mock_dataset.dart';
 import '../../../core/data/mock/mock_transit_repository.dart';
 import '../../../core/data/mock/simulator_config.dart';
 import '../../../core/data/transit_repository.dart';
 import '../../../core/data/transit_repository_provider.dart';
+import '../../../core/history/history_providers.dart';
+import '../../../core/history/observation.dart';
 import '../../../core/models/models.dart';
 import '../../../design/components/components.dart';
 import '../../../design/tokens/colors.dart';
@@ -149,6 +152,10 @@ class SimulatorScreen extends ConsumerWidget {
                 ],
               ),
             ),
+            if (repo is MockTransitRepository) ...<Widget>[
+              const SizedBox(height: Spacing.xl),
+              _SeedHistory(dataset: repo.dataset),
+            ],
           ],
         ),
       ),
@@ -330,6 +337,119 @@ class _Slider extends StatelessWidget {
           Slider(value: value.clamp(0, 1), onChanged: onChanged),
         ],
       ),
+    );
+  }
+}
+
+/// Siembra un historial de mentira, solo en debug.
+///
+/// La confiabilidad observada necesita cinco observaciones por ruta y parada,
+/// y llegan a razón de un camión a la vez: sin esto, verla en el emulador
+/// significa esperar media hora mirando una parada. Lo sembrado se borra desde
+/// Ajustes, con el mismo botón que lo de verdad.
+class _SeedHistory extends ConsumerStatefulWidget {
+  const _SeedHistory({required this.dataset});
+
+  final MockDataset dataset;
+
+  @override
+  ConsumerState<_SeedHistory> createState() => _SeedHistoryState();
+}
+
+class _SeedHistoryState extends ConsumerState<_SeedHistory> {
+  /// Las diferencias que se siembran, en minutos. Ni todas iguales ni
+  /// disparatadas: una ruta normal, con su cola de retrasos.
+  static const List<int> _delays = <int>[-1, 0, 0, 1, 2, 2, 3, 5];
+
+  String? _seeded;
+
+  /// Las primeras paradas del dataset que tienen ruta, con su ruta.
+  List<({String stopId, String routeId, String name})> _targets() {
+    final List<({String stopId, String routeId, String name})> targets =
+        <({String stopId, String routeId, String name})>[];
+    for (final Stop stop in widget.dataset.stops) {
+      final String? tripId = widget.dataset.tripsForStop(stop.id).firstOrNull;
+      final Trip? trip = tripId == null ? null : widget.dataset.trip(tripId);
+      if (trip == null) {
+        continue;
+      }
+      targets.add((stopId: stop.id, routeId: trip.routeId, name: stop.name));
+      if (targets.length == 3) {
+        break;
+      }
+    }
+    return targets;
+  }
+
+  Future<void> _seed() async {
+    final DateTime now = ref.read(clockProvider)();
+    final List<({String stopId, String routeId, String name})> targets =
+        _targets();
+    if (targets.isEmpty) {
+      return;
+    }
+
+    final List<ArrivalObservation> observations = <ArrivalObservation>[
+      for (final ({String stopId, String routeId, String name}) target
+          in targets)
+        for (int i = 0; i < _delays.length; i++)
+          ArrivalObservation(
+            routeId: target.routeId,
+            stopId: target.stopId,
+            band: TimeBand.of(now.subtract(Duration(days: i))),
+            delay: Duration(minutes: _delays[i]),
+            at: now.subtract(Duration(days: i)),
+          ),
+    ];
+    await ref.read(arrivalHistoryProvider.notifier).record(observations);
+
+    // Y el uso, para que la hoja del mapa encabece con la primera parada.
+    for (int i = 0; i < 4; i++) {
+      await ref
+          .read(usageLogProvider.notifier)
+          .record(stopId: targets.first.stopId, kind: UseKind.board);
+    }
+
+    if (mounted) {
+      setState(() => _seeded = targets.first.name);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors colors = context.colors;
+    final int observations =
+        ref.watch(arrivalHistoryProvider).value?.length ?? 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Text(
+          'Historial de prueba',
+          style: AppTypography.title.copyWith(color: colors.textPrimary),
+        ),
+        Text(
+          _seeded == null
+              ? 'Llena la confiabilidad observada y lo aprendido sin esperar '
+                    'a que pasen los camiones. Hoy hay $observations '
+                    'observaciones.'
+              : 'Sembrado. Abre "${_seeded!}" y mira la nota bajo cada ruta.',
+          style: AppTypography.caption.copyWith(color: colors.textSecondary),
+        ),
+        const SizedBox(height: Spacing.md),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: colors.brand,
+              foregroundColor: colors.onBrand,
+            ),
+            onPressed: _seed,
+            icon: const Icon(Icons.history),
+            label: const Text('Sembrar historial'),
+          ),
+        ),
+      ],
     );
   }
 }

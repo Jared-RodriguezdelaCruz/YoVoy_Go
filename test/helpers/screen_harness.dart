@@ -10,6 +10,8 @@ import 'package:yovoy_go/core/data/mock/mock_dataset.dart';
 import 'package:yovoy_go/core/data/mock/simulator_config.dart';
 import 'package:yovoy_go/core/data/transit_repository_provider.dart';
 import 'package:yovoy_go/core/device/screen_awake.dart';
+import 'package:yovoy_go/core/history/history_providers.dart';
+import 'package:yovoy_go/core/history/history_store.dart';
 import 'package:yovoy_go/core/location/location_service.dart';
 import 'package:yovoy_go/core/models/models.dart';
 import 'package:yovoy_go/core/transit/live_providers.dart';
@@ -17,6 +19,7 @@ import 'package:yovoy_go/core/transit/reliability.dart';
 import 'package:yovoy_go/design/theme.dart';
 import 'package:yovoy_go/features/favorites/application/favorites_providers.dart';
 import 'package:yovoy_go/features/favorites/data/favorites_store.dart';
+import 'package:yovoy_go/features/favorites/presentation/favorites_screen.dart';
 import 'package:yovoy_go/features/map/application/accessibility_filter.dart';
 import 'package:yovoy_go/features/map/application/basemap_style.dart';
 import 'package:yovoy_go/features/planner/application/trip_request.dart';
@@ -24,6 +27,10 @@ import 'package:yovoy_go/features/planner/presentation/itinerary_screen.dart';
 import 'package:yovoy_go/features/planner/presentation/planner_screen.dart';
 import 'package:yovoy_go/features/planner/presentation/ride_screen.dart';
 import 'package:yovoy_go/features/route/presentation/route_screen.dart';
+import 'package:yovoy_go/features/settings/application/settings_providers.dart';
+import 'package:yovoy_go/features/settings/data/settings_store.dart';
+import 'package:yovoy_go/features/settings/presentation/about_screen.dart';
+import 'package:yovoy_go/features/settings/presentation/settings_screen.dart';
 import 'package:yovoy_go/features/stop/presentation/stop_board_screen.dart';
 import 'package:yovoy_go/features/stop/presentation/stop_screen.dart';
 
@@ -68,6 +75,8 @@ ProviderContainer makeContainer(
   FavoritesStore? favorites,
   AccessibilityFilterStore? accessibility,
   ReliabilityHistory? reliability,
+  HistoryStore? history,
+  SettingsStore? settings,
   ScreenAwake? screenAwake,
   UserLocation? location,
   List<VehiclePosition>? vehicles,
@@ -90,8 +99,11 @@ ProviderContainer makeContainer(
       accessibilityFilterStoreProvider.overrideWithValue(
         accessibility ?? InMemoryAccessibilityFilterStore(),
       ),
-      reliabilityHistoryProvider.overrideWithValue(
-        reliability ?? const EmptyReliabilityHistory(),
+      if (reliability != null)
+        reliabilityHistoryProvider.overrideWithValue(reliability),
+      historyStoreProvider.overrideWithValue(history ?? InMemoryHistoryStore()),
+      settingsStoreProvider.overrideWithValue(
+        settings ?? InMemorySettingsStore(),
       ),
       screenAwakeProvider.overrideWithValue(screenAwake ?? FakeScreenAwake()),
       // Una flota a la medida, para poner un camión justo donde el test lo
@@ -169,6 +181,24 @@ Future<void> pumpAt(
           request: TripRequest.fromQuery(state.uri.queryParameters),
           index: int.parse(state.pathParameters[AppParams.option]!),
         ),
+      ),
+      GoRoute(
+        path: AppRoute.favorites.path,
+        name: AppRoute.favorites.name,
+        builder: (BuildContext context, GoRouterState state) =>
+            const FavoritesScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.settings.path,
+        name: AppRoute.settings.name,
+        builder: (BuildContext context, GoRouterState state) =>
+            const SettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.about.path,
+        name: AppRoute.about.name,
+        builder: (BuildContext context, GoRouterState state) =>
+            const AboutScreen(),
       ),
     ],
   );

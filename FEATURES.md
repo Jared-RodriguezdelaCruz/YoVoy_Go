@@ -83,7 +83,17 @@ siempre ganan, y en ajustes hay un botón para borrar el historial. Nada sale de
 **Necesita.** Almacenamiento local con una tabla de observaciones y una función de puntaje en
 `lib/core/`.
 
-**Fase 8**, junto con la decisión de persistencia local que el spec dejó abierta.
+**Fase 8 — construida** en `lib/core/history/`: `observation.dart` guarda el puntaje y las franjas,
+`history_store.dart` los deja en el teléfono, y la hoja del mapa los pinta arriba de "Paradas
+cercanas". Dos precisiones respecto de esta propuesta:
+
+- **La distancia no entra en el puntaje.** Lo aprendido sale del historial, no de la lista de
+  paradas cercanas, que se corta a seis antes de ordenarse. Lo que pesa es la frecuencia, la franja
+  horaria, el tipo de día —el domingo no se parece al martes— y qué tan reciente es, con la mitad
+  del peso cada dos semanas.
+- **"Fijar" no es un concepto nuevo:** es la estrella. Una sugerencia se fija volviéndola favorita y
+  se calla con "No me la muestres". Los favoritos manuales van arriba y no se repiten abajo, y
+  "Borrar el historial" en Ajustes deshace todo lo aprendido sin tocar los favoritos.
 
 ---
 
@@ -120,13 +130,26 @@ presentado como fuerte.
 
 **Cómo lo calcula.** El teléfono guarda, por ruta, parada y franja horaria, la diferencia entre lo
 que se prometió y la hora en que el vehículo pasó de verdad. Es el mismo historial de la feature 2.
+**Lo prometido es lo que esta app dijo**: el ETA que mostró, no el horario del papel. Así la nota
+responde exactamente a lo que reclama el problema —ninguna app te dice si cumplió— y se observa con
+lo que la pantalla ya estaba pidiendo, sin una petición más.
 
 **Por qué importa.** Es lo que una app oficial nunca va a publicar sobre sí misma, y es coherente
 con el principio del proyecto: no verse mejor, comportarse mejor.
 
-**Fase 8** para el cálculo, **fase 6** para mostrarlo. **La parte de la fase 6 está construida**:
-`ReliabilityNote` y `ReliabilityCopy` en `lib/core/transit/reliability.dart`, que calla con menos de
-cinco observaciones. Hoy el historial está vacío y la nota no aparece; la fase 8 lo llena.
+**Fase 6 para mostrarlo, fase 8 para calcularlo. Las dos están construidas.** `ReliabilityNote` y
+`ReliabilityCopy` viven en `lib/core/transit/reliability.dart` y callan con menos de cinco
+observaciones; el historial que las alimenta es `lib/core/history/`. Tres reglas lo mantienen
+honesto:
+
+- **La promesa se hace una vez** por camión y parada, y solo si viene a más de 2 minutos: acertarle
+  a "30 segundos" no demuestra puntualidad, y reescribir la promesa con cada refresco la volvería
+  siempre cumplida.
+- **Se cierra cuando el camión rebasa la parada** según su `current_stop_sequence`, con el reporte
+  fresco. Si lleva 3 minutos sin reportar, la promesa se tira **sin anotar nada**: eso es señal
+  perdida, no un camión tarde.
+- Solo se observa lo que está a la vista, y en segundo plano no se observa nada. Juntar cinco
+  observaciones toma días; por eso el panel del simulador siembra un historial de prueba en debug.
 
 ---
 
@@ -273,6 +296,6 @@ les cierre la puerta:
 | Accesibilidad como filtro | 6 ✅ · 7 ✅ en el planificador | `wheelchairBoarding` (simulado, ver `assets/mock/DATASET.md`) |
 | Confiabilidad observada (mostrar) | 6 ✅ | Historial local |
 | Modo viaje | 7 ✅ | Seguimiento de vehículo |
-| Mis rutas aprendidas | 8 | Persistencia local |
-| Confiabilidad observada (calcular) | 8 | Persistencia local |
+| Mis rutas aprendidas | 8 ✅ | Persistencia local |
+| Confiabilidad observada (calcular) | 8 ✅ | Persistencia local |
 | Offline con fecha | 9 | Caché |

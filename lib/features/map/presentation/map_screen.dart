@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../app/routes.dart';
+import '../../../core/cache/tile_cache.dart';
 import '../../../core/data/transit_network.dart';
 import '../../../core/location/location_service.dart';
 import '../../../core/models/models.dart';
@@ -222,6 +223,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       tileProviders: basemap.providers,
                       rasterSources: basemap.rasterSources,
                       sprites: basemap.sprites,
+                      cachePath: tileCacheFolder,
                     ),
                   const RouteNetworkLayer(),
                   if (location != null && !location.isFallback)
@@ -276,7 +278,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                               trailing: const GlobalFreshnessChip(),
                             ),
                           ),
-                          if (kDebugMode) const _DebugMenu(),
+                          const _AppMenu(),
                         ],
                       ),
                       _MapChips(sheet: _sheet),
@@ -438,9 +440,13 @@ class _PlanChip extends StatelessWidget {
   }
 }
 
-/// Los caminos a la galería y al simulador, solo en debug.
-class _DebugMenu extends StatelessWidget {
-  const _DebugMenu();
+/// El menú de la app: favoritos, ajustes y, en debug, las herramientas.
+///
+/// Un solo botón junto a la búsqueda. Dos más —una estrella y un engrane—
+/// cabrían hoy, pero no con el texto del sistema al 200 %, que es donde esta
+/// barra ya se desbordó una vez.
+class _AppMenu extends StatelessWidget {
+  const _AppMenu();
 
   @override
   Widget build(BuildContext context) {
@@ -448,8 +454,8 @@ class _DebugMenu extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: Spacing.sm),
       child: PopupMenuButton<AppRoute>(
-        tooltip: 'Herramientas de desarrollo',
-        icon: Icon(Icons.bug_report_outlined, color: colors.textSecondary),
+        tooltip: 'Menú',
+        icon: Icon(Icons.more_vert, color: colors.textSecondary),
         style: IconButton.styleFrom(
           backgroundColor: colors.surfaceRaised,
           minimumSize: const Size.square(AppSizes.minTouchTarget + Spacing.xs),
@@ -461,13 +467,24 @@ class _DebugMenu extends StatelessWidget {
         onSelected: (AppRoute route) => context.pushNamed(route.name),
         itemBuilder: (BuildContext context) => <PopupMenuEntry<AppRoute>>[
           const PopupMenuItem<AppRoute>(
-            value: AppRoute.gallery,
-            child: Text('Ver el design system'),
+            value: AppRoute.favorites,
+            child: Text('Favoritos'),
           ),
           const PopupMenuItem<AppRoute>(
-            value: AppRoute.simulator,
-            child: Text('Ver el simulador'),
+            value: AppRoute.settings,
+            child: Text('Ajustes'),
           ),
+          if (kDebugMode) ...<PopupMenuEntry<AppRoute>>[
+            const PopupMenuDivider(),
+            const PopupMenuItem<AppRoute>(
+              value: AppRoute.gallery,
+              child: Text('Ver el design system'),
+            ),
+            const PopupMenuItem<AppRoute>(
+              value: AppRoute.simulator,
+              child: Text('Ver el simulador'),
+            ),
+          ],
         ],
       ),
     );

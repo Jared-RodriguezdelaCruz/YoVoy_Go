@@ -28,3 +28,19 @@ class FavoriteStops extends _$FavoriteStops {
     await ref.read(favoritesStoreProvider).saveStops(next);
   }
 }
+
+/// Los ids de las rutas guardadas, como pide la sección 8.5 del spec.
+@Riverpod(keepAlive: true)
+class FavoriteRoutes extends _$FavoriteRoutes {
+  @override
+  Future<Set<String>> build() => ref.watch(favoritesStoreProvider).loadRoutes();
+
+  Future<void> toggle(String routeId) async {
+    final Set<String> current = await future;
+    final Set<String> next = current.contains(routeId)
+        ? (<String>{...current}..remove(routeId))
+        : <String>{...current, routeId};
+    state = AsyncData<Set<String>>(next);
+    await ref.read(favoritesStoreProvider).saveRoutes(next);
+  }
+}
