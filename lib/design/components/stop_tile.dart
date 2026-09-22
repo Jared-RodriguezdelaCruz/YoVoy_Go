@@ -7,6 +7,7 @@ import '../tokens/colors.dart';
 import '../tokens/spacing.dart';
 import '../tokens/typography.dart';
 import 'eta_chip.dart';
+import 'occupancy_indicator.dart';
 import 'route_badge.dart';
 
 /// Una parada con sus próximos arribos.
@@ -234,11 +235,19 @@ class _ArrivalRow extends StatelessWidget {
       gtfsTextColor: route?.textColor,
       size: RouteBadgeSize.small,
     );
-    final Widget headsign = Text(
-      arrival.headsign,
-      maxLines: stacked ? 2 : 1,
-      overflow: TextOverflow.ellipsis,
-      style: AppTypography.body.copyWith(color: colors.textPrimary),
+    final Widget headsign = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          arrival.headsign,
+          maxLines: stacked ? 2 : 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.body.copyWith(color: colors.textPrimary),
+        ),
+        if (arrival.occupancyStatus != null)
+          OccupancyIndicator(status: arrival.occupancyStatus),
+      ],
     );
 
     // Una sola frase para el lector de pantalla: "ruta R20N a Centro, llega
@@ -276,6 +285,9 @@ class _ArrivalRow extends StatelessWidget {
 }
 
 /// El anuncio completo de un arribo, como pide la sección 11 del spec.
-String arrivalAnnouncement(Arrival arrival) =>
-    'Ruta ${arrival.routeShortName} a ${arrival.headsign}, '
-    '${EtaChip.describeArrival(arrival)}';
+String arrivalAnnouncement(Arrival arrival) {
+  final OccupancyStatus? occupancy = arrival.occupancyStatus;
+  return 'Ruta ${arrival.routeShortName} a ${arrival.headsign}, '
+      '${EtaChip.describeArrival(arrival)}'
+      '${occupancy == null ? '' : ', ${OccupancyLevel.of(occupancy).word}'}';
+}

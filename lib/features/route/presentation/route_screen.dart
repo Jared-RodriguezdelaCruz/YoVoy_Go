@@ -6,6 +6,7 @@ import '../../../app/routes.dart';
 import '../../../core/config/freshness.dart';
 import '../../../core/models/models.dart';
 import '../../../core/transit/live_providers.dart';
+import '../../../core/transit/reliability.dart';
 import '../../../design/components/components.dart';
 import '../../../design/tokens/colors.dart';
 import '../../../design/tokens/route_palette.dart';
@@ -21,9 +22,13 @@ import 'route_stop_ladder.dart';
 /// Arriba el trazo sobre la ciudad; abajo la tira de pie, con los camiones
 /// entre paradas. El selector de sentido nombra el destino.
 class RouteScreen extends ConsumerWidget {
-  const RouteScreen({required this.routeId, super.key});
+  const RouteScreen({required this.routeId, this.fromStopId, super.key});
 
   final String routeId;
+
+  /// La parada desde la que se llegó, si se llegó desde una. La
+  /// confiabilidad solo tiene sentido en una parada concreta.
+  final String? fromStopId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -43,7 +48,7 @@ class RouteScreen extends ConsumerWidget {
         child: switch (directions) {
           AsyncValue<List<RouteDirection>>(:final List<RouteDirection> value?)
               when route != null =>
-            _RouteBody(route: route, directions: value),
+            _RouteBody(route: route, directions: value, fromStopId: fromStopId),
           AsyncValue<List<RouteDirection>>(error: RouteNotFound()) => _Missing(
             routeId: routeId,
           ),
@@ -67,10 +72,15 @@ class RouteScreen extends ConsumerWidget {
 }
 
 class _RouteBody extends ConsumerWidget {
-  const _RouteBody({required this.route, required this.directions});
+  const _RouteBody({
+    required this.route,
+    required this.directions,
+    required this.fromStopId,
+  });
 
   final TransitRoute route;
   final List<RouteDirection> directions;
+  final String? fromStopId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -85,6 +95,12 @@ class _RouteBody extends ConsumerWidget {
       routeId: route.id,
       gtfsColor: route.color,
     );
+    final String? stopId = fromStopId;
+    final String? reliability = stopId == null
+        ? null
+        : ref
+              .watch(reliabilityNoteProvider(routeId: route.id, stopId: stopId))
+              .value;
     final double mapHeight = (MediaQuery.sizeOf(context).height * 0.3).clamp(
       160,
       280,
@@ -104,17 +120,24 @@ class _RouteBody extends ConsumerWidget {
                 ),
                 const SizedBox(width: Spacing.md),
                 Expanded(
-                  child: Semantics(
-                    header: true,
-                    child: Text(
-                      route.longName,
-                      style: AppTypography.title.copyWith(
-                        color: colors.textPrimary,
-                        fontSize: 18,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Semantics(
+                        header: true,
+                        child: Text(
+                          route.longName,
+                          style: AppTypography.title.copyWith(
+                            color: colors.textPrimary,
+                            fontSize: 18,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                      ReliabilityNote(text: reliability),
+                    ],
                   ),
                 ),
               ],

@@ -21,6 +21,7 @@ class SimulatorConfig {
     this.minSignalLoss = const Duration(minutes: 1),
     this.maxSignalLoss = const Duration(minutes: 3),
     this.missingBearingRate = 0.15,
+    this.missingOccupancyRate = 0.25,
     this.minLatency = const Duration(milliseconds: 200),
     this.maxLatency = const Duration(milliseconds: 1500),
     this.errorRate = 0.05,
@@ -35,6 +36,7 @@ class SimulatorConfig {
     gpsNoiseMaxMeters: 0,
     signalLossRate: 0,
     missingBearingRate: 0,
+    missingOccupancyRate: 0,
     minLatency: Duration.zero,
     maxLatency: Duration.zero,
     errorRate: 0,
@@ -44,6 +46,7 @@ class SimulatorConfig {
   static const SimulatorConfig hostile = SimulatorConfig(
     signalLossRate: 0.35,
     missingBearingRate: 0.40,
+    missingOccupancyRate: 0.60,
     minLatency: Duration(milliseconds: 1200),
     maxLatency: Duration(seconds: 4),
     errorRate: 0.20,
@@ -78,6 +81,10 @@ class SimulatorConfig {
   /// círculo, no a una flecha apuntando al norte.
   final double missingBearingRate;
 
+  /// Proporción de reportes que llegan sin ocupación. Los feeds reales la
+  /// omiten seguido, y la UI tiene que verse bien sin ella.
+  final double missingOccupancyRate;
+
   final Duration minLatency;
   final Duration maxLatency;
 
@@ -97,6 +104,7 @@ class SimulatorConfig {
     Duration? minSignalLoss,
     Duration? maxSignalLoss,
     double? missingBearingRate,
+    double? missingOccupancyRate,
     Duration? minLatency,
     Duration? maxLatency,
     double? errorRate,
@@ -114,6 +122,7 @@ class SimulatorConfig {
       minSignalLoss: minSignalLoss ?? this.minSignalLoss,
       maxSignalLoss: maxSignalLoss ?? this.maxSignalLoss,
       missingBearingRate: missingBearingRate ?? this.missingBearingRate,
+      missingOccupancyRate: missingOccupancyRate ?? this.missingOccupancyRate,
       minLatency: minLatency ?? this.minLatency,
       maxLatency: maxLatency ?? this.maxLatency,
       errorRate: errorRate ?? this.errorRate,

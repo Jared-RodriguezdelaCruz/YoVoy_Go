@@ -6,11 +6,13 @@ import '../../../app/routes.dart';
 import '../../../core/data/transit_network.dart';
 import '../../../core/models/models.dart';
 import '../../../core/transit/live_providers.dart';
+import '../../../core/transit/reliability.dart';
 import '../../../design/components/components.dart';
 import '../../../design/tokens/colors.dart';
 import '../../../design/tokens/spacing.dart';
 import '../../../design/tokens/typography.dart';
 import '../../favorites/application/favorites_providers.dart';
+import '../../planner/application/trip_request.dart';
 import '../application/stop_providers.dart';
 
 /// Detalle de parada, como en la sección 8.2 del spec.
@@ -93,18 +95,39 @@ class _StopBoard extends ConsumerWidget {
         padding: const EdgeInsets.only(bottom: Spacing.xxxl),
         children: <Widget>[
           _TopBar(
-            trailing: IconButton(
-              tooltip: isFavorite
-                  ? 'Quitar de favoritos'
-                  : 'Guardar en favoritos',
-              onPressed: () =>
-                  ref.read(favoriteStopsProvider.notifier).toggle(stop.id),
-              icon: Icon(
-                isFavorite ? Icons.star : Icons.star_border,
-                // Cantera: el favorito lo decidió el usuario, no el sistema.
-                color: isFavorite ? colors.cantera : colors.textSecondary,
+            trailing: <Widget>[
+              IconButton(
+                tooltip: 'Cómo llego aquí',
+                icon: Icon(Icons.directions, color: colors.textPrimary),
+                onPressed: () => context.pushNamed(
+                  AppRoute.planner.name,
+                  queryParameters: TripRequest(
+                    from: const HerePlace(),
+                    to: StopPlace(stop.id),
+                  ).toQuery(),
+                ),
               ),
-            ),
+              IconButton(
+                tooltip: 'Modo paradero',
+                icon: Icon(Icons.fullscreen, color: colors.textPrimary),
+                onPressed: () => context.pushNamed(
+                  AppRoute.stopBoard.name,
+                  pathParameters: <String, String>{AppParams.stopId: stop.id},
+                ),
+              ),
+              IconButton(
+                tooltip: isFavorite
+                    ? 'Quitar de favoritos'
+                    : 'Guardar en favoritos',
+                onPressed: () =>
+                    ref.read(favoriteStopsProvider.notifier).toggle(stop.id),
+                icon: Icon(
+                  isFavorite ? Icons.star : Icons.star_border,
+                  // Cantera: el favorito lo decidió el usuario, no el sistema.
+                  color: isFavorite ? colors.cantera : colors.textSecondary,
+                ),
+              ),
+            ],
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
@@ -209,15 +232,19 @@ class _StopBoard extends ConsumerWidget {
           ),
         ),
       for (final Arrival arrival in rows)
-        _ArrivalRow(arrival: arrival, route: network?.route(arrival.routeId)),
+        _ArrivalRow(
+          arrival: arrival,
+          stopId: stop.id,
+          route: network?.route(arrival.routeId),
+        ),
     ];
   }
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({this.trailing});
+  const _TopBar({this.trailing = const <Widget>[]});
 
-  final Widget? trailing;
+  final List<Widget> trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -233,7 +260,7 @@ class _TopBar extends StatelessWidget {
                 : context.goNamed(AppRoute.map.name),
           ),
           const Spacer(),
-          ?trailing,
+          ...trailing,
         ],
       ),
     );
@@ -324,15 +351,27 @@ class _Header extends StatelessWidget {
 
 /// Una fila del letrero: placa, destino y el chip grande. Toda la fila abre
 /// la ruta.
-class _ArrivalRow extends StatelessWidget {
-  const _ArrivalRow({required this.arrival, required this.route});
+class _ArrivalRow extends ConsumerWidget {
+  const _ArrivalRow({
+    required this.arrival,
+    required this.stopId,
+    required this.route,
+  });
 
   final Arrival arrival;
+  final String stopId;
   final TransitRoute? route;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final AppColors colors = context.colors;
+    // Lo que este teléfono ha visto de la ruta en esta parada. Casi siempre
+    // es `null`, y entonces la fila no cambia.
+    final String? reliability = ref
+        .watch(
+          reliabilityNoteProvider(routeId: arrival.routeId, stopId: stopId),
+        )
+        .value;
     final bool stacked =
         MediaQuery.textScalerOf(context).scale(AppTypography.body.fontSize!) >
         22;
@@ -343,22 +382,38 @@ class _ArrivalRow extends StatelessWidget {
       gtfsColor: route?.color,
       gtfsTextColor: route?.textColor,
     );
-    final Widget headsign = Text(
-      'Hacia ${arrival.headsign}',
-      style: AppTypography.body.copyWith(color: colors.textPrimary),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
+    final Widget headsign = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          'Hacia ${arrival.headsign}',
+          style: AppTypography.body.copyWith(color: colors.textPrimary),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        if (arrival.occupancyStatus != null) ...<Widget>[
+          const SizedBox(height: Spacing.xs),
+          OccupancyIndicator(status: arrival.occupancyStatus),
+        ],
+        ReliabilityNote(text: reliability),
+      ],
     );
     final Widget chip = EtaChip.fromArrival(arrival, size: EtaChipSize.large);
 
     return Semantics(
       button: true,
-      label: '${arrivalAnnouncement(arrival)}. Ver la ruta',
+      label: <String>[
+        arrivalAnnouncement(arrival),
+        ?reliability,
+        'Ver la ruta',
+      ].join('. '),
       excludeSemantics: true,
       child: InkWell(
         onTap: () => context.pushNamed(
           AppRoute.route.name,
           pathParameters: <String, String>{AppParams.routeId: arrival.routeId},
+          queryParameters: <String, String>{AppParams.fromStop: stopId},
         ),
         child: Container(
           padding: const EdgeInsets.symmetric(

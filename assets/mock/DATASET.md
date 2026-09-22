@@ -53,7 +53,7 @@ las paradas a seis. Nada más.
 | `stop_code` | `P-001`, derivado del `stop_id` | El poste real tiene código y §8.2 del spec lo muestra; el feed no lo publica |
 | `wheelchair_boarding` | Semilla fija: ~35 % accesible, ~10 % no accesible, el resto sin verificar | Sin esto el filtro de accesibilidad no tiene nada que filtrar. `unknown` queda como mayoría, que es el estado real del mundo |
 | `alerts.json` | Dos alertas escritas a mano sobre rutas reales | GTFS-Realtime no viene en el feed estático |
-| `itineraries.json` | Cuatro pares armados sobre viajes y trazos reales | La v1 no tiene motor de ruteo (§4.3) |
+| `itineraries.json` | Cuatro pares armados sobre viajes y trazos reales. Los tres que tienen viaje traen hasta dos alternativas, halladas al generar con una búsqueda exhaustiva de hasta dos transbordos en la misma parada, subiendo y bajando a menos de 600 m. No hay tiempos de espera: la duración es caminata más recorrido | La v1 no tiene motor de ruteo (§4.3), y con una sola opción por par el orden del planificador no se vería nunca |
 | Vigencia de `calendar.json` | Abierta a 20260101–20271231 | El feed declara 20230101–20251231, vencida. Con las fechas originales `Calendar.runsOn(hoy)` da `false` siempre y la app diría que no hay servicio nunca |
 | `fare` | 10.50 el primer abordaje, 50 % el segundo y 25 % el tercero, que es el descuento por transbordo de la Tarjeta YoVoy dentro de 90 minutos. Consultado el 20 de septiembre de 2026 | El feed no trae `fare_attributes.txt` |
 

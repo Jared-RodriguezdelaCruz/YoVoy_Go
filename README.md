@@ -24,13 +24,17 @@ Simulación de punta a punta (`MockTransitRepository`) sobre **datos reales**. E
 empaquetado, no se descarga. Lo único que sale a la red son los tiles del mapa de fondo, de
 OpenFreeMap, sin llave ni cuenta.
 
-**Fases 1 a 5 cerradas**, más el repintado de la marca: base y router, modelos GTFS, el design
+**Fases 1 a 7 cerradas**, más el repintado de la marca: base y router, modelos GTFS, el design
 system, el dataset —48 rutas y 1 507 paradas de Aguascalientes—, el simulador con 323 camiones
 moviéndose sobre trazos reales, y **el mapa**: la pantalla de inicio con la flota en vivo, la red de
-rutas, "¿Ya me voy?", la búsqueda única y las paradas cercanas. De la fase 6 ya están **la parada
-y la ruta**: los arribos por ETA con las alertas arriba, la estrella que se guarda en el teléfono, y
-la ruta con su trazo y sus camiones entre paradas. Faltan las cinco features que `FEATURES.md` le
-asigna a esa fase.
+rutas, "¿Ya me voy?", la búsqueda única y las paradas cercanas. Y **la parada y la ruta**: los
+arribos por ETA con las alertas arriba, qué tan lleno viene cada camión y "cada 20 min" cuando no
+hay dato en vivo; la estrella que se guarda en el teléfono; el **modo paradero**, con un número
+enorme y la pantalla encendida; el filtro "Solo accesibles"; y la ruta con su trazo y sus camiones
+entre paradas. Y **el planificador**: origen y destino con "mi ubicación" y búsqueda, las opciones
+ordenadas por sencillez antes que por minutos, el detalle con su línea de tiempo y su mapa, un "no
+encontré ruta" que dice qué sí pasa cerca, y el **modo viaje**, que sigue al camión en el que vas y
+avisa dos paradas antes de bajarte. Siguiente: fase 8, favoritos y ajustes.
 
 **El color institucional es índigo `#3A3578`, no verde.** Se extrajo con cuentagotas de la app
 oficial y de la Tarjeta Soluciones YoVoy, como pedía el spec. La dirección visual completa está en
@@ -195,7 +199,8 @@ plugin usa el sistema nuevo del analizador (`analysis_server_plugin`, declarado 
 | Navegación | `go_router` | 18.0.1 |
 | Mapa | `flutter_map` + `flutter_map_vector_tiles` | 8.3.2 / 2.9.0 |
 | Ubicación | `geolocator` | 14.0.0 |
-| Favoritos | `shared_preferences` | 2.5.5 |
+| Favoritos y filtros | `shared_preferences` | 2.5.5 |
+| Pantalla encendida (modo paradero) | `wakelock_plus` | 1.8.0 |
 | Geometría | `latlong2` | 0.10.1 |
 | Formato | `intl` + `flutter_localizations` (`es_MX`) | 0.20.3 / SDK |
 | Lint | `flutter_lints` + `riverpod_lint` | 6.0.0 / 3.1.9 |
@@ -239,6 +244,7 @@ lib/
     config/freshness.dart      umbrales de frescura
     models/                    modelos GTFS + converters, con models.dart de barril
     data/                      TransitRepository + mock/ (dataset y simulador) + remote/
+    device/                    la pantalla encendida del modo paradero y del modo viaje
     clock/                     el reloj como provider, para fijar la hora en tests
     lifecycle/                 primer plano o segundo plano: sin sondeo en segundo plano
     location/                  geolocator detrás de una interfaz
@@ -281,8 +287,11 @@ Reglas que se revisan en cada PR:
 |---|---|---|
 | `/` | `map` | Mapa (inicio) |
 | `/stop/:stopId` | `stop` | Detalle de parada |
+| `/stop/:stopId/board` | `stopBoard` | Modo paradero |
 | `/route/:routeId` | `route` | Detalle de ruta |
-| `/planner` | `planner` | Planificador |
+| `/planner` | `planner` | Planificador; la petición va en la query: `?from=here&to=P606&at=8:30` |
+| `/planner/option/:option` | `plannerOption` | Detalle de un itinerario, con la misma query |
+| `/planner/option/:option/ride` | `ride` | Modo viaje |
 | `/favorites` | `favorites` | Favoritos |
 | `/settings` | `settings` | Ajustes |
 | `/debug/gallery` | `gallery` | Galería del design system (solo en debug) |

@@ -99,6 +99,8 @@ class LadderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppColors colors = context.colors;
     final bool terminal = position != LadderPosition.middle;
+    final bool accessible =
+        stop.wheelchairBoarding == WheelchairBoarding.accessible;
 
     final String vehicleText = switch (vehicles.length) {
       0 => '',
@@ -111,6 +113,7 @@ class LadderRow extends StatelessWidget {
       label: <String>[
         stop.name,
         if (terminal) 'terminal',
+        if (accessible) 'accesible',
         if (vehicles.isNotEmpty)
           vehicles.length == 1
               ? 'un camión acaba de pasar, ${_describe(vehicles.single.age)}'
@@ -154,8 +157,26 @@ class LadderRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(
-                    stop.name,
+                  Text.rich(
+                    TextSpan(
+                      text: stop.name,
+                      children: <InlineSpan>[
+                        // Junto al nombre y no en el margen: el margen es de
+                        // la línea y de los camiones.
+                        if (accessible)
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: Spacing.xs),
+                              child: Icon(
+                                Icons.accessible,
+                                size: 16,
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                     style: (terminal ? AppTypography.label : AppTypography.body)
                         .copyWith(
                           color: colors.textPrimary,

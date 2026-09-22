@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yovoy_go/core/data/mock/mock_dataset.dart';
 import 'package:yovoy_go/core/data/mock/simulator_config.dart';
+import 'package:yovoy_go/core/models/models.dart';
 import 'package:yovoy_go/design/components/components.dart';
 import 'package:yovoy_go/features/route/presentation/route_minimap.dart';
 import 'package:yovoy_go/features/route/presentation/route_stop_ladder.dart';
@@ -117,6 +118,41 @@ void main() {
 
     expect(find.byType(SegmentedButton<int>), findsNothing);
     expect(find.byType(LadderRow), findsWidgets);
+
+    await unmount(tester, container);
+  });
+
+  testWidgets('las paradas accesibles llevan su marca en la tira', (
+    WidgetTester tester,
+  ) async {
+    final ProviderContainer container = makeContainer(dataset);
+    await pumpAt(tester, container, '/route/R_01');
+
+    final Iterable<LadderRow> rows = tester.widgetList<LadderRow>(
+      find.byType(LadderRow),
+    );
+    final LadderRow accessible = rows.firstWhere(
+      (LadderRow r) =>
+          r.stop.wheelchairBoarding == WheelchairBoarding.accessible,
+    );
+    expect(
+      find.descendant(
+        of: find.byWidget(accessible),
+        matching: find.byIcon(Icons.accessible),
+      ),
+      findsOneWidget,
+    );
+    final LadderRow plain = rows.firstWhere(
+      (LadderRow r) =>
+          r.stop.wheelchairBoarding != WheelchairBoarding.accessible,
+    );
+    expect(
+      find.descendant(
+        of: find.byWidget(plain),
+        matching: find.byIcon(Icons.accessible),
+      ),
+      findsNothing,
+    );
 
     await unmount(tester, container);
   });

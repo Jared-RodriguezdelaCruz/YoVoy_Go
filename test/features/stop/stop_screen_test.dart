@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yovoy_go/core/data/mock/mock_dataset.dart';
 import 'package:yovoy_go/core/data/mock/simulator_config.dart';
+import 'package:yovoy_go/core/transit/reliability.dart';
 import 'package:yovoy_go/design/components/components.dart';
 import 'package:yovoy_go/features/favorites/data/favorites_store.dart';
 import 'package:yovoy_go/features/route/presentation/route_screen.dart';
@@ -13,6 +14,22 @@ import '../../helpers/screen_harness.dart';
 ///
 /// P074, Héroes de Chapultepec: pasan 14 rutas, entre ellas la R03, que
 /// tiene vigente el desvío de López Mateos.
+/// Un historial que siempre vio lo mismo: para probar la nota sin la fase 8.
+class _FixedHistory implements ReliabilityHistory {
+  const _FixedHistory();
+
+  @override
+  Future<ReliabilityStat?> statFor({
+    required String routeId,
+    required String stopId,
+  }) async => const ReliabilityStat(
+    observations: 14,
+    medianDelay: Duration(minutes: 3),
+    p10: Duration(minutes: 1),
+    p90: Duration(minutes: 5),
+  );
+}
+
 void main() {
   const String heroes = '/stop/P074';
   late MockDataset dataset;
@@ -83,6 +100,45 @@ void main() {
 
     expect(find.byTooltip('Quitar de favoritos'), findsOneWidget);
     expect(await store.loadStops(), <String>{'P074'});
+
+    await unmount(tester, container);
+  });
+
+  testWidgets('sin historial, la parada no dice nada de puntualidad', (
+    WidgetTester tester,
+  ) async {
+    final ProviderContainer container = makeContainer(dataset);
+    await pumpAt(tester, container, heroes);
+
+    expect(find.textContaining('suele llegar'), findsNothing);
+
+    await unmount(tester, container);
+  });
+
+  testWidgets('con historial, cada fila dice cómo le ha ido a esa ruta', (
+    WidgetTester tester,
+  ) async {
+    final ProviderContainer container = makeContainer(
+      dataset,
+      reliability: const _FixedHistory(),
+    );
+    await pumpAt(tester, container, heroes);
+
+    expect(
+      find.text('suele llegar 3 min tarde · según 14 observaciones tuyas'),
+      findsWidgets,
+    );
+
+    await unmount(tester, container);
+  });
+
+  testWidgets('las filas dicen qué tan lleno viene el camión', (
+    WidgetTester tester,
+  ) async {
+    final ProviderContainer container = makeContainer(dataset);
+    await pumpAt(tester, container, heroes);
+
+    expect(find.byType(OccupancyIndicator), findsWidgets);
 
     await unmount(tester, container);
   });

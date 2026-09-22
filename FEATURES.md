@@ -20,8 +20,8 @@ proyecto.
 |---|---|
 | Moovit: el contador llega a cero y se reinicia en 8 minutos, siempre | Pasados 180 s no hay número, hay estado. Nunca un contador que miente |
 | Google Maps muestra el horario como si fuera posición real del vehículo | `EtaConfidence` separa dato en vivo de horario programado, y la diferencia se ve |
-| Transit: el modo viaje consume 20 % de batería en 40 minutos | Polling que se ajusta a la cercanía y se apaga en background |
-| Citymapper propone cuatro transbordos cuando existía un camión directo | El planificador ordena por simplicidad antes que por minutos |
+| Transit: el modo viaje consume 20 % de batería en 40 minutos | El modo viaje no usa GPS: sigue al camión en el feed que ya está abierto, y se apaga en background |
+| Citymapper propone cuatro transbordos cuando existía un camión directo | El planificador ordena por simplicidad antes que por minutos: un transbordo cuesta 10 min |
 | Moovit y Citymapper quedan inservibles sin señal | Respaldo offline con su fecha: "horario guardado hace 2 h" |
 
 Y dos cosas que sí vale la pena copiar: el indicador de ocupación de NS (una, dos o tres figuras) y
@@ -101,7 +101,10 @@ número de minutos. Esta es la pantalla donde ese rol tiene sentido.
 
 **Necesita.** Nada nuevo: los mismos arribos del detalle de parada.
 
-**Fase 6.**
+**Fase 6 — construida** en `lib/features/stop/presentation/stop_board_screen.dart`, en
+`/stop/:id/board`. El protagonista es el primer camión **en vivo**; debajo va la tira desde donde
+viene hasta esta parada, a lo más cinco paradas. La pantalla no se apaga (`wakelock_plus`) y se
+suelta sola al pasar a segundo plano.
 
 ---
 
@@ -121,7 +124,9 @@ que se prometió y la hora en que el vehículo pasó de verdad. Es el mismo hist
 **Por qué importa.** Es lo que una app oficial nunca va a publicar sobre sí misma, y es coherente
 con el principio del proyecto: no verse mejor, comportarse mejor.
 
-**Fase 8** para el cálculo, **fase 6** para mostrarlo.
+**Fase 8** para el cálculo, **fase 6** para mostrarlo. **La parte de la fase 6 está construida**:
+`ReliabilityNote` y `ReliabilityCopy` en `lib/core/transit/reliability.dart`, que calla con menos de
+cinco observaciones. Hoy el historial está vacío y la nota no aparece; la fase 8 lo llena.
 
 ---
 
@@ -140,7 +145,22 @@ sección 7 del spec.
 
 **Necesita.** Ubicación en primer plano y el seguimiento del vehículo.
 
-**Fase 7.**
+**Fase 7 — construida** en `lib/features/planner/presentation/ride_screen.dart`, con su lógica en
+`application/ride_session.dart`. Se entra desde el detalle de un itinerario con "Empezar viaje".
+Dos cosas cambiaron respecto de esta propuesta al construirla:
+
+- **No usa GPS.** Con "Ya me subí" se fija el camión de esa ruta que está en la parada o llegando,
+  y el conteo sale de su reporte en el feed, que ya estaba abierto para el mapa. Se ahorra lo que
+  más batería gasta, y el modo funciona con el simulador. "Ya me subí" no se habilita si no hay
+  un camión cerca: seguir a uno inventado sería peor.
+- **La cadencia de 60 s y 15 s no aplica.** El feed reporta cada 30 s y no se puede pedir más
+  rápido; sin GPS, no hay nada más que sondear. A cambio, **la pantalla se queda encendida**
+  mientras dure el viaje: con la app en segundo plano todo se detiene, y un aviso que no llega
+  con la pantalla apagada es peor que no tener aviso.
+
+A las dos paradas dice "Prepárate: bajas en 2 paradas" y vibra; a la una, "Bájate en la
+siguiente". Cada aviso suena una sola vez por tramo y se anuncia al lector de pantalla. Con la
+señal perdida, el conteo se queda en el último reporte y lo dice.
 
 ---
 
@@ -159,7 +179,10 @@ en una disculpa.
 bajó a `assets/mock/frequencies.json` con su modelo `Frequency`. El respaldo se arma con el
 intervalo real de la ruta, no con un promedio inventado.
 
-**Fase 6.**
+**Fase 6 — construida.** `Arrival` trae `headway`, y `EtaChip` dice "cada 20 min · según horario"
+cuando no hay número en vivo. Se redondea a 5 minutos; si el intervalo cae lejos de un múltiplo, da
+el rango ("cada 15–20 min"). Una grieta del feed: las 184 frecuencias traen `headway_secs = 1199`,
+así que hoy toda la red dice "cada 20 min".
 
 ---
 
@@ -173,7 +196,9 @@ hay sol directo.
 
 **Necesita.** `occupancyStatus`, que ya está en el modelo de tiempo real del spec.
 
-**Fase 6.**
+**Fase 6 — construida** en `lib/design/components/occupancy_indicator.dart`. El simulador la
+reporta con más carga en horas pico y la omite en un 25 % de los reportes, como los feeds reales.
+Solo "va lleno" cambia de color.
 
 ---
 
@@ -187,7 +212,13 @@ marca en la tira sobre las paradas que lo son.
 
 **Necesita.** `wheelchairBoarding`, que ya está en el modelo de `Stop`.
 
-**Fase 6.**
+**Fase 6 — construida** en el mapa y en la tira de la ruta
+(`lib/features/map/application/accessibility_filter.dart`). El interruptor se guarda en el
+teléfono. Las paradas sin verificar también quedan fuera: quien necesita una rampa no puede apostar
+a que haya una. **Fase 7 — construido también en el planificador**: es el mismo interruptor.
+Esconde las opciones que suben o bajan en una parada sin verificar y dice cuántas; "Mostrarlas de
+todos modos" las enseña esa vez sin apagar el filtro. Con el dataset de hoy ninguna opción de los
+pares precocinados pasa, así que ese es el estado que más se va a ver.
 
 ---
 
@@ -236,12 +267,12 @@ les cierre la puerta:
 |---|---|---|
 | Búsqueda única | 5 ✅ | Dataset |
 | ¿Ya me voy? | 5 ✅ | Ubicación |
-| Modo paradero | 6 | Detalle de parada |
-| Frecuencia como respaldo | 6 | `Frequency` del dataset ✅ |
-| Ocupación | 6 | `occupancyStatus` |
-| Accesibilidad como filtro | 6 | `wheelchairBoarding` (simulado, ver `assets/mock/DATASET.md`) |
-| Confiabilidad observada (mostrar) | 6 | Historial local |
-| Modo viaje | 7 | Seguimiento de vehículo |
+| Modo paradero | 6 ✅ | Detalle de parada |
+| Frecuencia como respaldo | 6 ✅ | `Frequency` del dataset |
+| Ocupación | 6 ✅ | `occupancyStatus` |
+| Accesibilidad como filtro | 6 ✅ · 7 ✅ en el planificador | `wheelchairBoarding` (simulado, ver `assets/mock/DATASET.md`) |
+| Confiabilidad observada (mostrar) | 6 ✅ | Historial local |
+| Modo viaje | 7 ✅ | Seguimiento de vehículo |
 | Mis rutas aprendidas | 8 | Persistencia local |
 | Confiabilidad observada (calcular) | 8 | Persistencia local |
 | Offline con fecha | 9 | Caché |

@@ -153,7 +153,7 @@ class TransitSimulator {
       final _TrackSample sample = vehicle.track.sampleAt(seconds);
 
       final Random noise = Random(
-        Object.hash(vehicle.id, reportedAt.millisecondsSinceEpoch),
+        _stableHash(vehicle.id, reportedAt.millisecondsSinceEpoch, 0),
       );
 
       positions.add(
@@ -168,10 +168,66 @@ class TransitSimulator {
               : sample.bearing,
           speed: sample.moving ? 30 * vehicle.speedFactor / 3.6 : 0,
           currentStopSequence: sample.stopIndex + 1,
+          occupancyStatus: _occupancy(vehicle, reportedAt),
         ),
       );
     }
     return positions;
+  }
+
+  /// Una semilla que da lo mismo en cada corrida.
+  ///
+  /// `Object.hash` no sirve aquí: Dart lo siembra al azar en cada proceso, y
+  /// la promesa de este simulador es que `positionsAt(t)` sea igual siempre.
+  /// Es FNV-1a de 32 bits sobre el id, el instante y un canal, que separa los
+  /// dados de ruido de los de ocupación.
+  static int _stableHash(String id, int millis, int channel) {
+    int hash = 0x811c9dc5;
+    void mix(int byte) {
+      hash = ((hash ^ (byte & 0xff)) * 0x01000193) & 0xffffffff;
+    }
+
+    for (final int unit in id.codeUnits) {
+      mix(unit);
+      mix(unit >> 8);
+    }
+    for (int shift = 0; shift < 64; shift += 8) {
+      mix(millis >> shift);
+    }
+    mix(channel);
+    return hash;
+  }
+
+  /// Qué tan lleno va un vehículo en un reporte.
+  ///
+  /// Sale de su propio generador y no de `noise`: sacar un número más de ese
+  /// movería el ruido de posición y el `bearing` de toda la flota. En horas
+  /// pico la moneda se carga hacia lleno.
+  OccupancyStatus? _occupancy(_SimVehicle vehicle, DateTime reportedAt) {
+    final Random dice = Random(
+      _stableHash(vehicle.id, reportedAt.millisecondsSinceEpoch, 1),
+    );
+    if (dice.nextDouble() < config.missingOccupancyRate) {
+      return null;
+    }
+    final int hour = reportedAt.toLocal().hour;
+    final bool rush =
+        (hour >= 7 && hour < 9) ||
+        (hour >= 13 && hour < 15) ||
+        (hour >= 18 && hour < 20);
+    // De 0 (vacío) a 1 (lleno). En pico, uno de cada cuatro va lleno; fuera
+    // de pico, ninguno. Una lista donde todos van llenos no informa nada.
+    final double load = rush
+        ? 0.2 + dice.nextDouble() * 0.8
+        : dice.nextDouble() * 0.8;
+    return switch (load) {
+      < 0.25 => OccupancyStatus.empty,
+      < 0.45 => OccupancyStatus.manySeatsAvailable,
+      < 0.65 => OccupancyStatus.fewSeatsAvailable,
+      < 0.8 => OccupancyStatus.standingRoomOnly,
+      < 0.93 => OccupancyStatus.crushedStandingRoomOnly,
+      _ => OccupancyStatus.full,
+    };
   }
 
   /// El instante del último reporte antes de [now].

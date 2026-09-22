@@ -251,6 +251,10 @@ class MockTransitRepository implements TransitRepository {
         }
       }
 
+      final Frequency? frequency = _dataset.frequency(entry.value.id);
+      final bool running = frequency != null && frequency.coversTime(timeOfDay);
+      final Duration? headway = running ? frequency.headway : null;
+
       final ({VehiclePosition vehicle, Duration eta})? closest = best;
       if (closest != null) {
         final Duration age = closest.vehicle.ageAt(now);
@@ -267,15 +271,15 @@ class MockTransitRepository implements TransitRepository {
             dataAge: age,
             vehicleId: closest.vehicle.vehicleId,
             occupancyStatus: closest.vehicle.occupancyStatus,
+            headway: headway,
           ),
         );
         continue;
       }
 
       // Sin vehículo: queda la frecuencia. Media frecuencia es la espera
-      // esperada de quien llega al azar a un paradero.
-      final Frequency? frequency = _dataset.frequency(entry.value.id);
-      final bool running = frequency != null && frequency.coversTime(timeOfDay);
+      // esperada de quien llega al azar a un paradero; la UI no la pinta como
+      // minuto exacto, dice "cada 20 min".
       arrivals.add(
         Arrival(
           routeId: route.id,
@@ -288,6 +292,7 @@ class MockTransitRepository implements TransitRepository {
           // Un horario no envejece: su edad es cero, y por eso el chip lo
           // muestra sin advertencia de frescura.
           dataAge: Duration.zero,
+          headway: headway,
         ),
       );
     }

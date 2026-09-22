@@ -8,6 +8,7 @@ import '../../../core/data/transit_repository_provider.dart';
 import '../../../core/location/location_service.dart';
 import '../../../core/models/models.dart';
 import '../../../core/transit/live_providers.dart';
+import 'accessibility_filter.dart';
 import 'leave_now.dart';
 import 'search_index.dart';
 
@@ -109,9 +110,16 @@ Future<List<NearbyStop>> nearbyStops(Ref ref) async {
     location.position,
     radiusMeters: nearbyRadiusMeters,
   );
+  final bool accessibleOnly = await ref.watch(accessibleOnlyProvider.future);
   const Distance distance = Distance();
   return <NearbyStop>[
-    for (final Stop stop in stops.take(6))
+    for (final Stop stop
+        in stops
+            .where(
+              (Stop s) =>
+                  passesAccessibilityFilter(s, accessibleOnly: accessibleOnly),
+            )
+            .take(6))
       NearbyStop(
         stop: stop,
         meters: distance.as(LengthUnit.Meter, location.position, stop.position),

@@ -28,11 +28,13 @@ void main() {
         'confidence': 'live',
         'vehicle_id': 'v7',
         'occupancy_status': 'MANY_SEATS_AVAILABLE',
+        'headway': 1200,
       };
 
       final Arrival arrival = Arrival.fromJson(json);
 
       expect(arrival.eta, const Duration(minutes: 4));
+      expect(arrival.headway, const Duration(minutes: 20));
       expect(arrival.confidence, EtaConfidence.live);
       expect(arrival.toJson(), json);
     });

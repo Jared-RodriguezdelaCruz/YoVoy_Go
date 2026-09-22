@@ -7,9 +7,13 @@ import '../design/gallery/design_gallery_screen.dart';
 import '../features/debug/presentation/simulator_screen.dart';
 import '../features/favorites/presentation/favorites_screen.dart';
 import '../features/map/presentation/map_screen.dart';
+import '../features/planner/application/trip_request.dart';
+import '../features/planner/presentation/itinerary_screen.dart';
 import '../features/planner/presentation/planner_screen.dart';
+import '../features/planner/presentation/ride_screen.dart';
 import '../features/route/presentation/route_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
+import '../features/stop/presentation/stop_board_screen.dart';
 import '../features/stop/presentation/stop_screen.dart';
 import 'routes.dart';
 
@@ -38,16 +42,41 @@ GoRouter appRouter(Ref ref) {
             StopScreen(stopId: state.pathParameters[AppParams.stopId]!),
       ),
       GoRoute(
+        path: AppRoute.stopBoard.path,
+        name: AppRoute.stopBoard.name,
+        builder: (BuildContext context, GoRouterState state) =>
+            StopBoardScreen(stopId: state.pathParameters[AppParams.stopId]!),
+      ),
+      GoRoute(
         path: AppRoute.route.path,
         name: AppRoute.route.name,
-        builder: (BuildContext context, GoRouterState state) =>
-            RouteScreen(routeId: state.pathParameters[AppParams.routeId]!),
+        builder: (BuildContext context, GoRouterState state) => RouteScreen(
+          routeId: state.pathParameters[AppParams.routeId]!,
+          fromStopId: state.uri.queryParameters[AppParams.fromStop],
+        ),
       ),
       GoRoute(
         path: AppRoute.planner.path,
         name: AppRoute.planner.name,
-        builder: (BuildContext context, GoRouterState state) =>
-            const PlannerScreen(),
+        builder: (BuildContext context, GoRouterState state) => PlannerScreen(
+          request: TripRequest.fromQuery(state.uri.queryParameters),
+        ),
+      ),
+      GoRoute(
+        path: AppRoute.plannerOption.path,
+        name: AppRoute.plannerOption.name,
+        builder: (BuildContext context, GoRouterState state) => ItineraryScreen(
+          request: TripRequest.fromQuery(state.uri.queryParameters),
+          index: int.tryParse(state.pathParameters[AppParams.option]!) ?? -1,
+        ),
+      ),
+      GoRoute(
+        path: AppRoute.ride.path,
+        name: AppRoute.ride.name,
+        builder: (BuildContext context, GoRouterState state) => RideScreen(
+          request: TripRequest.fromQuery(state.uri.queryParameters),
+          index: int.tryParse(state.pathParameters[AppParams.option]!) ?? -1,
+        ),
       ),
       GoRoute(
         path: AppRoute.favorites.path,

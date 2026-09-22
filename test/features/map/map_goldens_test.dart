@@ -9,6 +9,7 @@ import 'package:yovoy_go/core/data/mock/simulator_config.dart';
 import 'package:yovoy_go/core/data/transit_repository_provider.dart';
 import 'package:yovoy_go/core/location/location_service.dart';
 import 'package:yovoy_go/design/theme.dart';
+import 'package:yovoy_go/features/map/application/accessibility_filter.dart';
 import 'package:yovoy_go/features/map/application/basemap_style.dart';
 import 'package:yovoy_go/features/map/presentation/layers/transit_markers_layer.dart';
 import 'package:yovoy_go/features/map/presentation/map_hit_test.dart';
@@ -56,6 +57,9 @@ void main() {
 
     final ProviderContainer container = ProviderContainer(
       overrides: [
+        accessibilityFilterStoreProvider.overrideWithValue(
+          InMemoryAccessibilityFilterStore(),
+        ),
         clockProvider.overrideWithValue(() => eightAm),
         mockDatasetProvider.overrideWith((Ref ref) async => dataset),
         simulatorSettingsProvider.overrideWith(

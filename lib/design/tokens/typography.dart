@@ -40,6 +40,19 @@ abstract final class AppTypography {
     fontFeatures: _tabular,
   );
 
+  /// El número del modo paradero: el mismo instrumento que [etaDisplay],
+  /// tres veces más grande, para leerse a un brazo de distancia y con sol de
+  /// frente. La pantalla lo escala con el ancho; este es el tamaño de un
+  /// teléfono de 360 dp.
+  static const TextStyle etaBoard = TextStyle(
+    fontFamily: tightFamily,
+    fontSize: 144,
+    fontWeight: FontWeight.w700,
+    height: 0.9,
+    letterSpacing: -2.88,
+    fontFeatures: _tabular,
+  );
+
   /// Código de ruta dentro de su placa.
   static const TextStyle routeBadge = TextStyle(
     fontFamily: condensedFamily,

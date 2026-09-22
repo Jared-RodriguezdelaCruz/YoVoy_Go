@@ -187,6 +187,56 @@ de delante se puntea. Así la firma deja de ser un componente suelto y se vuelve
 El sentido se elige por su destino, "Hacia Margaritas", en el índigo de marca. La estrella de
 favorito va en **cantera**: la decidió el usuario.
 
+**La ocupación son figuras más una palabra.** Una, dos o tres personas y "va vacío", "va
+llenándose", "va lleno". Solo "va lleno" cambia a `alert`; las otras dos van en `textSecondary`. La
+palabra nunca se va, porque el color no carga el significado solo.
+
+**Sin dato en vivo, el chip da la frecuencia**: "cada 20 min · según horario", con el reloj y el
+borde apagado. No es un número que se pueda confundir con una promesa.
+
+**La confiabilidad es una línea chica**, "suele llegar 3 min tarde · según 14 observaciones tuyas",
+con un ícono de historial en `textSecondary`. No va en cantera aunque sea algo que el teléfono
+aprendió: va en la fila del `EtaChip`, y cantera no comparte fila con un estado de frescura.
+
+---
+
+## El modo paradero
+
+Es la pantalla para la que existe el rol del contador. **El número va a 144 pt** en Barlow
+Condensed 700 (`AppTypography.etaBoard`), que es `etaDisplay` tres veces más grande, y crece con el
+ancho del teléfono. Encima, la placa y "Hacia X"; debajo, la frescura y la ocupación; al pie, la
+tira desde donde viene el camión hasta esta parada, y los dos siguientes en una línea.
+
+**El contraste va al máximo, pero sigue el tema del sistema.** Fondo y texto puros: negro y blanco
+de noche, blanco y negro de día. De noche no se deslumbra a nadie con una pantalla blanca. No hay
+nada más en pantalla: todo el vacío es a propósito, para que el número se encuentre de un vistazo.
+Un toque en cualquier parte sale.
+
+---
+
+## El planificador y el modo viaje
+
+**Una opción es una tarjeta que se compara de un vistazo**: la duración en el tamaño del ETA, las
+horas a la derecha, y abajo las placas en el orden en que se toman (`RouteSequence`), con la
+caminata marcada en las puntas. La línea de abajo dice los transbordos y los metros a pie, que es
+lo que más pesa al elegir. Solo la primera tarjeta trae el `EtaChip` en vivo de su primer camión:
+el planificador compara viajes, no es un tablero de arribos. Una nota al pie admite que las horas
+no cuentan la espera.
+
+**La línea de tiempo es la tira otra vez**, ahora como riel: la caminata punteada en gris y cada
+camión sólido en el color de su ruta. El color nunca va solo: cada tramo dice con palabras qué es,
+dónde se sube y dónde se baja, y las paradas accesibles llevan ♿.
+
+**"No encontré ruta" no es una disculpa.** El título nombra los dos lugares y abajo va lo que sí se
+puede hacer: hasta dónde te acerca un camión y qué rutas pasan cerca de donde estás, cada una con su
+placa y un toque para abrirla.
+
+**El modo viaje usa la paleta del modo paradero**, fondo y texto puros
+(`design/tokens/max_contrast.dart`), porque se lee igual: con una mano, en movimiento, con el sol
+por la ventana. El texto grande son palabras y no un número suelto: "Faltan 3 paradas" se entiende
+de un vistazo; un "3", no. El aviso de prepararse va en una franja índigo con ícono y texto, y el
+botón de cada paso queda abajo, al alcance del pulgar.
+
 ---
 
 ## Lo que se descartó, y por qué

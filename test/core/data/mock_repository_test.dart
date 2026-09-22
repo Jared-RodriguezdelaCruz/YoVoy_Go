@@ -191,6 +191,69 @@ void main() {
       // Los que perdieron señal simplemente no están en el feed.
       expect(reportes.length, lessThan(perfecto.positionsAt(martes).length));
     });
+
+    test('la ocupación es determinista y no mueve a nadie de lugar', () {
+      // Sale de su propio generador: si sacara un número del ruido de
+      // posición, cada golden del mapa cambiaría al agregarla.
+      final TransitSimulator con = TransitSimulator(
+        dataset: dataset,
+        config: SimulatorConfig.perfect,
+      );
+      final TransitSimulator sin = TransitSimulator(
+        dataset: dataset,
+        config: SimulatorConfig.perfect.copyWith(missingOccupancyRate: 1),
+      );
+      final List<VehiclePosition> a = con.positionsAt(martes);
+      final List<VehiclePosition> b = sin.positionsAt(martes);
+
+      expect(a.every((VehiclePosition v) => v.occupancyStatus != null), isTrue);
+      expect(b.every((VehiclePosition v) => v.occupancyStatus == null), isTrue);
+      for (int i = 0; i < a.length; i++) {
+        expect(a[i].position, b[i].position);
+        expect(a[i].bearing, b[i].bearing);
+      }
+      expect(
+        con.positionsAt(martes).map((VehiclePosition v) => v.occupancyStatus),
+        a.map((VehiclePosition v) => v.occupancyStatus),
+      );
+    });
+
+    test('en hora pico los camiones van más llenos que a media mañana', () {
+      final TransitSimulator simulator = TransitSimulator(
+        dataset: dataset,
+        config: SimulatorConfig.perfect,
+      );
+      double carga(DateTime t) {
+        final List<VehiclePosition> flota = simulator.positionsAt(t);
+        return flota
+                .map((VehiclePosition v) => v.occupancyStatus!.index)
+                .reduce((int x, int y) => x + y) /
+            flota.length;
+      }
+
+      // Las horas del reloj del teléfono: el pico es de 7 a 9 local.
+      expect(
+        carga(DateTime(2026, 9, 22, 8)),
+        greaterThan(carga(DateTime(2026, 9, 22, 11))),
+      );
+    });
+
+    test('con fallas, también falta la ocupación en algunos reportes', () {
+      final TransitSimulator hostil = TransitSimulator(
+        dataset: dataset,
+        config: SimulatorConfig.hostile,
+      );
+      final List<VehiclePosition> reportes = hostil.positionsAt(martes);
+
+      expect(
+        reportes.where((VehiclePosition v) => v.occupancyStatus == null),
+        isNotEmpty,
+      );
+      expect(
+        reportes.where((VehiclePosition v) => v.occupancyStatus != null),
+        isNotEmpty,
+      );
+    });
   });
 
   group('el repositorio', () {
@@ -343,8 +406,32 @@ void main() {
         // Un horario no envejece: su edad es cero y el chip no lo marca viejo.
         expect(sinVehiculo.dataAge, Duration.zero);
         expect(sinVehiculo.showsNumericEta, isTrue);
+        // Y trae el intervalo, que es lo que la UI dice: "cada 20 min".
+        expect(sinVehiculo.headway, isNotNull);
       },
     );
+
+    test('los arribos en vivo también traen su frecuencia', () async {
+      final MockTransitRepository repo = build();
+
+      final List<Arrival> arribos = await repo.getArrivals(paradaConServicio());
+
+      expect(
+        arribos.where((Arrival a) => a.vehicleId != null && a.headway != null),
+        isNotEmpty,
+      );
+    });
+
+    test('los arribos en vivo traen la ocupación de su camión', () async {
+      final MockTransitRepository repo = build();
+
+      final List<Arrival> arribos = await repo.getArrivals(paradaConServicio());
+
+      expect(
+        arribos.where((Arrival a) => a.occupancyStatus != null),
+        isNotEmpty,
+      );
+    });
 
     test('los arribos vienen ordenados por cercanía', () async {
       final MockTransitRepository repo = build();

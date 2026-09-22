@@ -9,6 +9,7 @@ import 'package:yovoy_go/core/data/transit_repository_provider.dart';
 import 'package:yovoy_go/core/location/location_service.dart';
 import 'package:yovoy_go/design/components/components.dart';
 import 'package:yovoy_go/design/theme.dart';
+import 'package:yovoy_go/features/map/application/accessibility_filter.dart';
 import 'package:yovoy_go/features/map/application/basemap_style.dart';
 import 'package:yovoy_go/features/map/application/map_providers.dart';
 import 'package:yovoy_go/features/map/presentation/layers/transit_markers_layer.dart';
@@ -50,6 +51,9 @@ void main() {
 
     final ProviderContainer container = ProviderContainer(
       overrides: [
+        accessibilityFilterStoreProvider.overrideWithValue(
+          InMemoryAccessibilityFilterStore(),
+        ),
         mockDatasetProvider.overrideWith((Ref ref) async => dataset),
         simulatorSettingsProvider.overrideWith(() => _FixedSettings(config)),
         basemapStyleProvider.overrideWith(
@@ -101,6 +105,27 @@ void main() {
       await unmount(tester, container);
     },
   );
+
+  testWidgets('"Solo accesibles" se nombra en la hoja y se recuerda', (
+    WidgetTester tester,
+  ) async {
+    final ProviderContainer container = await pumpMap(tester);
+
+    expect(find.text('Solo accesibles'), findsOneWidget);
+    await tester.tap(find.text('Solo accesibles'));
+    for (int i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    expect(find.text('Paradas accesibles cercanas'), findsOneWidget);
+    expect(container.read(accessibleOnlyProvider).value, isTrue);
+    final InMemoryAccessibilityFilterStore store = container.read(
+      accessibilityFilterStoreProvider,
+    ) as InMemoryAccessibilityFilterStore;
+    expect(store.value, isTrue);
+
+    await unmount(tester, container);
+  });
 
   testWidgets(
     'la hoja se detiene en 120 px, 45 % y 90 % (o bajo la búsqueda)',

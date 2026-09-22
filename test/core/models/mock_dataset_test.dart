@@ -397,6 +397,46 @@ void main() {
       }
     });
 
+    test('los pares con viaje traen alternativas distintas entre sí', () {
+      for (final dynamic par in pares) {
+        final List<dynamic> filas =
+            (par as Map<String, dynamic>)['itineraries'] as List<dynamic>;
+        if (filas.isEmpty) {
+          continue;
+        }
+        // Con una sola opción el orden del planificador no se vería nunca.
+        expect(filas.length, inInclusiveRange(2, 3), reason: '${par['id']}');
+        final Set<String> secuencias = <String>{
+          for (final dynamic row in filas)
+            Itinerary.fromJson(row as Map<String, dynamic>).busLegs
+                .map((Leg leg) => leg.route!.id)
+                .join('>'),
+        };
+        expect(secuencias, hasLength(filas.length), reason: '${par['id']}');
+      }
+    });
+
+    test('las alternativas empiezan y terminan cerca del par', () {
+      for (final dynamic par in pares) {
+        final Map<String, dynamic> row = par as Map<String, dynamic>;
+        final Map<String, dynamic> from = row['from'] as Map<String, dynamic>;
+        final Map<String, dynamic> to = row['to'] as Map<String, dynamic>;
+        for (final dynamic option in row['itineraries'] as List<dynamic>) {
+          final Itinerary itinerary = Itinerary.fromJson(
+            option as Map<String, dynamic>,
+          );
+          final LatLng start = itinerary.legs.first.geometry.first;
+          final LatLng end = itinerary.legs.last.geometry.last;
+          expect(start.latitude, closeTo(from['lat'] as double, 1e-9));
+          expect(start.longitude, closeTo(from['lon'] as double, 1e-9));
+          expect(end.latitude, closeTo(to['lat'] as double, 1e-9));
+          expect(end.longitude, closeTo(to['lon'] as double, 1e-9));
+          // A menos de 600 m por punta: más que eso ya no es "cerca".
+          expect(itinerary.walkingDistance, lessThanOrEqualTo(1200));
+        }
+      }
+    });
+
     test('el par sin resultados apunta lejos de la red', () {
       final Map<String, dynamic> vacio = pares.firstWhere(
         (dynamic p) =>

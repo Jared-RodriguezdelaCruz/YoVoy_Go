@@ -14,6 +14,7 @@ import '../../../design/components/components.dart';
 import '../../../design/tokens/colors.dart';
 import '../../../design/tokens/spacing.dart';
 import '../../../design/tokens/typography.dart';
+import '../application/accessibility_filter.dart';
 import '../application/leave_now.dart';
 import '../application/map_providers.dart';
 
@@ -165,6 +166,10 @@ class _HomeContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AppColors colors = context.colors;
     final AsyncValue<List<NearbyStop>> nearby = ref.watch(nearbyStopsProvider);
+    // El filtro se nombra en el título: una lista más corta sin explicación
+    // parece una zona con menos paradas.
+    final bool accessibleOnly =
+        ref.watch(accessibleOnlyProvider).value ?? false;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -172,20 +177,28 @@ class _HomeContent extends ConsumerWidget {
         const _LeaveNowCard(),
         const SizedBox(height: Spacing.xl),
         Text(
-          'Paradas cercanas',
+          accessibleOnly ? 'Paradas accesibles cercanas' : 'Paradas cercanas',
           style: AppTypography.title.copyWith(color: colors.textPrimary),
         ),
         const SizedBox(height: Spacing.md),
         switch (nearby) {
           AsyncData<List<NearbyStop>>(:final List<NearbyStop> value)
               when value.isEmpty =>
-            const EmptyState(
-              icon: Icons.directions_walk,
-              title: 'No hay paradas a 600 m',
-              message:
-                  'Busca una parada por su nombre o mueve el mapa para ver '
-                  'las de otra zona.',
-            ),
+            accessibleOnly
+                ? const EmptyState(
+                    icon: Icons.accessible,
+                    title: 'No hay paradas accesibles a 600 m',
+                    message:
+                        'Quita el filtro "Solo accesibles" para ver las '
+                        'demás, o mueve el mapa a otra zona.',
+                  )
+                : const EmptyState(
+                    icon: Icons.directions_walk,
+                    title: 'No hay paradas a 600 m',
+                    message:
+                        'Busca una parada por su nombre o mueve el mapa para ver '
+                        'las de otra zona.',
+                  ),
           AsyncData<List<NearbyStop>>(:final List<NearbyStop> value) => Column(
             children: <Widget>[
               for (final NearbyStop stop in value)

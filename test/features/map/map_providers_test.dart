@@ -14,6 +14,7 @@ import 'package:yovoy_go/core/data/transit_repository_provider.dart';
 import 'package:yovoy_go/core/lifecycle/app_lifecycle_provider.dart';
 import 'package:yovoy_go/core/location/location_service.dart';
 import 'package:yovoy_go/core/models/models.dart';
+import 'package:yovoy_go/features/map/application/accessibility_filter.dart';
 import 'package:yovoy_go/features/map/application/leave_now.dart';
 import 'package:yovoy_go/features/map/application/map_providers.dart';
 
@@ -55,6 +56,9 @@ void main() {
 
       container = ProviderContainer(
         overrides: [
+          accessibilityFilterStoreProvider.overrideWithValue(
+            InMemoryAccessibilityFilterStore(),
+          ),
           transitRepositoryProvider.overrideWith((Ref ref) async => repository),
         ],
       );
@@ -111,6 +115,9 @@ void main() {
     ProviderContainer containerWith(UserLocation location) {
       final ProviderContainer container = ProviderContainer(
         overrides: [
+          accessibilityFilterStoreProvider.overrideWithValue(
+            InMemoryAccessibilityFilterStore(),
+          ),
           transitRepositoryProvider.overrideWith(
             (Ref ref) async => MockTransitRepository(
               dataset: dataset,

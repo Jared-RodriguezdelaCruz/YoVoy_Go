@@ -63,6 +63,14 @@ INACTIVE_ROUTES = ("R_50B", "R_52")
 # Velocidad a pie de los tramos de caminata de los itinerarios, m/s.
 WALK_SPEED = 1.2
 
+# Las alternativas de un itinerario suben y bajan a lo más a esta distancia
+# del origen y del destino. Es el mismo radio con el que la app sugiere rutas
+# cercanas cuando no encuentra viaje.
+ALT_WALK_METERS = 600
+
+# Opciones por par: la original y hasta dos alternativas.
+MAX_OPTIONS = 3
+
 # Siglas que el feed escribe en Title Case y quedan mal en pantalla.
 ACRONYMS = {
     "xxi": "XXI",
@@ -637,7 +645,11 @@ def build_itineraries(routes, trips, times_by_trip, shapes, stops_by_id) -> dict
             round(last_stop["stop_lat"] - 0.0009 - 0.0005 * spread, 6),
             round(last_stop["stop_lon"] + 0.0004 + 0.0008 * spread, 6),
         )
+        return origin, target, itinerary_between(hops, origin, target)
 
+    def itinerary_between(hops, origin, target):
+        first_stop = stops_by_id[sequence(hops[0][0])[hops[0][1]]["stop_id"]]
+        last_stop = stops_by_id[sequence(hops[-1][0])[hops[-1][2]]["stop_id"]]
         legs = []
         first_walk, walked = walk_leg(origin, "Tu ubicación", first_stop, to_stop=True)
         legs.append(first_walk)
@@ -647,13 +659,99 @@ def build_itineraries(routes, trips, times_by_trip, shapes, stops_by_id) -> dict
         legs.append(last_walk)
         walked += more
 
-        return origin, target, {
+        return {
             "legs": legs,
             "total_duration": sum(leg["duration"] for leg in legs),
             "walking_distance": round(walked, 1),
             "transfer_count": len(hops) - 1,
             "fare": fare_for(len(hops)),
         }
+
+    def ride_seconds(trip_id, from_index, to_index):
+        rows = sequence(trip_id)
+        return gtfs_seconds(rows[to_index]["arrival_time"]) - gtfs_seconds(
+            rows[from_index]["departure_time"]
+        )
+
+    def point_of(stop_id):
+        stop = stops_by_id[stop_id]
+        return (stop["stop_lat"], stop["stop_lon"])
+
+    def alternatives(origin, target, keep):
+        """Otras formas de hacer el mismo viaje, para que el orden se vea.
+
+        No es un motor de ruteo: es una búsqueda exhaustiva sobre los viajes
+        de ida, de hasta dos transbordos en la misma parada, que corre una vez
+        al generar el dataset. Sube a menos de ALT_WALK_METERS del origen, baja
+        a menos de ALT_WALK_METERS del destino, y se queda con la opción más
+        corta por número de transbordos. La app no la ejecuta nunca.
+        """
+        near_origin = {
+            stop_id: meters(origin, point_of(stop_id))
+            for stop_id in routes_of_stop
+            if meters(origin, point_of(stop_id)) <= ALT_WALK_METERS
+        }
+        near_target = {
+            stop_id: meters(target, point_of(stop_id))
+            for stop_id in routes_of_stop
+            if meters(target, point_of(stop_id)) <= ALT_WALK_METERS
+        }
+
+        def walk_seconds(distance):
+            return max(60, round(distance / WALK_SPEED))
+
+        best = {}
+
+        def offer(hops):
+            first = sequence(hops[0][0])[hops[0][1]]["stop_id"]
+            last = sequence(hops[-1][0])[hops[-1][2]]["stop_id"]
+            total = walk_seconds(near_origin[first]) + walk_seconds(near_target[last])
+            total += sum(ride_seconds(*hop) for hop in hops)
+            routes_used = tuple(trip_by_id[hop[0]]["route_id"] for hop in hops)
+            if routes_used == keep:
+                return
+            key = len(hops) - 1
+            candidate = (total, routes_used, hops)
+            if key not in best or candidate[:2] < best[key][:2]:
+                best[key] = candidate
+
+        # Las paradas donde se puede seguir en otro viaje, con su posición.
+        def continuations(trip_id, after, used):
+            rows = sequence(trip_id)
+            for index in range(after + 1, len(rows)):
+                stop_id = rows[index]["stop_id"]
+                for route_id in sorted(routes_of_stop[stop_id] - used):
+                    next_trip = outbound[route_id]
+                    position = position_of(next_trip, stop_id)
+                    if position is not None and position < len(sequence(next_trip)) - 1:
+                        yield index, route_id, next_trip, position
+
+        def alight_points(trip_id, board):
+            rows = sequence(trip_id)
+            for index in range(board + 1, len(rows)):
+                if rows[index]["stop_id"] in near_target:
+                    yield index
+
+        for route_id in sorted(outbound):
+            trip_id = outbound[route_id]
+            for board, row in enumerate(sequence(trip_id)):
+                if row["stop_id"] not in near_origin:
+                    continue
+                for alight in alight_points(trip_id, board):
+                    offer([(trip_id, board, alight)])
+                used = {route_id}
+                for i1, r1, t1, p1 in continuations(trip_id, board, used):
+                    first = (trip_id, board, i1)
+                    for alight in alight_points(t1, p1):
+                        offer([first, (t1, p1, alight)])
+                    for i2, _, t2, p2 in continuations(t1, p1, used | {r1}):
+                        for alight in alight_points(t2, p2):
+                            offer([first, (t1, p1, i2), (t2, p2, alight)])
+
+        return [
+            itinerary_between(hops, origin, target)
+            for _, (_, _, hops) in sorted(best.items())
+        ]
 
     pairs = []
     plans = (
@@ -666,13 +764,15 @@ def build_itineraries(routes, trips, times_by_trip, shapes, stops_by_id) -> dict
         if hops is None:
             raise SystemExit(f"no se pudo armar el itinerario '{name}' desde {route_id}")
         origin, target, itinerary = itinerary_from(hops, spread)
+        keep = tuple(trip_by_id[hop[0]]["route_id"] for hop in hops)
+        others = alternatives(origin, target, keep)[: MAX_OPTIONS - 1]
         pairs.append(
             {
                 "id": name,
                 "from": {"lat": origin[0], "lon": origin[1]},
                 "to": {"lat": target[0], "lon": target[1]},
                 "match_radius_meters": 500,
-                "itineraries": [itinerary],
+                "itineraries": [itinerary, *others],
             }
         )
 
@@ -782,7 +882,7 @@ las paradas a seis. Nada más.
 | `stop_code` | `P-001`, derivado del `stop_id` | El poste real tiene código y §8.2 del spec lo muestra; el feed no lo publica |
 | `wheelchair_boarding` | Semilla fija: ~35 % accesible, ~10 % no accesible, el resto sin verificar | Sin esto el filtro de accesibilidad no tiene nada que filtrar. `unknown` queda como mayoría, que es el estado real del mundo |
 | `alerts.json` | Dos alertas escritas a mano sobre rutas reales | GTFS-Realtime no viene en el feed estático |
-| `itineraries.json` | Cuatro pares armados sobre viajes y trazos reales | La v1 no tiene motor de ruteo (§4.3) |
+| `itineraries.json` | Cuatro pares armados sobre viajes y trazos reales. Los tres que tienen viaje traen hasta dos alternativas, halladas al generar con una búsqueda exhaustiva de hasta dos transbordos en la misma parada, subiendo y bajando a menos de {ALT_WALK_METERS} m. No hay tiempos de espera: la duración es caminata más recorrido | La v1 no tiene motor de ruteo (§4.3), y con una sola opción por par el orden del planificador no se vería nunca |
 | Vigencia de `calendar.json` | Abierta a {CALENDAR_START}–{CALENDAR_END} | El feed declara 20230101–20251231, vencida. Con las fechas originales `Calendar.runsOn(hoy)` da `false` siempre y la app diría que no hay servicio nunca |
 | `fare` | {FARE_CARD:.2f} el primer abordaje, 50 % el segundo y 25 % el tercero, que es el descuento por transbordo de la Tarjeta YoVoy dentro de 90 minutos. Consultado el 20 de septiembre de 2026 | El feed no trae `fare_attributes.txt` |
 

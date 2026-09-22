@@ -9,12 +9,22 @@ import 'package:yovoy_go/core/clock/clock_provider.dart';
 import 'package:yovoy_go/core/data/mock/mock_dataset.dart';
 import 'package:yovoy_go/core/data/mock/simulator_config.dart';
 import 'package:yovoy_go/core/data/transit_repository_provider.dart';
+import 'package:yovoy_go/core/device/screen_awake.dart';
 import 'package:yovoy_go/core/location/location_service.dart';
+import 'package:yovoy_go/core/models/models.dart';
+import 'package:yovoy_go/core/transit/live_providers.dart';
+import 'package:yovoy_go/core/transit/reliability.dart';
 import 'package:yovoy_go/design/theme.dart';
 import 'package:yovoy_go/features/favorites/application/favorites_providers.dart';
 import 'package:yovoy_go/features/favorites/data/favorites_store.dart';
+import 'package:yovoy_go/features/map/application/accessibility_filter.dart';
 import 'package:yovoy_go/features/map/application/basemap_style.dart';
+import 'package:yovoy_go/features/planner/application/trip_request.dart';
+import 'package:yovoy_go/features/planner/presentation/itinerary_screen.dart';
+import 'package:yovoy_go/features/planner/presentation/planner_screen.dart';
+import 'package:yovoy_go/features/planner/presentation/ride_screen.dart';
 import 'package:yovoy_go/features/route/presentation/route_screen.dart';
+import 'package:yovoy_go/features/stop/presentation/stop_board_screen.dart';
 import 'package:yovoy_go/features/stop/presentation/stop_screen.dart';
 
 /// Lunes 21 de septiembre de 2026, 8:00: hora pico, con la flota en la calle.
@@ -27,11 +37,14 @@ MockDataset loadTestDataset() => MockDataset.fromJsonStrings(<String, String>{
 });
 
 class FixedLocation implements LocationService {
-  const FixedLocation();
+  const FixedLocation([
+    this.location = const UserLocation(position: aguascalientesCenter),
+  ]);
+
+  final UserLocation location;
 
   @override
-  Future<UserLocation> current() async =>
-      const UserLocation(position: aguascalientesCenter);
+  Future<UserLocation> current() async => location;
 
   @override
   Future<void> openSettings(LocationIssue issue) async {}
@@ -46,13 +59,18 @@ class FixedSettings extends SimulatorSettings {
   SimulatorConfig build() => initial;
 }
 
-/// Un contenedor con el dataset real, el reloj fijo, sin red y con los
-/// favoritos en memoria.
+/// Un contenedor con el dataset real, el reloj fijo, sin red, sin tocar el
+/// disco ni la pantalla del teléfono.
 ProviderContainer makeContainer(
   MockDataset dataset, {
   SimulatorConfig config = SimulatorConfig.perfect,
   DateTime? now,
   FavoritesStore? favorites,
+  AccessibilityFilterStore? accessibility,
+  ReliabilityHistory? reliability,
+  ScreenAwake? screenAwake,
+  UserLocation? location,
+  List<VehiclePosition>? vehicles,
 }) {
   final DateTime moment = now ?? eightAm;
   return ProviderContainer(
@@ -63,10 +81,25 @@ ProviderContainer makeContainer(
       basemapStyleProvider.overrideWith(
         (Ref ref, Brightness brightness) async => null,
       ),
-      locationServiceProvider.overrideWithValue(const FixedLocation()),
+      locationServiceProvider.overrideWithValue(
+        location == null ? const FixedLocation() : FixedLocation(location),
+      ),
       favoritesStoreProvider.overrideWithValue(
         favorites ?? InMemoryFavoritesStore(),
       ),
+      accessibilityFilterStoreProvider.overrideWithValue(
+        accessibility ?? InMemoryAccessibilityFilterStore(),
+      ),
+      reliabilityHistoryProvider.overrideWithValue(
+        reliability ?? const EmptyReliabilityHistory(),
+      ),
+      screenAwakeProvider.overrideWithValue(screenAwake ?? FakeScreenAwake()),
+      // Una flota a la medida, para poner un camión justo donde el test lo
+      // necesita.
+      if (vehicles != null)
+        vehicleFeedProvider.overrideWith(
+          (Ref ref) => Stream<List<VehiclePosition>>.value(vehicles),
+        ),
     ],
   );
 }
@@ -101,10 +134,41 @@ Future<void> pumpAt(
             StopScreen(stopId: state.pathParameters[AppParams.stopId]!),
       ),
       GoRoute(
+        path: AppRoute.stopBoard.path,
+        name: AppRoute.stopBoard.name,
+        builder: (BuildContext context, GoRouterState state) =>
+            StopBoardScreen(stopId: state.pathParameters[AppParams.stopId]!),
+      ),
+      GoRoute(
         path: AppRoute.route.path,
         name: AppRoute.route.name,
-        builder: (BuildContext context, GoRouterState state) =>
-            RouteScreen(routeId: state.pathParameters[AppParams.routeId]!),
+        builder: (BuildContext context, GoRouterState state) => RouteScreen(
+          routeId: state.pathParameters[AppParams.routeId]!,
+          fromStopId: state.uri.queryParameters[AppParams.fromStop],
+        ),
+      ),
+      GoRoute(
+        path: AppRoute.planner.path,
+        name: AppRoute.planner.name,
+        builder: (BuildContext context, GoRouterState state) => PlannerScreen(
+          request: TripRequest.fromQuery(state.uri.queryParameters),
+        ),
+      ),
+      GoRoute(
+        path: AppRoute.plannerOption.path,
+        name: AppRoute.plannerOption.name,
+        builder: (BuildContext context, GoRouterState state) => ItineraryScreen(
+          request: TripRequest.fromQuery(state.uri.queryParameters),
+          index: int.parse(state.pathParameters[AppParams.option]!),
+        ),
+      ),
+      GoRoute(
+        path: AppRoute.ride.path,
+        name: AppRoute.ride.name,
+        builder: (BuildContext context, GoRouterState state) => RideScreen(
+          request: TripRequest.fromQuery(state.uri.queryParameters),
+          index: int.parse(state.pathParameters[AppParams.option]!),
+        ),
       ),
     ],
   );

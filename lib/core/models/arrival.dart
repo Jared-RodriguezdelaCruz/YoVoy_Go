@@ -34,6 +34,11 @@ abstract class Arrival with _$Arrival {
 
     /// Ocupación reportada por el vehículo, cuando la hay.
     @JsonKey(name: 'occupancy_status') OccupancyStatus? occupancyStatus,
+
+    /// Cada cuánto pasa la ruta según su horario, cuando se conoce. Sin dato
+    /// en vivo es lo único honesto que se puede decir: "cada 20 min", no un
+    /// minuto exacto.
+    @NullableDurationSecondsConverter() Duration? headway,
   }) = _Arrival;
 
   const Arrival._();

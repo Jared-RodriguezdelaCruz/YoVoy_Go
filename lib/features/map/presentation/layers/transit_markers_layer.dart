@@ -14,6 +14,7 @@ import '../../../../design/tokens/colors.dart';
 import '../../../../design/tokens/motion.dart';
 import '../../../../design/tokens/route_palette.dart';
 import '../../../../design/tokens/typography.dart';
+import '../../application/accessibility_filter.dart';
 import '../../application/map_providers.dart';
 import '../../application/screen_clusterer.dart';
 import '../map_hit_test.dart';
@@ -83,6 +84,8 @@ class _TransitMarkersLayerState extends ConsumerState<TransitMarkersLayer>
     final VehicleInterpolator tracker = ref.watch(vehicleTrackerProvider);
     final TransitNetwork? network = ref.watch(transitNetworkProvider).value;
     final MapSelection selection = ref.watch(mapSelectionStateProvider);
+    final bool accessibleOnly =
+        ref.watch(accessibleOnlyProvider).value ?? false;
     final MapCamera camera = MapCamera.of(context);
     final AppColors colors = context.colors;
     final bool animate = AppMotion.allowsLooping(context);
@@ -101,6 +104,7 @@ class _TransitMarkersLayerState extends ConsumerState<TransitMarkersLayer>
           network: network,
           camera: camera,
           selection: selection,
+          accessibleOnly: accessibleOnly,
           colors: colors,
           hits: widget.hits,
           interpolate: animate,
@@ -117,6 +121,7 @@ class _TransitMarkersPainter extends CustomPainter {
     required this.network,
     required this.camera,
     required this.selection,
+    required this.accessibleOnly,
     required this.colors,
     required this.hits,
     required this.interpolate,
@@ -127,6 +132,7 @@ class _TransitMarkersPainter extends CustomPainter {
   final TransitNetwork? network;
   final MapCamera camera;
   final MapSelection selection;
+  final bool accessibleOnly;
   final AppColors colors;
   final MapHitRegistry hits;
   final bool interpolate;
@@ -169,6 +175,11 @@ class _TransitMarkersPainter extends CustomPainter {
 
     for (final Stop stop in net.stops) {
       if (!bounds.contains(stop.position)) {
+        continue;
+      }
+      // La elegida se queda aunque no pase el filtro: el usuario la tocó.
+      if (stop.id != selectedStop &&
+          !passesAccessibilityFilter(stop, accessibleOnly: accessibleOnly)) {
         continue;
       }
       final Offset point = camera.latLngToScreenOffset(stop.position);
@@ -358,6 +369,7 @@ class _TransitMarkersPainter extends CustomPainter {
   bool shouldRepaint(_TransitMarkersPainter oldDelegate) =>
       oldDelegate.camera != camera ||
       oldDelegate.selection != selection ||
+      oldDelegate.accessibleOnly != accessibleOnly ||
       oldDelegate.network != network ||
       oldDelegate.colors != colors ||
       oldDelegate.tracker != tracker ||

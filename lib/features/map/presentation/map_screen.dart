@@ -14,9 +14,11 @@ import '../../../design/tokens/colors.dart';
 import '../../../design/tokens/motion.dart';
 import '../../../design/tokens/spacing.dart';
 import '../../../design/tokens/typography.dart';
+import '../../planner/application/trip_request.dart';
 import '../application/basemap_style.dart';
 import '../application/map_providers.dart';
 import '../application/search_index.dart';
+import 'accessible_only_chip.dart';
 import 'global_freshness_chip.dart';
 import 'layers/route_network_layer.dart';
 import 'layers/transit_markers_layer.dart';
@@ -261,16 +263,23 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     Spacing.lg,
                     0,
                   ),
-                  child: Row(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Expanded(
-                        child: MapSearchBar(
-                          onPick: _onSearchPick,
-                          trailing: const GlobalFreshnessChip(),
-                        ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Expanded(
+                            child: MapSearchBar(
+                              onPick: _onSearchPick,
+                              trailing: const GlobalFreshnessChip(),
+                            ),
+                          ),
+                          if (kDebugMode) const _DebugMenu(),
+                        ],
                       ),
-                      if (kDebugMode) const _DebugMenu(),
+                      _MapChips(sheet: _sheet),
                     ],
                   ),
                 ),
@@ -366,6 +375,64 @@ class _FloatingControls extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Los chips bajo la búsqueda: "Cómo llego" y "Solo accesibles".
+///
+/// Se esconden mientras se busca, para no quedar encima de los resultados, y
+/// cuando la hoja pasa de la mitad, para no quedar encima de ella: igual que
+/// el botón de ubicación.
+class _MapChips extends ConsumerWidget {
+  const _MapChips({required this.sheet});
+
+  final DraggableScrollableController sheet;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.watch(searchQueryProvider).trim().isNotEmpty) {
+      return const SizedBox.shrink();
+    }
+    return AnimatedBuilder(
+      animation: sheet,
+      builder: (BuildContext context, Widget? child) {
+        final bool covered =
+            sheet.isAttached && sheet.size > SheetStops.half + 0.05;
+        return covered ? const SizedBox.shrink() : child!;
+      },
+      child: const Padding(
+        padding: EdgeInsets.only(top: Spacing.sm),
+        child: Wrap(
+          spacing: Spacing.sm,
+          runSpacing: Spacing.xs,
+          children: <Widget>[_PlanChip(), AccessibleOnlyChip()],
+        ),
+      ),
+    );
+  }
+}
+
+/// "Cómo llego": el planificador, saliendo de donde estás.
+class _PlanChip extends StatelessWidget {
+  const _PlanChip();
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors colors = context.colors;
+    return ActionChip(
+      avatar: Icon(Icons.directions, size: 18, color: colors.brand),
+      label: const Text('Cómo llego'),
+      labelStyle: AppTypography.label.copyWith(color: colors.textPrimary),
+      tooltip: 'Planear un viaje desde tu ubicación',
+      backgroundColor: colors.surfaceRaised,
+      side: BorderSide(color: colors.outline),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.chipRadius),
+      materialTapTargetSize: MaterialTapTargetSize.padded,
+      onPressed: () => context.pushNamed(
+        AppRoute.planner.name,
+        queryParameters: const TripRequest(from: HerePlace()).toQuery(),
       ),
     );
   }

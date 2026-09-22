@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/routes.dart';
 import '../../../core/data/mock/mock_dataset.dart';
 import '../../../core/data/mock/mock_transit_repository.dart';
 import '../../../core/data/mock/simulator_config.dart';
@@ -11,6 +13,7 @@ import '../../../design/components/components.dart';
 import '../../../design/tokens/colors.dart';
 import '../../../design/tokens/spacing.dart';
 import '../../../design/tokens/typography.dart';
+import '../../planner/application/trip_request.dart';
 
 /// Panel de control del simulador, solo en builds de debug.
 ///
@@ -60,7 +63,11 @@ class SimulatorScreen extends ConsumerWidget {
             Spacing.xxxl,
           ),
           children: <Widget>[
-            if (repo is MockTransitRepository) _Fleet(repository: repo),
+            if (repo is MockTransitRepository) ...<Widget>[
+              _Fleet(repository: repo),
+              const SizedBox(height: Spacing.xl),
+              _TestTrips(dataset: repo.dataset),
+            ],
             const SizedBox(height: Spacing.xl),
             Text(
               'Las fallas',
@@ -93,6 +100,13 @@ class SimulatorScreen extends ConsumerWidget {
               display: '${(config.missingBearingRate * 100).round()} %',
               onChanged: (double value) =>
                   _update(ref, config.copyWith(missingBearingRate: value)),
+            ),
+            _Slider(
+              label: 'Reportes sin ocupación',
+              value: config.missingOccupancyRate,
+              display: '${(config.missingOccupancyRate * 100).round()} %',
+              onChanged: (double value) =>
+                  _update(ref, config.copyWith(missingOccupancyRate: value)),
             ),
             _Slider(
               label: 'Latencia máxima',
@@ -143,6 +157,70 @@ class SimulatorScreen extends ConsumerWidget {
 
   void _update(WidgetRef ref, SimulatorConfig next) =>
       ref.read(simulatorSettingsProvider.notifier).update(next);
+}
+
+/// Los pares precocinados de `itineraries.json`, a un toque.
+///
+/// La v1 no tiene motor de ruteo (§4.3): el planificador solo responde cerca
+/// de estos pares. Sin este atajo, demostrarlo es adivinar coordenadas.
+class _TestTrips extends StatelessWidget {
+  const _TestTrips({required this.dataset});
+
+  final MockDataset dataset;
+
+  static String _title(String id) => switch (id) {
+    'directo' => 'Directo',
+    'un_transbordo' => 'Con un transbordo',
+    'dos_transbordos' => 'Con dos transbordos',
+    'sin_resultados' => 'Sin resultados',
+    _ => id,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors colors = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Text(
+          'Viajes de prueba',
+          style: AppTypography.title.copyWith(color: colors.textPrimary),
+        ),
+        Text(
+          'Los pares precocinados del planificador. Fuera de ellos, la '
+          'respuesta correcta es "no encontré ruta".',
+          style: AppTypography.caption.copyWith(color: colors.textSecondary),
+        ),
+        for (final PrecookedTrip trip in dataset.precookedTrips)
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(Icons.directions, color: colors.brand),
+            title: Text(
+              _title(trip.id),
+              style: AppTypography.label.copyWith(color: colors.textPrimary),
+            ),
+            subtitle: Text(
+              switch (trip.itineraries.length) {
+                0 => 'ninguna opción',
+                1 => '1 opción',
+                final int n => '$n opciones',
+              },
+              style: AppTypography.caption.copyWith(
+                color: colors.textSecondary,
+              ),
+            ),
+            trailing: Icon(Icons.chevron_right, color: colors.textSecondary),
+            onTap: () => context.pushNamed(
+              AppRoute.planner.name,
+              queryParameters: TripRequest(
+                from: PointPlace(trip.from),
+                to: PointPlace(trip.to),
+              ).toQuery(),
+            ),
+          ),
+      ],
+    );
+  }
 }
 
 /// La flota, en vivo. Es la prueba de que el simulador está andando.

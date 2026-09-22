@@ -90,6 +90,9 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                 _RouteLineSection(),
                 _VehicleMarkerSection(),
                 _AlertBannerSection(),
+                _OccupancySection(),
+                _ReliabilitySection(),
+                _RouteSequenceSection(),
                 _StatesSection(),
               ],
             ),
@@ -568,6 +571,15 @@ class _EtaChipSection extends StatelessWidget {
             ),
           ),
           _Labeled(
+            label: 'solo frecuencia',
+            child: EtaChip(
+              eta: Duration(minutes: 10),
+              confidence: EtaConfidence.scheduled,
+              dataAge: Duration.zero,
+              headway: Duration(minutes: 20),
+            ),
+          ),
+          _Labeled(
             label: 'sin dato, con horario',
             child: EtaChip(
               eta: null,
@@ -856,6 +868,135 @@ class _AlertBannerSection extends StatelessWidget {
           AlertBanner(
             header: 'Sin servicio el 16 de septiembre por el desfile',
             effect: AlertEffect.noService,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OccupancySection extends StatelessWidget {
+  const _OccupancySection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const _Section(
+      title: 'OccupancyIndicator',
+      note:
+          'Una, dos o tres figuras, y la palabra siempre al lado: el color '
+          'solo acompaña. Sin dato no se pinta nada.',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          OccupancyIndicator(status: OccupancyStatus.manySeatsAvailable),
+          SizedBox(height: Spacing.sm),
+          OccupancyIndicator(status: OccupancyStatus.standingRoomOnly),
+          SizedBox(height: Spacing.sm),
+          OccupancyIndicator(status: OccupancyStatus.full),
+          SizedBox(height: Spacing.md),
+          OccupancyIndicator(status: OccupancyStatus.full, large: true),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReliabilitySection extends StatelessWidget {
+  const _ReliabilitySection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const _Section(
+      title: 'ReliabilityNote',
+      note:
+          'Lo que este teléfono ha visto de una ruta. Con menos de cinco '
+          'observaciones calla. El cálculo llega en la fase 8.',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          ReliabilityNote(
+            text: 'suele llegar 3 min tarde · según 14 observaciones tuyas',
+          ),
+          SizedBox(height: Spacing.sm),
+          ReliabilityNote(
+            text:
+                'irregular, entre 2 y 11 min tarde · según 9 observaciones '
+                'tuyas',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RouteSequenceSection extends StatelessWidget {
+  const _RouteSequenceSection();
+
+  static const TransitRoute _r07 = TransitRoute(
+    id: 'R_07',
+    shortName: 'R07',
+    longName: 'Centro (Calle Morelos) — Las Palmas',
+    color: '834348',
+    textColor: 'F0F0F0',
+  );
+  static const TransitRoute _r02 = TransitRoute(
+    id: 'R_02',
+    shortName: 'R02',
+    longName: 'Lunaria — Centro (Calle Morelos)',
+    color: 'BF0733',
+    textColor: 'F0F0F0',
+  );
+
+  static const Leg _walk = Leg(
+    type: LegType.walk,
+    from: 'Tu ubicación',
+    to: 'Palma Cana',
+    duration: Duration(minutes: 5),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return const _Section(
+      title: 'RouteSequence',
+      note:
+          'Las placas de un itinerario en el orden en que se toman, con la '
+          'caminata en las puntas. Envuelve cuando no cabe.',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          RouteSequence(
+            legs: <Leg>[
+              _walk,
+              Leg(
+                type: LegType.bus,
+                from: 'Palma Cana',
+                to: 'Templo de San José Obrero',
+                duration: Duration(minutes: 14),
+                route: _r07,
+              ),
+              _walk,
+            ],
+          ),
+          SizedBox(height: Spacing.md),
+          RouteSequence(
+            legs: <Leg>[
+              _walk,
+              Leg(
+                type: LegType.bus,
+                from: 'Palma Cana',
+                to: 'Templo de San José Obrero',
+                duration: Duration(minutes: 14),
+                route: _r07,
+              ),
+              Leg(
+                type: LegType.bus,
+                from: 'Templo de San José Obrero',
+                to: 'Sitio de Cautla',
+                duration: Duration(minutes: 5),
+                route: _r02,
+              ),
+              _walk,
+            ],
           ),
         ],
       ),

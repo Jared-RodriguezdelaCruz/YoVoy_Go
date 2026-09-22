@@ -24,6 +24,7 @@ class EtaChip extends StatelessWidget {
     required this.confidence,
     required this.dataAge,
     this.scheduledTimeLabel,
+    this.headway,
     this.size = EtaChipSize.medium,
     super.key,
   });
@@ -36,7 +37,8 @@ class EtaChip extends StatelessWidget {
     super.key,
   }) : eta = arrival.eta,
        confidence = arrival.confidence,
-       dataAge = arrival.dataAge;
+       dataAge = arrival.dataAge,
+       headway = arrival.headway;
 
   /// `null` es un estado válido y frecuente.
   final Duration? eta;
@@ -51,6 +53,10 @@ class EtaChip extends StatelessWidget {
   /// puede dar un número de minutos, esto es lo mejor que se puede ofrecer.
   final String? scheduledTimeLabel;
 
+  /// Cada cuánto pasa la ruta según su horario. Sin dato en vivo, el chip
+  /// dice "cada 20 min" en vez de un minuto que no se puede prometer.
+  final Duration? headway;
+
   final EtaChipSize size;
 
   /// Si el chip puede mostrar minutos.
@@ -60,6 +66,33 @@ class EtaChip extends StatelessWidget {
       eta != null &&
       confidence != EtaConfidence.unknown &&
       Freshness.allowsNumericEta(Freshness.classify(dataAge));
+
+  /// Si el chip da la frecuencia en lugar de minutos.
+  bool get showsFrequency => _showsFrequency(
+    eta: eta,
+    confidence: confidence,
+    dataAge: dataAge,
+    headway: headway,
+    scheduledTimeLabel: scheduledTimeLabel,
+  );
+
+  static bool _showsFrequency({
+    required Duration? eta,
+    required EtaConfidence confidence,
+    required Duration dataAge,
+    required Duration? headway,
+    required String? scheduledTimeLabel,
+  }) {
+    if (headway == null || scheduledTimeLabel != null) {
+      return false;
+    }
+    // Un número en vivo siempre gana: es la mejor respuesta que hay.
+    final bool liveNumber =
+        confidence == EtaConfidence.live &&
+        eta != null &&
+        Freshness.allowsNumericEta(Freshness.classify(dataAge));
+    return !liveNumber;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,17 +126,16 @@ class EtaChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
-            showsNumericEta
-                ? _NumericEta(
-                    minutes: eta!.inMinutes,
-                    color: accent,
-                    size: size,
-                  )
-                : _NoEta(
-                    scheduledTimeLabel: scheduledTimeLabel,
-                    color: accent,
-                    size: size,
-                  ),
+            if (showsFrequency)
+              _Frequency(headway: headway!, color: accent, size: size)
+            else if (showsNumericEta)
+              _NumericEta(minutes: eta!.inMinutes, color: accent, size: size)
+            else
+              _NoEta(
+                scheduledTimeLabel: scheduledTimeLabel,
+                color: accent,
+                size: size,
+              ),
             const SizedBox(height: 2),
             Text(
               _footnote(freshness),
@@ -120,6 +152,9 @@ class EtaChip extends StatelessWidget {
 
   /// La línea chica: de dónde viene el dato o qué tan viejo es.
   String _footnote(DataFreshness freshness) {
+    if (showsFrequency) {
+      return 'según horario';
+    }
     if (confidence == EtaConfidence.scheduled) {
       return 'programado';
     }
@@ -142,6 +177,7 @@ class EtaChip extends StatelessWidget {
       confidence: confidence,
       dataAge: dataAge,
       scheduledTimeLabel: scheduledTimeLabel,
+      headway: headway,
     );
     // Sin número, el chip solo abre la frase y va con mayúscula; con número
     // se anuncia igual que siempre, "llega en 4 minutos".
@@ -156,7 +192,21 @@ class EtaChip extends StatelessWidget {
     required EtaConfidence confidence,
     required Duration dataAge,
     String? scheduledTimeLabel,
+    Duration? headway,
   }) {
+    if (_showsFrequency(
+      eta: eta,
+      confidence: confidence,
+      dataAge: dataAge,
+      headway: headway,
+      scheduledTimeLabel: scheduledTimeLabel,
+    )) {
+      final String every =
+          'pasa ${FrequencyCopy.spoken(headway!)}, según horario';
+      return confidence == EtaConfidence.unknown
+          ? 'sin señal de este camión; $every'
+          : every;
+    }
     final bool numeric =
         eta != null &&
         confidence != EtaConfidence.unknown &&
@@ -186,7 +236,43 @@ class EtaChip extends StatelessWidget {
     confidence: arrival.confidence,
     dataAge: arrival.dataAge,
     scheduledTimeLabel: scheduledTimeLabel,
+    headway: arrival.headway,
   );
+}
+
+/// Cómo se dice una frecuencia.
+///
+/// Se redondea a 5 minutos, que es como lo dice el poste. Cuando el intervalo
+/// no cae cerca de un múltiplo, se da el rango entre los dos que lo encierran:
+/// "cada 15–20 min" no promete más de lo que se sabe.
+abstract final class FrequencyCopy {
+  /// "cada 20 min" · "cada 15–20 min".
+  static String label(Duration headway) {
+    final (int low, int high) = _bounds(headway);
+    return low == high ? 'cada $low min' : 'cada $low–$high min';
+  }
+
+  /// Lo mismo, para un lector de pantalla: "cada 20 minutos".
+  static String spoken(Duration headway) {
+    final (int low, int high) = _bounds(headway);
+    return low == high
+        ? 'cada $low ${low == 1 ? 'minuto' : 'minutos'}'
+        : 'cada $low a $high minutos';
+  }
+
+  static (int, int) _bounds(Duration headway) {
+    final double minutes = headway.inSeconds / 60;
+    if (minutes < 5) {
+      final int exact = minutes.round().clamp(1, 5);
+      return (exact, exact);
+    }
+    final int nearest = (minutes / 5).round() * 5;
+    if ((minutes - nearest).abs() <= 1) {
+      return (nearest, nearest);
+    }
+    final int low = (minutes / 5).floor() * 5;
+    return (low, low + 5);
+  }
 }
 
 /// Tamaños del chip.
@@ -248,6 +334,37 @@ class _NumericEta extends StatelessWidget {
         ),
         const SizedBox(width: 3),
         Text('min', style: AppTypography.caption.copyWith(color: color)),
+      ],
+    );
+  }
+}
+
+class _Frequency extends StatelessWidget {
+  const _Frequency({
+    required this.headway,
+    required this.color,
+    required this.size,
+  });
+
+  final Duration headway;
+  final Color color;
+  final EtaChipSize size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(Icons.schedule, size: 14, color: color),
+        const SizedBox(width: Spacing.xs),
+        Text(
+          FrequencyCopy.label(headway),
+          style:
+              (size == EtaChipSize.large
+                      ? AppTypography.eta
+                      : AppTypography.label)
+                  .copyWith(color: color),
+        ),
       ],
     );
   }

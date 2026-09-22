@@ -5,9 +5,8 @@ Plan de construcción de la v1. El **qué** y el **por qué** viven en
 terminado**. Las features propuestas encima del spec, con su justificación, están en
 [`FEATURES.md`](FEATURES.md).
 
-**Estado:** fases 1 a 5 cerradas, más el repintado de la marca. De la fase 6 están hechas las dos
-pantallas —parada y ruta— y los favoritos guardados; faltan sus cinco features de `FEATURES.md`.
-Pendiente heredado: medir los fps en un teléfono real de gama media-baja.
+**Estado:** fases 1 a 7 cerradas, más el repintado de la marca. Siguiente: fase 8, favoritos y
+ajustes. Pendiente heredado: medir los fps en un teléfono real de gama media-baja.
 
 La dirección visual completa —de dónde salió cada color, la regla que los organiza y la firma de la
 app— vive en [`DESIGN.md`](DESIGN.md).
@@ -30,9 +29,9 @@ spec, pero sin ellos la app no es entregable.
 | 4a | Dataset del simulador | 2 | ✅ cerrada |
 | 4b | `MockTransitRepository` y simulador | 2, 4a | ✅ cerrada |
 | 5 | Mapa | 3, 4b | ✅ cerrada · fps en hardware pendiente |
-| 6 | Parada y ruta | 5 | 🟡 pantallas hechas · faltan sus 5 features |
-| 7 | Planificador | 6 | ⏳ |
-| 8 | Favoritos y ajustes | 6 | ⏳ |
+| 6 | Parada y ruta | 5 | ✅ cerrada |
+| 7 | Planificador | 6 | ✅ cerrada |
+| 8 | Favoritos y ajustes | 6 | ⏳ siguiente |
 | 9 | Pulido: accesibilidad, rendimiento, los cuatro estados | 7, 8 | ⏳ |
 | — | **(extra)** Build de release firmado | 9 | ⏳ |
 
@@ -456,7 +455,7 @@ acepta otra familia.
 
 ---
 
-## Fase 6 — Parada y ruta 🟡
+## Fase 6 — Parada y ruta ✅
 
 **Objetivo.** Las dos pantallas que responden "qué rutas pasan por aquí" y "dónde viene mi camión".
 
@@ -465,10 +464,13 @@ acepta otra familia.
 guardar, y `lib/core/transit/`, a donde se mudaron los providers en vivo que ya comparten tres
 pantallas.
 
-**Decisión que se acordó antes de empezar:** los favoritos se guardan desde ya con
-**`shared_preferences ^2.5`** (oficial de Flutter, BSD-3), detrás de una interfaz `FavoritesStore`.
-Una lista de ids no pide una base de datos. Con esto queda resuelta la decisión de persistencia que
-el spec dejaba para la fase 8.
+**Decisiones que se acordaron antes de empezar:**
+
+- Los favoritos se guardan desde ya con **`shared_preferences ^2.5`** (oficial de Flutter, BSD-3),
+  detrás de una interfaz `FavoritesStore`. Una lista de ids no pide una base de datos. Con esto
+  queda resuelta la decisión de persistencia que el spec dejaba para la fase 8.
+- Para que el modo paradero no deje apagar la pantalla, **`wakelock_plus ^1.8`** (Flutter
+  Community, BSD-3), detrás de una interfaz `ScreenAwake`.
 
 **Tareas**
 
@@ -482,19 +484,35 @@ el spec dejaba para la fase 8.
 - [x] `Semantics`: un ETA se anuncia completo, "ruta 20, llega en 4 minutos, dato en vivo".
 - [x] Tests de los providers de `application/` con repositorio falso inyectado por `override`.
 
-**Pendiente para cerrarla: las cinco features de `FEATURES.md` que el catálogo le asigna.** Modo
-paradero, frecuencia como respaldo, ocupación, accesibilidad como filtro y mostrar confiabilidad.
-El plan de esta tanda salió de la lista de tareas de arriba, que no las nombra, y se quedaron
-fuera. El modo paradero pide además decidir un paquete para que la pantalla no se apague.
+**Las cinco features de `FEATURES.md`**, en una segunda tanda. La primera salió solo de la lista de
+tareas de arriba, que no las nombra.
 
-**Cierre de las pantallas.** Ningún widget llama al repositorio: todo pasa por un provider de
-`application/`. `dart analyze` en cero y **286 tests en verde** (44 nuevos), incluidos el modo
-hostil y el texto al 200 % en las dos pantallas. Cuatro imágenes de referencia nuevas en
-`test/features/stop/goldens/` y `test/features/route/goldens/`, y una de `AlertBanner`. Visto en el
-emulador Pixel 8: mapa → parada → favorito, que sigue marcado después de matar la app → ruta.
+- [x] **Modo paradero** (`/stop/:id/board`): una parada, el número enorme, la tira de acercamiento
+      y los dos siguientes en una línea. Contraste al máximo, pantalla encendida, se actualiza sola
+      y un toque sale. Se entra desde el ícono de pantalla completa del detalle de parada.
+- [x] **Frecuencia como respaldo.** Sin dato en vivo, el chip dice "cada 20 min · según horario"
+      en vez de un minuto que no se puede prometer. `Arrival` ganó el campo `headway`.
+- [x] **Ocupación.** El simulador la reporta y la UI la pinta con una, dos o tres figuras más la
+      palabra: "va vacío", "va llenándose", "va lleno".
+- [x] **Accesibilidad como filtro.** "Solo accesibles" en el mapa, guardado en el teléfono, y la
+      marca ♿ en la tira de la ruta. El interruptor del planificador entra con la fase 7.
+- [x] **Mostrar confiabilidad.** `ReliabilityNote` y el hueco donde se conecta el historial.
+      Hoy el historial está vacío y la app calla; el cálculo es de la fase 8.
 
-**Cómo verlo.** En el mapa, toca una parada cercana y luego su tarjeta: se abre la parada. Toca un
-arribo: se abre su ruta. Desde un camión o una ruta buscada, "Ver ruta".
+**Cierre.** Ningún widget llama al repositorio: todo pasa por un provider de `application/`.
+`dart analyze` en cero y **332 tests en verde** (90 nuevos en la fase), incluidos el modo hostil y
+el texto al 200 % en las tres pantallas. Imágenes de referencia en `test/features/stop/goldens/`
+(parada y modo paradero, en los dos temas) y `test/features/route/goldens/`. Visto en el emulador
+Pixel 8:
+
+- mapa → parada → favorito, que sigue marcado después de matar la app → ruta
+- "Solo accesibles", que sigue activo después de reinstalar
+- modo paradero con la pantalla configurada para apagarse a los 15 s: a los 28 s seguía
+  encendida, con el wakelock a nombre de la app
+
+**Cómo verlo.** En el mapa, toca una parada cercana y luego su tarjeta: se abre la parada. El
+ícono de pantalla completa abre el modo paradero. Toca un arribo: se abre su ruta. Desde un camión
+o una ruta buscada, "Ver ruta".
 
 **Lo que se decidió en el camino**
 
@@ -508,6 +526,12 @@ arribo: se abre su ruta. Desde un camión o una ruta buscada, "Ver ruta".
    no existe se quedaba cargando diez veces. `StopNotFound` y `RouteNotFound` salen de la regla.
 5. **Los providers en vivo se mudaron a `lib/core/transit/`.** El mapa los sigue importando desde
    `map_providers.dart`, que los reexporta.
+6. **El protagonista del modo paradero es el primer camión en vivo**, no el primero de la lista: un
+   horario ordena como "10 min" (media frecuencia), pero no es una promesa.
+7. **"Solo accesibles" deja fuera las paradas sin verificar.** Quien necesita una rampa no puede
+   apostar a que haya una. El tooltip lo dice.
+8. **El modo paradero sigue el tema del sistema**, con fondo y texto puros. De noche no se deslumbra
+   a nadie con blanco.
 
 **Lo que encontraron el emulador y los goldens**
 
@@ -519,28 +543,112 @@ arribo: se abre su ruta. Desde un camión o una ruta buscada, "Ver ruta".
 - El selector de sentido salía en el turquesa de fábrica de Material. Va en el índigo de marca.
 - La estrella de favorito iba en índigo; `colors.dart` reserva **cantera** para lo que el usuario
   decidió. Corregido también en `StopTile`.
+- **El simulador no era determinista entre corridas.** `Object.hash` se siembra al azar en cada
+  proceso; no se notaba porque los goldens corren sin ruido de GPS. La ocupación lo destapó: el
+  golden de la parada cambiaba en cada corrida. Ahora las semillas salen de un FNV-1a propio.
+- A las 8:00 casi todos los camiones salían "va lleno" y la lista era una pared roja. En hora pico
+  va lleno uno de cada cuatro.
+- En un renglón angosto las tres figuras de ocupación desbordaban 9 px. Ahora son un solo texto
+  que envuelve.
+- Con la hoja del mapa arriba, el chip "Solo accesibles" quedaba encima de "Sal en…". Se esconde
+  pasando la mitad, como el botón de ubicación.
+- Con el camión "llegando", el modo paradero no dibujaba la tira: lo trataba como ya pasado.
+- El ícono de la nota de confiabilidad iba en cantera, en la misma fila que el `EtaChip`; la regla
+  de `DESIGN.md` lo prohíbe.
 
 ---
 
-## Fase 7 — Planificador
+## Fase 7 — Planificador ✅
 
 **Objetivo.** Responder "cómo llego de A a B" con itinerarios simulados, y responder bien también
 cuando no hay respuesta.
 
-**Entrega.** `lib/features/planner/` completa.
+**Entrega.** `lib/features/planner/` completa: `application/` con la petición, el orden, la salida
+útil, las horas y el modo viaje, y `presentation/` con el planificador, el buscador de lugares, el
+detalle y el modo viaje.
+
+**Decisiones que se acordaron antes de empezar:**
+
+- **El modo viaje sigue al camión en el que vas, no al GPS.** Con "Ya me subí" se fija el vehículo
+  de esa ruta que está en la parada o llegando, y el conteo sale de su reporte. El GPS es lo que
+  más batería gasta, y en el emulador el usuario no se mueve.
+- **La pantalla se queda encendida durante el viaje**, con el `ScreenAwake` de la fase 6. Con la
+  app en segundo plano todo se detiene (§7), así que un aviso de "bájate" con la pantalla apagada
+  no llegaría nunca. Se suelta al terminar y al pasar a segundo plano.
+- **`itineraries.json` gana alternativas**, generadas con `tool/gtfs_to_mock.py`. Con una sola
+  opción por par el orden "simplicidad antes que minutos" no se vería nunca.
 
 **Tareas**
 
-- [ ] Formulario de origen y destino con "mi ubicación" y búsqueda, más selector de hora de salida.
-- [ ] Lista de resultados: duración total, número de transbordos, placas de las rutas en secuencia
+- [x] Formulario de origen y destino con "mi ubicación" y búsqueda, más selector de hora de salida.
+- [x] Lista de resultados: duración total, número de transbordos, placas de las rutas en secuencia
       y distancia a pie.
-- [ ] Detalle del itinerario: timeline vertical con tramos de caminata y de camión, y mapa con la
+- [x] Detalle del itinerario: timeline vertical con tramos de caminata y de camión, y mapa con la
       geometría completa.
-- [ ] Estado "no encontré ruta" **con salida útil**: sugerir un destino cercano o mostrar las rutas
-      que sí pasan cerca del origen. Un callejón sin salida no es un estado terminado.
+- [x] Estado "no encontré ruta" **con salida útil**: las rutas que pasan a menos de 600 m del
+      origen, que abren la ruta, y hasta dónde te acerca un solo camión, que abre esa parada.
+- [x] **Modo viaje** (`FEATURES.md`, feature 5): la tira con lo que falta, "faltan 3 paradas" en
+      grande y un aviso a las dos paradas y a la una, con vibración y anuncio al lector de pantalla,
+      una sola vez por tramo.
+- [x] **El interruptor "Solo accesibles" en el planificador** (feature 8). Es el mismo del mapa.
 
 **Nota de alcance.** No hay motor de ruteo real en la v1. La UI se construye completa contra los
 itinerarios precocinados de la fase 4a.
+
+**Cierre.** `dart analyze` en cero y **382 tests en verde** (50 nuevos en la fase), con modo hostil
+y texto al 200 % en el planificador, el detalle y el modo viaje. Imágenes de referencia en
+`test/features/planner/goldens/`: resultados en los dos temas, "no encontré ruta", el detalle y el
+modo viaje a dos paradas. Visto en el emulador Pixel 8: simulador → "Con dos transbordos" → el
+filtro de accesibilidad las esconde y lo dice → "Mostrarlas de todos modos" → el detalle, con el
+mapa de fondo real → "Empezar viaje", con el wakelock a nombre de la app.
+
+**Cómo verlo.** En el mapa, el chip "Cómo llego" abre el planificador desde tu ubicación, y en una
+parada, el ícono de direcciones lo abre con esa parada como destino. En debug, el panel del
+simulador trae **"Viajes de prueba"**: los cuatro pares precocinados, a un toque. Fuera de ellos,
+la respuesta correcta es "no encontré ruta".
+
+**Lo que se decidió en el camino**
+
+1. **La petición vive en la URL**: `/planner?from=here&to=P606&at=8:30`. El detalle y el modo viaje
+   llevan la misma query, así que se rearman solos si se abren por enlace. Cambiar un campo
+   reemplaza la página, y "volver" regresa a donde se estaba antes de planear.
+2. **El orden** cuesta cada transbordo en 10 min y cada minuto a pie más allá de 500 m en 1.5 min
+   extra (`ranking.dart`). Un transbordo solo gana si ahorra de verdad.
+3. **Las horas no cuentan la espera** y la pantalla lo dice: los itinerarios no traen horarios. Si
+   se sale ahora, la primera tarjeta y la primera subida traen el `EtaChip` en vivo de ese camión.
+4. **Un destino se resuelve a la parada donde termina el viaje.** "Hacia Las Palmas" es un lugar
+   al que se llega bajando donde el camión termina.
+5. **"Mi ubicación" sin GPS no se sustituye en silencio** por el centro de la ciudad: la pantalla
+   dice por qué y ofrece elegir una parada.
+6. **Con el filtro activo, una opción que suba o baje en una parada sin verificar se esconde**, y
+   se dice cuántas. "Mostrarlas de todos modos" no cambia el interruptor guardado. Con el dataset
+   de hoy **ninguna opción de ningún par pasa el filtro**: es el estado que más se va a ver, y
+   está resuelto como tal.
+7. **"Ya me subí" no se habilita sin un camión cerca.** Seguir a un camión inventado sería peor que
+   no seguir a ninguno. Con la señal perdida, el conteo se queda en el último reporte y lo dice.
+8. **La paleta de máximo contraste** del modo paradero se mudó a `design/tokens/max_contrast.dart`:
+   la usan el modo paradero y el modo viaje.
+9. **`RouteSequence`**, las placas del itinerario en orden, pasó a `design/components` y a la
+   galería. La tarjeta y la línea de tiempo leen providers y se quedan en la feature: la galería
+   no importa `features/`.
+
+**Lo que encontraron las pruebas y el emulador**
+
+- **Las alternativas desnudaron a los pares originales.** En el par "directo", la R33 llega en 18
+  min contra los 27 de la R09 precocinada; en "dos transbordos", la R25 → R27 con un transbordo
+  gana por 14 minutos. El orden lo muestra.
+- **El modo viaje volvía al paso 1 solo.** `rideView` escuchaba al controlador del viaje después
+  de un `await`; mientras se recalculaba, el controlador (`autoDispose`) se quedaba sin quien lo
+  escuchara y se desechaba. Todo lo que se escucha va ahora antes del primer `await`, como en
+  `stopBoard`.
+- "→" no existe en Barlow y salía un cuadro vacío en "8:00 → 8:33". Ahora es una raya.
+- Con texto al 200 %, un botón "Cómo llego" junto a la búsqueda la desbordaba 6 px. Pasó a ser un
+  chip con texto junto a "Solo accesibles", que además se entiende mejor que un ícono solo.
+- A bordo, con texto al 200 %, el contenido no cabía y los `Spacer` desbordaban. Las cuatro vistas
+  del modo viaje reparten el espacio cuando sobra y se desplazan cuando no alcanza.
+- **Una prueba del mapa es inestable bajo carga.** "Tocar un camión abre la tira" falló una vez en
+  la suite completa y pasó en las demás corridas: la posición interpolada depende del reloj real.
+  Es previa a esta fase; queda anotada para la fase 9.
 
 ---
 
@@ -559,8 +667,8 @@ itinerarios precocinados de la fase 4a.
       afiliación con CMOV ni con el operador del sistema.
 - [ ] Panel de control del simulador accesible solo en builds de debug.
 
-**Decisión pendiente.** `shared_preferences` o `drift` para la persistencia. El spec pide elegir
-**y justificar** la elección; ninguno de los dos está en la tabla de stack.
+**Decisión ya tomada en la fase 6:** `shared_preferences`, porque lo que se guarda son listas de
+ids. Si "Mis rutas aprendidas" pide consultas sobre el historial, se revisa aquí.
 
 ---
 
@@ -605,8 +713,8 @@ locales: ninguna necesita servidor. Dónde entra cada una:
 | Fase | Features que se suman |
 |---|---|
 | 5 | Búsqueda única · ¿Ya me voy? |
-| 6 | Modo paradero · Frecuencia como respaldo · Ocupación · Accesibilidad como filtro · Mostrar confiabilidad |
-| 7 | Modo viaje |
+| 6 ✅ | Modo paradero · Frecuencia como respaldo · Ocupación · Accesibilidad como filtro · Mostrar confiabilidad |
+| 7 ✅ | Modo viaje · el interruptor de accesibilidad del planificador |
 | 8 | Mis rutas aprendidas · Calcular confiabilidad |
 | 9 | Offline con fecha |
 
@@ -622,7 +730,8 @@ que les toca.
 | ~~Verde institucional real~~ | ~~Fase 3~~ | **Resuelta**: no era verde. Índigo `#3A3578`, extraído de la app oficial y de la Tarjeta Soluciones YoVoy el 20 de septiembre de 2026. Ver [`DESIGN.md`](DESIGN.md) |
 | ~~Proveedor de tiles, caché en disco y atribución~~ | ~~Fase 5~~ | **Resuelta**: OpenFreeMap con `flutter_map_vector_tiles`, que trae su propia caché en disco. Atribución visible sobre la hoja |
 | ~~Paquete de ubicación y permisos~~ | ~~Fase 5~~ | **Resuelta**: `geolocator`, solo "mientras se usa", con los textos en es_MX en el manifest y el `Info.plist` |
-| `shared_preferences` o `drift` | Fase 8 | El spec pide elegir y justificar |
+| ~~`shared_preferences` o `drift`~~ | ~~Fase 8~~ | **Resuelta** en la fase 6: `shared_preferences`, porque lo que se guarda son listas de ids |
+| ~~Mantener la pantalla encendida~~ | ~~Fase 6~~ | **Resuelta**: `wakelock_plus`, solo en el modo paradero y soltado en segundo plano |
 | ~~Fuente del trazado de las rutas~~ | ~~Fase 4a~~ | **Resuelta**: el GTFS oficial de CMOV, vía el Hub de Codeando México, CC BY-SA 4.0. Ver [`tool/gtfs/SOURCE.md`](tool/gtfs/SOURCE.md) |
 
 ---
@@ -637,6 +746,6 @@ que les toca.
    `Ticker`, clustering y filtrado por viewport no son optimizaciones tardías: son el diseño. **Ya
    están**, y en el emulador el reposo va a 59 fps; al arrastrar baja a 43–55 con un build p90 de
    17.5 ms. Sigue abierto hasta medirlo en un teléfono real.
-3. **Agregar paquetes fuera de la tabla de stack** sin discutirlo. De las tres decisiones que lo
-   requerían, dos se acordaron y se instalaron en la fase 5 (`flutter_map_vector_tiles` y
-   `geolocator`); queda `shared_preferences` o `drift` para la fase 8.
+3. **Agregar paquetes fuera de la tabla de stack** sin discutirlo. Todos los que se sumaron se
+   acordaron antes: `flutter_map_vector_tiles` y `geolocator` en la fase 5, `shared_preferences` y
+   `wakelock_plus` en la fase 6.

@@ -11,6 +11,7 @@ import 'package:yovoy_go/core/data/mock/mock_dataset.dart';
 import 'package:yovoy_go/core/data/mock/simulator_config.dart';
 import 'package:yovoy_go/core/data/transit_repository_provider.dart';
 import 'package:yovoy_go/core/location/location_service.dart';
+import 'package:yovoy_go/features/map/application/accessibility_filter.dart';
 import 'package:yovoy_go/features/map/application/basemap_style.dart';
 import 'package:yovoy_go/features/map/presentation/map_screen.dart';
 import 'package:yovoy_go/features/route/presentation/route_screen.dart';
@@ -49,6 +50,9 @@ void main() {
     // baja tiles: nada de eso le toca a un test de navegación.
     container = ProviderContainer(
       overrides: [
+        accessibilityFilterStoreProvider.overrideWithValue(
+          InMemoryAccessibilityFilterStore(),
+        ),
         mockDatasetProvider.overrideWith((Ref ref) async => dataset),
         simulatorSettingsProvider.overrideWith(_FixedSettings.new),
         basemapStyleProvider.overrideWith(
