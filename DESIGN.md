@@ -260,6 +260,47 @@ independiente se lee completo, en cuerpo de texto y no en letra chica.
 
 ---
 
+## Avisar sin tapar
+
+Dos franjas nacieron en la fase 9 y comparten forma con `AlertBanner`: un filo de color a la
+izquierda, un ícono junto al texto, una línea. No tapan nada, no piden nada y **no se pueden
+cerrar**, porque lo que dicen sigue siendo cierto mientras se ve.
+
+**"Sin conexión. El mapa y los horarios son los que ya tenías."** Es el cuarto estado del spec
+aplicado a la red entera: el dato no se borra, se marca. No dice "no se pudo cargar" ni ofrece
+reintentar, porque lo que está en pantalla sigue sirviendo; solo dejó de refrescarse.
+
+**"Horario del 2 de septiembre de 2025 · su vigencia terminó."** Aparece **una vez por pantalla** y
+solo donde algún renglón salió del feed empacado en vez de un camión. Un horario sin fecha se lee
+como si fuera de hoy, y este no lo es. Mientras la vigencia vale, la franja va en contorno y no
+compite con los arribos; vencida, sube a filo de alerta.
+
+**El ícono nunca es decoración.** Nube tachada y calendario dicen de qué va cada franja sin leer,
+que es la misma regla del color: si dos avisos se distinguieran solo por su filo, no se
+distinguirían.
+
+---
+
+## Lo que la auditoría cambió
+
+La fase 9 midió cada pantalla en los dos temas. Tres cosas se movieron, y ninguna es cosmética:
+
+- **La letra chica pasó a Medium.** A 13 px, Barlow Regular pierde tanto cuerpo al antialiasear que
+  el contraste que llega al ojo cae debajo de 4.5:1, aunque el color nominal dé 8:1. El tamaño no
+  cambió: el peso sí.
+- **El cuerpo se quedó en Regular.** Subir todo el texto a Medium habría pasado el matcher de un
+  golpe y habría cambiado la voz de la app. Los dos casos que faltaban se arreglaron donde estaban:
+  la etiqueta de un campo pesa más que su contenido, y el modo viaje —que se lee a un brazo de
+  distancia— no lleva Regular en ninguna línea.
+- **La atribución del mapa se volvió opaca.** Translúcida sobre calles iba a 3:1. Una obligación
+  legal que no se lee no está cumplida.
+
+**Un mapa es un control, no un dibujo.** Se arrastra y se acerca, así que lleva nombre para el
+lector de pantalla. Lo que dibuja no se narra: la hoja de abajo y la escalera de paradas ya lo
+dicen con palabras, y leer cuarenta marcadores en voz alta sería ruido.
+
+---
+
 ## Lo que se descartó, y por qué
 
 - **Neón cian sobre negro con cristal esmerilado.** Es el default de "futurista" y el

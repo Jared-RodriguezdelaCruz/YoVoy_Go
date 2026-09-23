@@ -264,10 +264,28 @@ mayúsculas. Con el dataset real, "Plaza" da paradas primero y "Chicahuales" da 
 
 **El problema.** Sin señal, la mayoría de las apps muestran una pantalla vacía o un error genérico.
 
-**Qué se ve.** El contenido que había, más una franja: **"Sin conexión. Horario guardado hace
-2 h."** El usuario decide si le sirve.
+**Qué se ve.** El contenido que había, más una franja: **"Sin conexión. El mapa y los horarios son
+los que ya tenías."** El usuario decide si le sirve.
 
-**Fase 9**, junto con la revisión de los cuatro estados.
+**Fase 9 — construida**, con una corrección de lo que aquí se prometía. "Horario guardado hace 2 h"
+suponía que el horario se baja y se guarda. En esta app no: **el horario viene empacado con la app**
+y tiene fecha de publicación, no de descarga. Así que la fecha existe, y es mejor: `feed_info.txt`
+del GTFS dice quién lo publicó, cuándo y hasta cuándo dijo valer. La app lo enseña en dos lugares.
+
+- **Donde una pantalla se apoya en el horario** —algún arribo que no viene de un camión—, una sola
+  franja: *"Horario del 2 de septiembre de 2025 · su vigencia terminó"*. Una vez por pantalla, nunca
+  por fila (`lib/design/components/schedule_note.dart`).
+- **En "Acerca de"**, siempre, con el publicador y la vigencia completa.
+
+Y sí, **ya venció**: el feed declaró valer hasta el 31 de diciembre de 2025. El script de conversión
+leía `feed_info.txt` desde la fase 4a y lo tiraba a la basura; en la fase 9 se emitió a `feed.json`
+y la app dejó de callarlo.
+
+La franja de conexión es lo otro, y dice solo lo que puede sostener: `connectivity_plus` reporta la
+**interfaz**, no que haya internet del otro lado, así que aparece cuando el teléfono no tiene
+ninguna. **No apaga el simulador**: con el teléfono sin datos los camiones simulados siguen
+moviéndose, porque el simulador vive en el teléfono. Fingir que el feed se murió sería la clase de
+mentira que esta app existe para no decir.
 
 ---
 
@@ -298,4 +316,4 @@ les cierre la puerta:
 | Modo viaje | 7 ✅ | Seguimiento de vehículo |
 | Mis rutas aprendidas | 8 ✅ | Persistencia local |
 | Confiabilidad observada (calcular) | 8 ✅ | Persistencia local |
-| Offline con fecha | 9 | Caché |
+| Offline con fecha | 9 ✅ | El feed empacado y su fecha |

@@ -201,45 +201,53 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
           return Stack(
             children: <Widget>[
-              FlutterMap(
-                mapController: _map,
-                options: MapOptions(
-                  initialCenter: location?.position ?? aguascalientesCenter,
-                  initialZoom: 14,
-                  minZoom: 10,
-                  maxZoom: 18,
-                  backgroundColor: colors.surface,
-                  onTap: _onTap,
-                  // Sin rotación: un mapa de transporte girado desorienta, y
-                  // la capa de marcadores asume norte arriba.
-                  interactionOptions: const InteractionOptions(
-                    flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+              Semantics(
+                container: true,
+                // El mapa se arrastra, se acerca y se toca. Sin nombre, el
+                // lector de pantalla anuncia un control sin decir de qué. Lo
+                // que hay encima —los camiones y las paradas— se lee en la
+                // hoja de abajo, que es lista y no dibujo.
+                label: 'Mapa de Aguascalientes',
+                child: FlutterMap(
+                  mapController: _map,
+                  options: MapOptions(
+                    initialCenter: location?.position ?? aguascalientesCenter,
+                    initialZoom: 14,
+                    minZoom: 10,
+                    maxZoom: 18,
+                    backgroundColor: colors.surface,
+                    onTap: _onTap,
+                    // Sin rotación: un mapa de transporte girado desorienta, y
+                    // la capa de marcadores asume norte arriba.
+                    interactionOptions: const InteractionOptions(
+                      flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                    ),
                   ),
+                  children: <Widget>[
+                    if (basemap != null)
+                      vt.VectorTileLayer(
+                        theme: basemap.theme,
+                        tileProviders: basemap.providers,
+                        rasterSources: basemap.rasterSources,
+                        sprites: basemap.sprites,
+                        cachePath: tileCacheFolder,
+                      ),
+                    const RouteNetworkLayer(),
+                    if (location != null && !location.isFallback)
+                      CircleLayer(
+                        circles: <CircleMarker>[
+                          CircleMarker(
+                            point: location.position,
+                            radius: 7,
+                            color: colors.brand,
+                            borderColor: colors.surface,
+                            borderStrokeWidth: 3,
+                          ),
+                        ],
+                      ),
+                    TransitMarkersLayer(hits: _hits),
+                  ],
                 ),
-                children: <Widget>[
-                  if (basemap != null)
-                    vt.VectorTileLayer(
-                      theme: basemap.theme,
-                      tileProviders: basemap.providers,
-                      rasterSources: basemap.rasterSources,
-                      sprites: basemap.sprites,
-                      cachePath: tileCacheFolder,
-                    ),
-                  const RouteNetworkLayer(),
-                  if (location != null && !location.isFallback)
-                    CircleLayer(
-                      circles: <CircleMarker>[
-                        CircleMarker(
-                          point: location.position,
-                          radius: 7,
-                          color: colors.brand,
-                          borderColor: colors.surface,
-                          borderStrokeWidth: 3,
-                        ),
-                      ],
-                    ),
-                  TransitMarkersLayer(hits: _hits),
-                ],
               ),
               _FloatingControls(
                 sheet: _sheet,
@@ -346,14 +354,14 @@ class _FloatingControls extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: colors.surface.withValues(alpha: 0.85),
+                    color: colors.surface,
                     borderRadius: AppRadius.chipRadius,
                   ),
                   child: Text(
                     '© OpenMapTiles © OpenStreetMap',
                     style: AppTypography.caption.copyWith(
                       color: colors.textSecondary,
-                      fontSize: 11,
+                      fontSize: 12,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

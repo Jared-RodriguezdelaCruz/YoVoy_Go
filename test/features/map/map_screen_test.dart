@@ -1,32 +1,16 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yovoy_go/core/data/mock/mock_dataset.dart';
 import 'package:yovoy_go/core/data/mock/simulator_config.dart';
-import 'package:yovoy_go/core/data/transit_repository_provider.dart';
-import 'package:yovoy_go/core/location/location_service.dart';
 import 'package:yovoy_go/design/components/components.dart';
-import 'package:yovoy_go/design/theme.dart';
 import 'package:yovoy_go/features/map/application/accessibility_filter.dart';
-import 'package:yovoy_go/features/map/application/basemap_style.dart';
 import 'package:yovoy_go/features/map/application/map_providers.dart';
 import 'package:yovoy_go/features/map/presentation/layers/transit_markers_layer.dart';
 import 'package:yovoy_go/features/map/presentation/map_hit_test.dart';
-import 'package:yovoy_go/features/map/presentation/map_screen.dart';
 import 'package:yovoy_go/features/map/presentation/map_sheet.dart';
 
-class _FixedLocation implements LocationService {
-  const _FixedLocation();
-
-  @override
-  Future<UserLocation> current() async =>
-      const UserLocation(position: aguascalientesCenter);
-
-  @override
-  Future<void> openSettings(LocationIssue issue) async {}
-}
+import '../../helpers/screen_harness.dart';
 
 /// La pantalla de inicio, con el dataset real y sin tocar la red: el fondo
 /// vectorial se sustituye por la superficie lisa, que es también lo que ve el
@@ -34,61 +18,16 @@ class _FixedLocation implements LocationService {
 void main() {
   late MockDataset dataset;
 
-  setUpAll(() {
-    dataset = MockDataset.fromJsonStrings(<String, String>{
-      for (final String name in MockAssets.files)
-        name: File('${MockAssets.directory}/$name').readAsStringSync(),
-    });
-  });
+  setUpAll(() => dataset = loadTestDataset());
 
   Future<ProviderContainer> pumpMap(
     WidgetTester tester, {
     SimulatorConfig config = SimulatorConfig.perfect,
     double textScale = 1,
   }) async {
-    await tester.binding.setSurfaceSize(const Size(412, 915));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-
-    final ProviderContainer container = ProviderContainer(
-      overrides: [
-        accessibilityFilterStoreProvider.overrideWithValue(
-          InMemoryAccessibilityFilterStore(),
-        ),
-        mockDatasetProvider.overrideWith((Ref ref) async => dataset),
-        simulatorSettingsProvider.overrideWith(() => _FixedSettings(config)),
-        basemapStyleProvider.overrideWith(
-          (Ref ref, Brightness brightness) async => null,
-        ),
-        locationServiceProvider.overrideWithValue(const _FixedLocation()),
-      ],
-    );
-
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp(
-          theme: AppTheme.dark,
-          builder: (BuildContext context, Widget? child) => MediaQuery(
-            data: MediaQuery.of(context)
-                .copyWith(textScaler: TextScaler.linear(textScale)),
-            child: child!,
-          ),
-          home: const MapScreen(),
-        ),
-      ),
-    );
-    // El `Ticker` de la flota nunca se asienta: se avanza a mano.
-    for (int i = 0; i < 8; i++) {
-      await tester.pump(const Duration(milliseconds: 100));
-    }
+    final ProviderContainer container = makeContainer(dataset, config: config);
+    await pumpMapScreen(tester, container, textScale: textScale);
     return container;
-  }
-
-  Future<void> unmount(WidgetTester tester, ProviderContainer container) async {
-    // Soltar el stream de 30 s y los relojes de la hoja antes de terminar.
-    await tester.pumpWidget(const SizedBox.shrink());
-    container.dispose();
-    await tester.pump();
   }
 
   testWidgets(
@@ -284,13 +223,4 @@ void main() {
 
     await unmount(tester, container);
   });
-}
-
-class _FixedSettings extends SimulatorSettings {
-  _FixedSettings(this.initial);
-
-  final SimulatorConfig initial;
-
-  @override
-  SimulatorConfig build() => initial;
 }

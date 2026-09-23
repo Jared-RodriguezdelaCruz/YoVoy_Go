@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
+import '../../../core/clock/clock_provider.dart';
+import '../../../core/data/transit_network.dart';
+import '../../../core/models/models.dart';
+import '../../../core/transit/live_providers.dart';
 import '../../../design/tokens/colors.dart';
 import '../../../design/tokens/spacing.dart';
 import '../../../design/tokens/typography.dart';
@@ -13,7 +18,7 @@ abstract final class AppInfo {
 
   /// Se mueve a mano con cada fase. Leerla del `pubspec` pediría un paquete
   /// más solo para pintar un número.
-  static const String version = '0.8.0';
+  static const String version = '0.9.0';
 }
 
 /// "Acerca de", con el aviso que exige la sección 10 del spec y la atribución
@@ -74,6 +79,7 @@ class AboutScreen extends StatelessWidget {
                         'Transporte Público de Codeando México. CC BY-SA 4.0. '
                         'Atribuir una fuente no es afiliarse a ella.',
                   ),
+                  const _FeedBlock(),
                   const _Block(
                     title: 'Los tiempos que ves',
                     body:
@@ -102,6 +108,34 @@ class AboutScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// De cuándo es el horario que la app trae empacado.
+///
+/// Se enseña siempre y no solo cuando está vencido: un horario sin fecha se
+/// lee como si fuera de hoy, y el usuario merece saber contra qué está
+/// comparando lo que ve en la calle.
+class _FeedBlock extends ConsumerWidget {
+  const _FeedBlock();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final TransitNetwork? network = ref.watch(transitNetworkProvider).value;
+    if (network == null) {
+      return const SizedBox.shrink();
+    }
+    final FeedInfo feed = network.feed;
+    final bool expired = feed.expiredAt(ref.watch(clockProvider)());
+    return _Block(
+      title: 'De cuándo es el horario',
+      body:
+          'El horario y las frecuencias salen del feed que ${feed.publisherName} '
+          'publicó el ${feed.versionLabel}. El propio feed declaró valer hasta '
+          'el ${feed.endLabel}'
+          '${expired ? ', así que su vigencia ya terminó. Las rutas y las paradas '
+                    'siguen siendo las de ese feed: puede que alguna ya no sea así.' : '.'}',
     );
   }
 }

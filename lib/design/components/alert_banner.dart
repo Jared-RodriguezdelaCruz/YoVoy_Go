@@ -75,6 +75,13 @@ class _AlertBannerState extends State<AlertBanner> {
               ? () => setState(() => _expanded = !_expanded)
               : null,
           child: Container(
+            // 48 dp de alto aunque el encabezado quepa en una línea: se abre
+            // al tocar, y la sección 11 del spec no hace excepciones con los
+            // controles que además son texto.
+            constraints: const BoxConstraints(
+              minHeight: AppSizes.minTouchTarget,
+            ),
+            alignment: Alignment.centerLeft,
             decoration: BoxDecoration(
               border: Border(left: BorderSide(color: colors.alert, width: 3)),
             ),

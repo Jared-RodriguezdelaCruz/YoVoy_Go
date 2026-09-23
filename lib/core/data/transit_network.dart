@@ -18,6 +18,7 @@ class TransitNetwork {
     required this.trips,
     required this.shapes,
     required this.stops,
+    required this.feed,
     required this._stopIdsByTrip,
   }) {
     for (final TransitRoute route in routes) {
@@ -39,6 +40,13 @@ class TransitNetwork {
   final List<Trip> trips;
   final List<Shape> shapes;
   final List<Stop> stops;
+
+  /// De cuándo es este feed y hasta cuándo dijo valer.
+  ///
+  /// Viaja con la red y no aparte porque en GTFS viene en el mismo zip:
+  /// `feed_info.txt` junto a `routes.txt`. La app lo enseña donde se apoya
+  /// en el horario.
+  final FeedInfo feed;
 
   final Map<String, List<String>> _stopIdsByTrip;
   final Map<String, TransitRoute> _routesById = <String, TransitRoute>{};

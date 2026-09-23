@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/notices.dart';
 import '../../../app/routes.dart';
 import '../../../core/data/transit_network.dart';
 import '../../../core/models/models.dart';
@@ -54,6 +55,9 @@ class FavoritesScreen extends ConsumerWidget {
                         Spacing.xxxl,
                       ),
                       children: <Widget>[
+                        const OfflineNotice(
+                          padding: EdgeInsets.only(bottom: Spacing.md),
+                        ),
                         if (stops.isNotEmpty) ...<Widget>[
                           const SectionTitle('Tus paradas'),
                           for (final String stopId in stops)

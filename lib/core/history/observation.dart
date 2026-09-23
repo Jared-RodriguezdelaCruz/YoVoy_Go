@@ -216,13 +216,25 @@ class Promise {
   const Promise({
     required this.vehicleId,
     required this.routeId,
+    required this.tripId,
     required this.promisedAt,
     required this.madeAt,
     required this.lastSeenAt,
+    this.approachedAt,
   });
 
   final String vehicleId;
   final String routeId;
+
+  /// El viaje en el que el camión venía cuando se hizo la promesa.
+  ///
+  /// Un camión da la vuelta y empieza otro viaje con el mismo id de unidad.
+  /// En el viaje de regreso la misma parada está en otro lugar de la secuencia,
+  /// así que sin esto un camión que apenas arranca su regreso se lee como uno
+  /// que **ya pasó**, y la promesa se cierra con un adelanto imposible. Pasó:
+  /// se vio en el emulador en la fase 9, con notas de "suele llegar 26 min
+  /// antes".
+  final String tripId;
 
   /// La hora que la app prometió. **No se reescribe**: si se actualizara con
   /// cada refresco, la promesa siempre se cumpliría y la nota sería un adorno.
@@ -234,13 +246,31 @@ class Promise {
   /// caduca sin observación: eso es señal perdida, no un camión tarde.
   final DateTime lastSeenAt;
 
-  Promise seenAt(DateTime now) => Promise(
+  /// La última vez que se le vio **todavía sin llegar**, con dato fresco.
+  ///
+  /// No se puede decir que un camión pasó si no se le vio venir justo antes.
+  /// Es la misma honestidad del resto del módulo: se observa, no se deduce.
+  final DateTime? approachedAt;
+
+  Promise seenAt(DateTime now, {bool approaching = false}) => Promise(
     vehicleId: vehicleId,
     routeId: routeId,
+    tripId: tripId,
     promisedAt: promisedAt,
     madeAt: madeAt,
     lastSeenAt: now,
+    approachedAt: approaching ? now : approachedAt,
   );
+
+  /// Si el cruce se vio de un reporte al siguiente.
+  ///
+  /// Entre "viene llegando" y "ya pasó" no puede haber un hueco: si el camión
+  /// desapareció en medio y reapareció del otro lado, **nadie lo vio pasar**.
+  /// El umbral es [Freshness.liveMax], que es lo que la app considera un dato
+  /// en vivo: una cadencia del feed más holgura.
+  bool crossingSeenAt(DateTime now) =>
+      approachedAt != null &&
+      now.difference(approachedAt!) <= Freshness.liveMax;
 }
 
 /// Lo que se sabe de un camión respecto de **una** parada, en este instante.
@@ -248,11 +278,16 @@ class Promise {
 class StopSighting {
   const StopSighting({
     required this.vehicleId,
+    required this.tripId,
     required this.passed,
     required this.age,
   });
 
   final String vehicleId;
+
+  /// El viaje en el que va **ahora**. Si no es el de la promesa, la promesa ya
+  /// no se puede juzgar.
+  final String tripId;
 
   /// Si su última posición ya rebasó la parada.
   final bool passed;
@@ -283,6 +318,7 @@ StopSighting? sightingOf({
   }
   return StopSighting(
     vehicleId: vehicle.vehicleId,
+    tripId: vehicle.tripId,
     // `current_stop_sequence` cuenta desde 1: la parada por la que va.
     passed: (sequence - 1) > target,
     age: vehicle.ageAt(now),
@@ -301,10 +337,15 @@ const Duration promiseForgetAfter = Freshness.staleMax;
 /// Solo prometen los arribos en vivo con número y con camión: un horario dice
 /// "cada 20 min", que no es una promesa que se pueda incumplir. Una promesa ya
 /// hecha se conserva tal cual.
+///
+/// [tripOf] dice en qué viaje va cada unidad ahora mismo. Sin viaje no hay
+/// promesa: sería imposible saber después si el camión sigue siendo el mismo
+/// camión o ya dio la vuelta.
 Map<String, Promise> promisesFrom({
   required List<Arrival> arrivals,
   required Map<String, Promise> known,
   required DateTime now,
+  required String? Function(String vehicleId) tripOf,
 }) {
   final Map<String, Promise> next = <String, Promise>{...known};
   for (final Arrival arrival in arrivals) {
@@ -318,9 +359,14 @@ Map<String, Promise> promisesFrom({
         next.containsKey(vehicleId)) {
       continue;
     }
+    final String? tripId = tripOf(vehicleId);
+    if (tripId == null) {
+      continue;
+    }
     next[vehicleId] = Promise(
       vehicleId: vehicleId,
       routeId: arrival.routeId,
+      tripId: tripId,
       promisedAt: now.add(eta),
       madeAt: now,
       lastSeenAt: now,
@@ -356,8 +402,29 @@ settlePromises({
       }
       continue;
     }
+    // Dio la vuelta y va en otro viaje: el camión que prometía ya no existe
+    // como tal, y su lugar en la secuencia de este viaje no dice nada de la
+    // promesa anterior. Se tira, como con la señal perdida.
+    if (sighting.tripId != promise.tripId) {
+      continue;
+    }
     if (!sighting.passed) {
-      pending[promise.vehicleId] = promise.seenAt(now);
+      pending[promise.vehicleId] = promise.seenAt(now, approaching: true);
+      continue;
+    }
+    // Se le vio pasar, pero no se le vio venir justo antes: entre un reporte
+    // y otro desapareció y reapareció del otro lado. Nadie lo vio cruzar, así
+    // que no hay nada que fechar.
+    if (!promise.crossingSeenAt(now)) {
+      continue;
+    }
+    // Y cruzó **demasiado pronto**: si el camión pasa antes de los dos minutos
+    // que la app exige para prometer algo, lo que falló no fue el camión, fue
+    // el dato. Un reporte que salta de un lado al otro de la parada no es
+    // puntualidad récord. Sin esto la app guardaba adelantos imposibles
+    // —"suele llegar 26 min antes"—, que es como se encontró en el emulador
+    // en la fase 9.
+    if (now.difference(promise.madeAt) < minPromiseLead) {
       continue;
     }
     observations.add(

@@ -62,6 +62,7 @@ verse mejor, es comportarse mejor cuando los datos son malos** — que es siempr
 | Ubicación | `geolocator`, solo permiso "mientras se usa". *Acordado en la fase 5* |
 | Persistencia local | `shared_preferences`, detrás de `FavoritesStore`, `SettingsStore` y `HistoryStore`. Guarda listas de ids y de líneas cortas, topadas; no hace falta una base de datos. *Acordado en la fase 6, revisado y sostenido en la fase 8 con el historial ya construido* |
 | Carpetas del sistema | `path_provider`, solo para saber dónde vive la caché de tiles y poder borrarla desde Ajustes. *Acordado en la fase 8* |
+| Estado de la red | `connectivity_plus`, detrás de `ConnectivityMonitor`. Reporta la **interfaz**, no que haya internet del otro lado, y la franja de la app no promete más que eso. *Acordado en la fase 9* |
 | Pantalla encendida | `wakelock_plus`, detrás de `ScreenAwake`. Solo en el modo paradero y en el modo viaje, y se suelta en segundo plano. *Acordado en la fase 6; el modo viaje, en la fase 7* |
 | Geometría | `latlong2` |
 | Formato | `intl` + `flutter_localizations` (locale `es_MX`) |
@@ -559,6 +560,21 @@ usuario decide si le sirve.
 Copy: verbos activos, sentence case, sin disculpas. "Sin señal de esta ruta" y no "Lo
 sentimos, no fue posible obtener la información en este momento".
 
+### Revisado en la fase 9
+
+`test/states/four_states_test.dart` provoca los cuatro en cada pantalla que consume datos: la
+latencia alta para el esqueleto, una parada sin rutas y una ruta sin flota para el vacío,
+`errorRate: 1` para el error —la única forma honesta de verlo, porque con 20 % a veces sale y a
+veces no— y la señal perdida para el dato viejo.
+
+Ahí salió que el estado de error **era inalcanzable**: Riverpod reintentaba diez veces con espera
+creciente, treinta y ocho segundos de esqueleto antes de que la pantalla dijera nada. Ahora son
+tres intentos, y la regla vive en el `ProviderScope` para que la sigan todos los providers.
+
+El tono tiene su propia prueba (`test/design/copy_test.dart`): busca disculpas y pasivas en los
+literales de texto de `lib/` y de `test/`. Lo que no se puede revisar solo —sentence case, verbo
+activo— se leyó a mano, y no hubo nada que corregir.
+
 ---
 
 ## 10. Marca y legal
@@ -581,6 +597,10 @@ sentimos, no fue posible obtener la información en este momento".
   Aguascalientes (CMOV), vía el Hub de Datos de Transporte Público de Codeando México.
   CC BY-SA 4.0.* CompartirIgual alcanza al dataset derivado, no al código. Atribuir una
   fuente no es afiliarse a ella: el aviso de app independiente se queda tal cual.
+- **De cuándo es el horario (enmienda de la fase 9).** "Acerca de" dice también quién publicó el
+  feed, cuándo y hasta cuándo dijo valer, y lo dice aunque la respuesta incomode: el feed empacado
+  declaró vigencia hasta el **31 de diciembre de 2025**. Un horario sin fecha se lee como si fuera
+  de hoy. El dato sale de `feed_info.txt` y viaja con la red, no de una constante escrita a mano.
 
 ---
 
@@ -596,6 +616,28 @@ Piso no negociable:
 - Respetar reducción de movimiento.
 - **El color nunca es el único portador de significado.** El estado de frescura lleva texto
   e ícono además del color — hay daltonismo, y hay sol directo.
+
+### Auditado en la fase 9
+
+`test/a11y/accessibility_test.dart` monta **cada pantalla en los dos temas** y le pasa los tres
+matchers de Flutter: contraste de texto, toque de 48×48 y ningún control sin nombre. Una segunda
+tabla monta las mismas pantallas al 200 %, donde no hay nada que afirmar: un `RenderFlex` que se
+desborda falla el test solo. Una pantalla nueva se audita agregando un renglón, y olvidarlo se nota.
+
+Lo que encontró y se arregló: la letra chica pasó a Medium —a 13 px una Regular pierde tanto cuerpo
+al antialiasear que el contraste medido cae debajo de 4.5:1—, la atribución del mapa dejó de ir
+sobre una pastilla translúcida, el banner de alerta creció a 48 dp de alto, la barra de búsqueda
+dejó de ofrecer 22 dp de toque en una barra de 52, y los tres mapas llevan nombre para el lector de
+pantalla.
+
+Lo que ningún matcher lee —que un ETA se anuncie completo— se revisó con TalkBack en el emulador.
+Lo que anuncia: *"Ruta R37 a San Marcos, llega en 3 minutos, dato en vivo, va llenándose. Ver la
+ruta"*.
+
+`test/design/meaning_test.dart` cuida la última regla: recorre todos los valores de frescura,
+ocupación, alerta y origen del ETA y afirma que **ni la palabra ni el ícono se repiten** entre dos
+estados. Deja anotado, además, que el verde de "en vivo" y el ámbar de "hace 2 min" se separan
+1.02:1 entre sí: por eso ninguno viaja nunca sin su palabra.
 
 ---
 

@@ -90,6 +90,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                 _RouteLineSection(),
                 _VehicleMarkerSection(),
                 _AlertBannerSection(),
+                _NoticeSection(),
                 _OccupancySection(),
                 _ReliabilitySection(),
                 _RouteSequenceSection(),
@@ -869,6 +870,50 @@ class _AlertBannerSection extends StatelessWidget {
             header: 'Sin servicio el 16 de septiembre por el desfile',
             effect: AlertEffect.noService,
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NoticeSection extends StatelessWidget {
+  const _NoticeSection();
+
+  /// Un feed con la vigencia terminada y otro vigente, para ver los dos
+  /// tratamientos. Son los datos de `feed_info.txt`, con la fecha de fin
+  /// movida en el segundo.
+  static final FeedInfo expired = FeedInfo(
+    publisherName: 'Gobierno del Estado de Aguascalientes',
+    publisherUrl: 'https://www.aguascalientes.gob.mx/cmov',
+    startDate: DateTime.utc(2023),
+    endDate: DateTime.utc(2025, 12, 31),
+    version: '20250902',
+  );
+
+  static final FeedInfo current = FeedInfo(
+    publisherName: expired.publisherName,
+    publisherUrl: expired.publisherUrl,
+    startDate: expired.startDate,
+    endDate: DateTime.utc(2027, 12, 31),
+    version: expired.version,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final DateTime now = DateTime.utc(2026, 9, 22);
+    return _Section(
+      title: 'OfflineBanner · ScheduleNote',
+      note:
+          'Los dos avisos que no piden nada: el contenido sigue ahí y solo se '
+          'dice de cuándo es. El horario vencido sube a filo de alerta; el '
+          'vigente se queda en contorno para no competir con los arribos.',
+      child: Column(
+        children: <Widget>[
+          const OfflineBanner(),
+          const SizedBox(height: Spacing.md),
+          ScheduleNote(feed: expired, now: now),
+          const SizedBox(height: Spacing.md),
+          ScheduleNote(feed: current, now: now),
         ],
       ),
     );

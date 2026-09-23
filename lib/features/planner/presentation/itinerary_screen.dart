@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/notices.dart';
 import '../../../app/routes.dart';
 import '../../../core/data/not_found.dart';
 import '../../../core/models/models.dart';
@@ -125,6 +126,16 @@ class _Body extends StatelessWidget {
                         color: colors.textPrimary,
                       ),
                     ),
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(
+                child: OfflineNotice(
+                  padding: EdgeInsets.fromLTRB(
+                    Spacing.lg,
+                    Spacing.sm,
+                    Spacing.lg,
+                    0,
                   ),
                 ),
               ),

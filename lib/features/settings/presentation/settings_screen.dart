@@ -326,7 +326,12 @@ class _Field extends StatelessWidget {
     children: <Widget>[
       Text(
         label,
-        style: AppTypography.body.copyWith(color: context.colors.textPrimary),
+        style: AppTypography.body.copyWith(
+          color: context.colors.textPrimary,
+          // SemiBold: es la etiqueta de un campo, no texto corrido, y es lo
+          // que se busca al recorrer la pantalla de arriba abajo.
+          fontWeight: FontWeight.w600,
+        ),
       ),
       const SizedBox(height: Spacing.sm),
       child,
@@ -392,6 +397,9 @@ class _Choice extends StatelessWidget {
       showCheckmark: false,
       labelStyle: AppTypography.label.copyWith(
         color: selected ? colors.onBrand : colors.textPrimary,
+        // El elegido va en SemiBold: tinta oscura sobre el índigo aclarado del
+        // tema oscuro es la combinación más floja de la app a 14 px.
+        fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
       ),
       backgroundColor: colors.surfaceRaised,
       selectedColor: colors.brand,

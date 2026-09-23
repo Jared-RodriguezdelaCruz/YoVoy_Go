@@ -31,7 +31,7 @@ oficial, así que cada campo dice de dónde viene.
 `route_type` · `stop_id` · `stop_lat` · `stop_lon` · `trip_id` · `route_id` ·
 `service_id` · `direction_id` · `shape_id` · todos los puntos de `shapes.json` ·
 todo `stop_times.json` · todo `frequencies.json` · los días de `calendar.json` ·
-la agencia.
+la agencia · todo `feed.json`, que es `feed_info.txt` tal cual.
 
 Las coordenadas de los trazos se redondean a cinco decimales (~1 m) y las de
 las paradas a seis. Nada más.

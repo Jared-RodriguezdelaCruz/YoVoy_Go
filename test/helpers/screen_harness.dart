@@ -8,12 +8,14 @@ import 'package:yovoy_go/app/routes.dart';
 import 'package:yovoy_go/core/clock/clock_provider.dart';
 import 'package:yovoy_go/core/data/mock/mock_dataset.dart';
 import 'package:yovoy_go/core/data/mock/simulator_config.dart';
+import 'package:yovoy_go/core/data/not_found.dart';
 import 'package:yovoy_go/core/data/transit_repository_provider.dart';
 import 'package:yovoy_go/core/device/screen_awake.dart';
 import 'package:yovoy_go/core/history/history_providers.dart';
 import 'package:yovoy_go/core/history/history_store.dart';
 import 'package:yovoy_go/core/location/location_service.dart';
 import 'package:yovoy_go/core/models/models.dart';
+import 'package:yovoy_go/core/network/connectivity.dart';
 import 'package:yovoy_go/core/transit/live_providers.dart';
 import 'package:yovoy_go/core/transit/reliability.dart';
 import 'package:yovoy_go/design/theme.dart';
@@ -22,6 +24,7 @@ import 'package:yovoy_go/features/favorites/data/favorites_store.dart';
 import 'package:yovoy_go/features/favorites/presentation/favorites_screen.dart';
 import 'package:yovoy_go/features/map/application/accessibility_filter.dart';
 import 'package:yovoy_go/features/map/application/basemap_style.dart';
+import 'package:yovoy_go/features/map/presentation/map_screen.dart';
 import 'package:yovoy_go/features/planner/application/trip_request.dart';
 import 'package:yovoy_go/features/planner/presentation/itinerary_screen.dart';
 import 'package:yovoy_go/features/planner/presentation/planner_screen.dart';
@@ -72,9 +75,14 @@ ProviderContainer makeContainer(
   MockDataset dataset, {
   SimulatorConfig config = SimulatorConfig.perfect,
   DateTime? now,
+
+  /// Un reloj que **avanza**, para los tests que necesitan que el mundo se
+  /// mueva. Manda sobre [now].
+  DateTime Function()? clock,
   FavoritesStore? favorites,
   AccessibilityFilterStore? accessibility,
   ReliabilityHistory? reliability,
+  ConnectivityMonitor? connectivity,
   HistoryStore? history,
   SettingsStore? settings,
   ScreenAwake? screenAwake,
@@ -83,8 +91,11 @@ ProviderContainer makeContainer(
 }) {
   final DateTime moment = now ?? eightAm;
   return ProviderContainer(
+    // La misma regla que instala `main.dart`: sin ella los tests reintentarían
+    // diez veces y el estado de error no se vería nunca.
+    retry: retryUnlessNotFound,
     overrides: [
-      clockProvider.overrideWithValue(() => moment),
+      clockProvider.overrideWithValue(clock ?? () => moment),
       mockDatasetProvider.overrideWith((Ref ref) async => dataset),
       simulatorSettingsProvider.overrideWith(() => FixedSettings(config)),
       basemapStyleProvider.overrideWith(
@@ -106,6 +117,9 @@ ProviderContainer makeContainer(
         settings ?? InMemorySettingsStore(),
       ),
       screenAwakeProvider.overrideWithValue(screenAwake ?? FakeScreenAwake()),
+      connectivityMonitorProvider.overrideWithValue(
+        connectivity ?? FakeConnectivityMonitor(),
+      ),
       // Una flota a la medida, para poner un camión justo donde el test lo
       // necesita.
       if (vehicles != null)
@@ -216,6 +230,44 @@ Future<void> pumpAt(
               .copyWith(textScaler: TextScaler.linear(textScale)),
           child: child!,
         ),
+      ),
+    ),
+  );
+  await settle(tester, frames: frames);
+}
+
+/// Monta el mapa **de verdad**, no el de cartón de [pumpAt].
+///
+/// El fondo vectorial se sustituye por la superficie lisa, que es también lo
+/// que ve el usuario sin datos y sin caché.
+///
+/// El reloj viene congelado desde [makeContainer], y eso importa aquí más que
+/// en ninguna otra pantalla: el `Ticker` de la capa de vehículos lee el reloj
+/// en cada cuadro, así que con el reloj real los camiones se mueven mientras
+/// el test corre y un toque apuntado a un marcador puede fallar bajo carga.
+Future<void> pumpMapScreen(
+  WidgetTester tester,
+  ProviderContainer container, {
+  ThemeData? theme,
+  double textScale = 1,
+  Size size = const Size(412, 915),
+  int frames = 8,
+}) async {
+  await tester.binding.setSurfaceSize(size);
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: theme ?? AppTheme.dark,
+        builder: (BuildContext context, Widget? child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
+        home: const MapScreen(),
       ),
     ),
   );

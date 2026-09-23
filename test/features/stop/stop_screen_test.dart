@@ -220,6 +220,13 @@ void main() {
     await pumpAt(tester, container, heroes, textScale: 2, frames: 60);
 
     expect(tester.takeException(), isNull);
+    // Al doble de tamaño el letrero, la fecha del horario y las 14 rutas de
+    // esta parada no caben de un golpe, y una lista perezosa no construye lo
+    // que no se ve: hay que bajar antes de buscar los arribos.
+    await tester.drag(find.byType(ListView), const Offset(0, -600));
+    await settle(tester, frames: 5);
+
+    expect(tester.takeException(), isNull);
     // Con 20 % de error puede quedar el error o los arribos, nunca nada.
     expect(
       find.byType(EtaChip).evaluate().isNotEmpty ||

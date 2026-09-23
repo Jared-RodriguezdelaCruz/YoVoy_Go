@@ -76,6 +76,7 @@ class MockTransitRepository implements TransitRepository {
     trips: _dataset.trips,
     shapes: _dataset.shapes,
     stops: _dataset.stops,
+    feed: _dataset.feed,
     stopIdsByTrip: <String, List<String>>{
       for (final Trip trip in _dataset.trips)
         trip.id: <String>[

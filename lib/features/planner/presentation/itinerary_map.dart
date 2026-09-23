@@ -64,107 +64,114 @@ class _ItineraryMapState extends ConsumerState<ItineraryMap> {
     final List<Leg> legs = widget.itinerary.legs;
     final List<LatLng> points = _points;
 
-    return ClipRRect(
-      borderRadius: AppRadius.cardRadius,
-      child: DecoratedBox(
-        position: DecorationPosition.foreground,
-        decoration: BoxDecoration(
-          borderRadius: AppRadius.cardRadius,
-          border: Border.all(
-            color: colors.outline,
-            width: AppSizes.outlineWidth,
+    return Semantics(
+      container: true,
+      // Un mapa se arrastra y se acerca, así que el árbol de semántica lo ve
+      // como algo que se toca; sin nombre sería un control mudo. Lo que
+      // dibuja lo dice con palabras la línea de tiempo de abajo.
+      label: 'Mapa del itinerario',
+      child: ClipRRect(
+        borderRadius: AppRadius.cardRadius,
+        child: DecoratedBox(
+          position: DecorationPosition.foreground,
+          decoration: BoxDecoration(
+            borderRadius: AppRadius.cardRadius,
+            border: Border.all(
+              color: colors.outline,
+              width: AppSizes.outlineWidth,
+            ),
           ),
-        ),
-        child: Stack(
-          children: <Widget>[
-            FlutterMap(
-              mapController: _map,
-              options: MapOptions(
-                initialCenter: points.firstOrNull ?? aguascalientesCenter,
-                initialZoom: 13,
-                onMapReady: _fit,
-                minZoom: 10,
-                maxZoom: 18,
-                backgroundColor: colors.surface,
-                interactionOptions: const InteractionOptions(
-                  flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-                ),
-              ),
-              children: <Widget>[
-                if (basemap != null)
-                  vt.VectorTileLayer(
-                    theme: basemap.theme,
-                    tileProviders: basemap.providers,
-                    rasterSources: basemap.rasterSources,
-                    sprites: basemap.sprites,
-                    cachePath: tileCacheFolder,
+          child: Stack(
+            children: <Widget>[
+              FlutterMap(
+                mapController: _map,
+                options: MapOptions(
+                  initialCenter: points.firstOrNull ?? aguascalientesCenter,
+                  initialZoom: 13,
+                  onMapReady: _fit,
+                  minZoom: 10,
+                  maxZoom: 18,
+                  backgroundColor: colors.surface,
+                  interactionOptions: const InteractionOptions(
+                    flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
                   ),
-                PolylineLayer(
-                  polylines: <Polyline>[
-                    for (final Leg leg in legs)
-                      if (leg.geometry.length >= 2)
-                        leg.isWalk || leg.route == null
-                            ? Polyline(
-                                points: leg.geometry,
-                                color: colors.textSecondary,
-                                strokeWidth: 3,
-                                pattern: const StrokePattern.dotted(),
-                              )
-                            : Polyline(
-                                points: leg.geometry,
-                                color: RoutePalette.colorForRoute(
-                                  routeId: leg.route!.id,
-                                  gtfsColor: leg.route!.color,
-                                ),
-                                strokeWidth: RouteLine.strokeWidthForZoom(13),
-                                borderColor: colors.surface,
-                                borderStrokeWidth: 2,
-                              ),
-                  ],
                 ),
-                if (points.length >= 2)
-                  CircleLayer(
-                    circles: <CircleMarker>[
-                      CircleMarker(
-                        point: points.first,
-                        radius: 7,
-                        color: colors.surface,
-                        borderColor: colors.brand,
-                        borderStrokeWidth: 3,
-                      ),
-                      CircleMarker(
-                        point: points.last,
-                        radius: 7,
-                        color: colors.brand,
-                        borderColor: colors.surface,
-                        borderStrokeWidth: 3,
-                      ),
+                children: <Widget>[
+                  if (basemap != null)
+                    vt.VectorTileLayer(
+                      theme: basemap.theme,
+                      tileProviders: basemap.providers,
+                      rasterSources: basemap.rasterSources,
+                      sprites: basemap.sprites,
+                      cachePath: tileCacheFolder,
+                    ),
+                  PolylineLayer(
+                    polylines: <Polyline>[
+                      for (final Leg leg in legs)
+                        if (leg.geometry.length >= 2)
+                          leg.isWalk || leg.route == null
+                              ? Polyline(
+                                  points: leg.geometry,
+                                  color: colors.textSecondary,
+                                  strokeWidth: 3,
+                                  pattern: const StrokePattern.dotted(),
+                                )
+                              : Polyline(
+                                  points: leg.geometry,
+                                  color: RoutePalette.colorForRoute(
+                                    routeId: leg.route!.id,
+                                    gtfsColor: leg.route!.color,
+                                  ),
+                                  strokeWidth: RouteLine.strokeWidthForZoom(13),
+                                  borderColor: colors.surface,
+                                  borderStrokeWidth: 2,
+                                ),
                     ],
                   ),
-              ],
-            ),
-            Positioned(
-              left: Spacing.sm,
-              bottom: Spacing.sm,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.sm,
-                  vertical: 2,
-                ),
-                decoration: BoxDecoration(
-                  color: colors.surface.withValues(alpha: 0.85),
-                  borderRadius: AppRadius.chipRadius,
-                ),
-                child: Text(
-                  '© OpenMapTiles © OpenStreetMap',
-                  style: AppTypography.caption.copyWith(
-                    color: colors.textSecondary,
-                    fontSize: 11,
+                  if (points.length >= 2)
+                    CircleLayer(
+                      circles: <CircleMarker>[
+                        CircleMarker(
+                          point: points.first,
+                          radius: 7,
+                          color: colors.surface,
+                          borderColor: colors.brand,
+                          borderStrokeWidth: 3,
+                        ),
+                        CircleMarker(
+                          point: points.last,
+                          radius: 7,
+                          color: colors.brand,
+                          borderColor: colors.surface,
+                          borderStrokeWidth: 3,
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+              Positioned(
+                left: Spacing.sm,
+                bottom: Spacing.sm,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.sm,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    borderRadius: AppRadius.chipRadius,
+                  ),
+                  child: Text(
+                    '© OpenMapTiles © OpenStreetMap',
+                    style: AppTypography.caption.copyWith(
+                      color: colors.textSecondary,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

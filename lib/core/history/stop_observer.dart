@@ -59,7 +59,12 @@ class StopObserver extends _$StopObserver {
     final List<Arrival> arrivals =
         ref.read(stopArrivalsProvider(stopId)).value ?? const <Arrival>[];
 
-    _promises = promisesFrom(arrivals: arrivals, known: _promises, now: now);
+    _promises = promisesFrom(
+      arrivals: arrivals,
+      known: _promises,
+      now: now,
+      tripOf: (String id) => tracker.vehicleOf(id)?.tripId,
+    );
 
     final List<StopSighting> sightings = <StopSighting>[
       for (final Promise promise in _promises.values)

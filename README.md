@@ -24,7 +24,7 @@ Simulación de punta a punta (`MockTransitRepository`) sobre **datos reales**. E
 empaquetado, no se descarga. Lo único que sale a la red son los tiles del mapa de fondo, de
 OpenFreeMap, sin llave ni cuenta.
 
-**Fases 1 a 8 cerradas**, más el repintado de la marca: base y router, modelos GTFS, el design
+**Fases 1 a 9 cerradas**, más el repintado de la marca: base y router, modelos GTFS, el design
 system, el dataset —48 rutas y 1 507 paradas de Aguascalientes—, el simulador con 323 camiones
 moviéndose sobre trazos reales, y **el mapa**: la pantalla de inicio con la flota en vivo, la red de
 rutas, "¿Ya me voy?", la búsqueda única y las paradas cercanas. Y **la parada y la ruta**: los
@@ -37,7 +37,10 @@ encontré ruta" que dice qué sí pasa cerca, y el **modo viaje**, que sigue al 
 avisa dos paradas antes de bajarte. Y lo que hace que la app **recuerde**: favoritos de paradas y
 rutas con su ETA en vivo, ajustes —tema, tamaño de texto, animaciones, limpiar caché—, "Acerca de"
 con el aviso de app independiente, la hoja del mapa encabezada por lo que sueles tomar a esa hora, y
-la confiabilidad observada, que ya tiene historial que leer. Siguiente: fase 9, pulido.
+la confiabilidad observada, que ya tiene historial que leer. Y el **pulido**: cada pantalla auditada
+en los dos temas contra los pisos de accesibilidad del spec, los cuatro estados revisados con el
+simulador roto a propósito, y el **offline con fecha** —"sin conexión" cuando de verdad no la hay, y
+de cuándo es el horario que la app trae empacado—. Siguiente: el build de release firmado.
 
 **El color institucional es índigo `#3A3578`, no verde.** Se extrajo con cuentagotas de la app
 oficial y de la Tarjeta Soluciones YoVoy, como pedía el spec. La dirección visual completa está en
@@ -204,6 +207,8 @@ plugin usa el sistema nuevo del analizador (`analysis_server_plugin`, declarado 
 | Ubicación | `geolocator` | 14.0.0 |
 | Favoritos y filtros | `shared_preferences` | 2.5.5 |
 | Pantalla encendida (modo paradero) | `wakelock_plus` | 1.8.0 |
+| Caché de tiles: medirla y borrarla | `path_provider` | 2.1.6 |
+| "Sin conexión" | `connectivity_plus` | 7.3.1 |
 | Geometría | `latlong2` | 0.10.1 |
 | Formato | `intl` + `flutter_localizations` (`es_MX`) | 0.20.3 / SDK |
 | Lint | `flutter_lints` + `riverpod_lint` | 6.0.0 / 3.1.9 |
@@ -240,6 +245,7 @@ lib/
   main.dart                    ProviderScope + YoVoyGoApp, sin lógica
   app/
     app.dart                   MaterialApp.router, locale es_MX, tema
+    notices.dart               "sin conexión" y la fecha del horario, ya conectados
     router.dart                go_router como provider keepAlive
     routes.dart                nombres y paths, sin strings sueltos
   core/
@@ -252,6 +258,7 @@ lib/
     clock/                     el reloj como provider, para fijar la hora en tests
     lifecycle/                 primer plano o segundo plano: sin sondeo en segundo plano
     location/                  geolocator detrás de una interfaz
+    network/                   si hay red, detrás de una interfaz
     perf/                      contador de cuadros, solo con FRAME_STATS
     transit/                   la red, la flota, los arribos y las alertas: lo que comparten
                                el mapa, la parada y la ruta

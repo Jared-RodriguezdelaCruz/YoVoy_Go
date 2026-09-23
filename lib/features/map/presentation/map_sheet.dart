@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/notices.dart';
 import '../../../app/routes.dart';
 import '../../../core/clock/clock_provider.dart';
 import '../../../core/data/transit_network.dart';
@@ -190,6 +191,7 @@ class _HomeContent extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        const OfflineNotice(padding: EdgeInsets.only(bottom: Spacing.md)),
         const _LeaveNowCard(),
         const SizedBox(height: Spacing.xl),
         if (favorites.isNotEmpty) ...<Widget>[

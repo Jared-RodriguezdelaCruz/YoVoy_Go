@@ -12,6 +12,7 @@ abstract final class MockAssets {
 
   static const List<String> files = <String>[
     'agency.json',
+    'feed.json',
     'routes.json',
     'stops.json',
     'shapes.json',
@@ -106,6 +107,7 @@ class PrecookedTrip {
 class MockDataset {
   MockDataset._({
     required this.agencies,
+    required this.feed,
     required this.routes,
     required this.stops,
     required this.shapes,
@@ -165,6 +167,7 @@ class MockDataset {
     final Map<String, dynamic> itineraries = map('itineraries.json');
 
     return MockDataset._(
+      feed: FeedInfo.fromJson(map('feed.json')),
       agencies: <Agency>[
         for (final dynamic row in list('agency.json'))
           Agency.fromJson(row as Map<String, dynamic>),
@@ -228,6 +231,9 @@ class MockDataset {
   }
 
   final List<Agency> agencies;
+
+  /// De cuándo es el horario que la app trae empacado.
+  final FeedInfo feed;
   final List<TransitRoute> routes;
   final List<Stop> stops;
   final List<Shape> shapes;

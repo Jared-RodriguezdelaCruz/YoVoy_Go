@@ -75,9 +75,19 @@ class _MapSearchBarState extends ConsumerState<MapSearchBar> {
             ),
           ),
           padding: const EdgeInsets.only(left: Spacing.md, right: Spacing.xs),
+          // Estirados a lo alto: sin esto el campo mide lo que mide una línea
+          // de texto —22 dp— y es lo único que se puede tocar de una barra de
+          // 52. La sección 11 del spec pide 48.
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Icon(Icons.search, color: colors.textSecondary, size: 22),
+              Center(
+                child: Icon(
+                  Icons.search,
+                  color: colors.textSecondary,
+                  size: 22,
+                ),
+              ),
               const SizedBox(width: Spacing.sm),
               Expanded(
                 child: TextField(
@@ -85,6 +95,7 @@ class _MapSearchBarState extends ConsumerState<MapSearchBar> {
                   focusNode: _focus,
                   onChanged: ref.read(searchQueryProvider.notifier).set,
                   textInputAction: TextInputAction.search,
+                  textAlignVertical: TextAlignVertical.center,
                   style: AppTypography.body.copyWith(color: colors.textPrimary),
                   decoration: InputDecoration(
                     isCollapsed: true,
@@ -97,15 +108,17 @@ class _MapSearchBarState extends ConsumerState<MapSearchBar> {
                 ),
               ),
               if (query.isNotEmpty)
-                IconButton(
-                  tooltip: 'Borrar búsqueda',
-                  onPressed: _clear,
-                  icon: Icon(Icons.close, color: colors.textSecondary),
+                Center(
+                  child: IconButton(
+                    tooltip: 'Borrar búsqueda',
+                    onPressed: _clear,
+                    icon: Icon(Icons.close, color: colors.textSecondary),
+                  ),
                 )
               else if (widget.trailing != null)
                 Padding(
                   padding: const EdgeInsets.only(right: Spacing.xs),
-                  child: widget.trailing,
+                  child: Center(child: widget.trailing),
                 ),
             ],
           ),

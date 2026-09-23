@@ -5,8 +5,8 @@ Plan de construcción de la v1. El **qué** y el **por qué** viven en
 terminado**. Las features propuestas encima del spec, con su justificación, están en
 [`FEATURES.md`](FEATURES.md).
 
-**Estado:** fases 1 a 8 cerradas, más el repintado de la marca. Siguiente: fase 9, pulido.
-Pendiente heredado: medir los fps en un teléfono real de gama media-baja.
+**Estado:** fases 1 a 9 cerradas, más el repintado de la marca. Siguiente: el build de release
+firmado. Pendiente heredado: medir los fps en un teléfono real de gama media-baja.
 
 La dirección visual completa —de dónde salió cada color, la regla que los organiza y la firma de la
 app— vive en [`DESIGN.md`](DESIGN.md).
@@ -32,8 +32,8 @@ spec, pero sin ellos la app no es entregable.
 | 6 | Parada y ruta | 5 | ✅ cerrada |
 | 7 | Planificador | 6 | ✅ cerrada |
 | 8 | Favoritos y ajustes | 6 | ✅ cerrada |
-| 9 | Pulido: accesibilidad, rendimiento, los cuatro estados | 7, 8 | ⏳ siguiente |
-| — | **(extra)** Build de release firmado | 9 | ⏳ |
+| 9 | Pulido: accesibilidad, rendimiento, los cuatro estados | 7, 8 | ✅ cerrada · fps en hardware pendiente |
+| — | **(extra)** Build de release firmado | 9 | ⏳ siguiente |
 
 Las fases 3 y 4 pueden avanzar en paralelo: ambas solo necesitan los modelos de la fase 2. La 4a
 estaba marcada como la tarea más larga del proyecto porque suponía trazar las rutas a mano; dejó de
@@ -741,23 +741,120 @@ mismo botón que lo de verdad.
 
 ---
 
-## Fase 9 — Pulido
+## Fase 9 — Pulido ✅
 
 **Objetivo.** Que lo construido aguante el mundo real y a un usuario con lentes, con sol en la
 cara y con un teléfono de hace cuatro años.
 
+**Entrega.** No hay pantallas nuevas: hay pruebas que antes no existían y arreglos de lo que
+encontraron. `test/a11y/`, `test/states/`, `test/design/meaning_test.dart` y
+`test/design/copy_test.dart` son la auditoría hecha máquina. Más `lib/core/network/` y las dos
+franjas nuevas de `design/components/`, que son la feature 10.
+
+**Decisiones que se acordaron antes de empezar:**
+
+- **"Offline con fecha" se construye por los dos lados**: la franja de conexión real, con
+  `connectivity_plus` —paquete nuevo, acordado—, y la fecha del horario empacado, que sale del
+  `feed_info.txt` que el script ya leía y tiraba.
+- **El perfilado se corre en el emulador** y la medición en hardware real se queda explícitamente
+  abierta: `adb devices` solo ve el Pixel 8.
+- **El build de release firmado no entra**: se planea aparte.
+
 **Tareas**
 
-- [ ] Auditoría de accesibilidad pantalla por pantalla: contraste mínimo 4.5:1 en texto y 3:1 en
+- [x] Auditoría de accesibilidad pantalla por pantalla: contraste mínimo 4.5:1 en texto y 3:1 en
       gráficos, toque mínimo de 48×48 dp, `Semantics` en todo control, texto del sistema al 200 %
       sin romper layouts, reducción de movimiento respetada.
-- [ ] Verificar que el color nunca sea el único portador de significado: la frescura lleva texto e
+- [x] Verificar que el color nunca sea el único portador de significado: la frescura lleva texto e
       ícono además de color. Hay daltonismo, y hay sol directo.
-- [ ] Perfilado de rendimiento en gama media-baja: fps del mapa, jank y memoria.
-- [ ] Los cuatro estados revisados pantalla por pantalla con el simulador en su configuración más
+- [x] Perfilado de rendimiento: fps del mapa, jank y memoria. **En el emulador**; el teléfono real
+      sigue pendiente.
+- [x] Los cuatro estados revisados pantalla por pantalla con el simulador en su configuración más
       hostil.
-- [ ] Repaso de copy: verbos activos, sentence case, sin disculpas. "Sin señal de esta ruta", no
-      "Lo sentimos, no fue posible obtener la información en este momento".
+- [x] Repaso de copy: verbos activos, sentence case, sin disculpas.
+- [x] **Offline con fecha** (`FEATURES.md`, feature 10).
+- [x] La prueba inestable del mapa, heredada de la fase 7.
+
+**Cierre.** `dart analyze` en cero y **506 tests en verde** (68 nuevos en la fase). Los 39 casos de
+`test/a11y/` cubren cada pantalla en los dos temas con los tres matchers que Flutter ya trae, más
+las mismas pantallas al 200 %. Se regeneraron 23 imágenes de referencia: la letra chica cambió de
+peso y eso toca casi todas.
+
+**Cómo verlo.** En modo avión, la franja "Sin conexión" aparece en la hoja, en la parada, en la
+ruta, en favoritos y en el planificador, y se va sola al volver. La fecha del horario sale en
+cualquier parada que se apoye en él y, completa, en "Acerca de".
+
+**Los números, en el emulador Pixel 8 (`--profile --dart-define=FRAME_STATS=true`)**
+
+| Escenario | fps | build p50 / p90 | raster p50 / p90 |
+|---|---|---|---|
+| Mapa en reposo, flota completa | 60 | 1.1 / 1.4 ms | 15.8 / 16.9 ms |
+| Mapa arrastrando | 60 | 1.2 / 2.0 ms | 15.8 / 17.1 ms |
+| Ruta con el trazo completo, desplazando | 31 | 0.9 / 1.5 ms | 15.4 / 17.0 ms |
+| Ruta quieta | 1–4 | 0.6 / 0.8 ms | 2.8 / 3.4 ms |
+
+**El hilo de UI no es el problema**: construir un cuadro cuesta 1–2 ms contra un presupuesto de
+16.7. Lo que ronda el límite es el rasterizado, y el emulador rasteriza por software. Los 31 fps de
+la ruta no son caída: es que sin gesto la app no dibuja —la ruta quieta baja a 1 fps y a 0.6 ms de
+build—, que es justo lo que se quiere de una app que la gente abre esperando el camión. Memoria:
+**173 MB PSS** con la ciudad completa cargada. La medición en un teléfono real sigue abierta y el
+riesgo 2 se queda como está.
+
+**Lo que se decidió en el camino**
+
+1. **La letra chica pesa más.** `AppTypography.caption` pasó de Regular a Medium. A 13 px una
+   Regular pierde tanto cuerpo al antialiasear que su contraste **medido** —el que llega al ojo, no
+   el nominal— cae debajo de 4.5:1. Los tokens de color nunca estuvieron mal: `textSecondary` da
+   6.1:1 en claro y 8.0:1 en oscuro. Lo que fallaba era la tinta.
+2. **El cuerpo se quedó en Regular.** Subir `body` a Medium habría callado los dos últimos avisos
+   del matcher de un golpe, pero eso es un cambio de diseño en toda la app, no una corrección de
+   accesibilidad. Se arreglaron los dos casos en su lugar: la etiqueta de un campo de ajustes pesa
+   más que su contenido, y el modo viaje —que se lee a un brazo de distancia— no lleva Regular.
+3. **Un mapa no es un adorno, es un control.** Se arrastra y se acerca, así que el árbol de
+   semántica lo ve como algo que se toca; sin nombre, el lector de pantalla anunciaba un control
+   mudo. Los tres mapas llevan nombre. Lo que dibujan no se lee en voz alta: la hoja y la escalera
+   de paradas dicen lo mismo con palabras.
+4. **La barra de búsqueda medía 52 dp y solo se podían tocar 22.** `isCollapsed` deja el campo del
+   alto de una línea de texto. Ahora la fila se estira y el campo ocupa la barra entera.
+5. **Tres intentos, no diez.** Riverpod reintenta diez veces con espera creciente: **38 segundos de
+   esqueleto** antes de que la pantalla diga nada. El estado de error existía desde la fase 6 y era
+   inalcanzable. La regla se instala ahora en el `ProviderScope`, así que la siguen todos los
+   providers y no solo los seis que la nombraban.
+6. **El verde y el ámbar de frescura se separan 1.02:1.** Los dos pasan 3:1 contra el fondo, pero
+   entre ellos casi no se distinguen por luminancia. **No se arregló**: es la razón por la que la
+   regla del color existe, y por eso ninguno de los dos aparece nunca sin su palabra y su ícono. El
+   test lo afirma y explica que si algún día se separan, hay que releer el párrafo y no subir el
+   número.
+7. **El linter de tono solo mira literales de texto.** Los comentarios nombran las frases
+   prohibidas justamente para explicar por qué no se dicen, y `hasError:` es un identificador. Un
+   linter con falsos positivos se termina apagando, y apagado no cuida nada. El copy de la app pasó
+   sin un solo cambio: la lectura a mano tampoco encontró Title Case ni pasivas.
+
+**Lo que encontraron las pruebas y el emulador**
+
+- **La confiabilidad observada decía "suele llegar 26 min antes".** Es el hallazgo de la fase, y era
+  de la fase 8. `timeToStop` mide hasta la **próxima** visita —un camión que acaba de pasar vuelve
+  en 35 min— mientras que `current_stop_sequence` describe la vuelta actual. En el borde, las dos
+  cosas no hablan de lo mismo: la app prometía 35 minutos y treinta segundos después veía al camión
+  del otro lado de la parada, y lo anotaba como puntualidad récord. Ahora una promesa se cierra solo
+  si se cumplen las tres: **mismo viaje**, **se le vio venir en el reporte anterior** y **el cruce
+  tardó al menos los dos minutos que la app exige para prometer algo**. Lo demás se tira sin anotar,
+  como ya se tiraba la señal perdida. Verificado en el emulador: seis minutos frente a una parada
+  dan siete observaciones de entre −2 y +79 **segundos**.
+- **Nadie probaba el lazo de observación completo.** Los tests de la fase 8 sembraban la tienda y
+  miraban la pantalla; ninguno dejaba correr el reloj. `test/core/history/observer_test.dart` lo
+  hace: media hora de servicio simulado y una afirmación sobre lo que la app anota sola, también en
+  modo hostil. Por ahí se habría visto el error el día que se escribió.
+- **La prueba inestable del mapa ya no lo es**, y la causa era vieja: `pumpMap` no congelaba el
+  reloj, así que el `Ticker` de la capa de vehículos leía la hora real en cada cuadro y los camiones
+  se movían mientras el test corría. Bajo carga se movían lo suficiente para que un toque apuntado a
+  un marcador fallara. El `pumpMapScreen` del harness congela el reloj, como `makeContainer` desde
+  la fase 6.
+- **El banner de alerta medía 44 dp de alto.** Se toca para abrirlo, así que le toca el piso de 48.
+- **La atribución del mapa iba a 11 px sobre una pastilla translúcida**: 3.0:1. Ahora es opaca y va
+  a 12 px.
+- **Una lista perezosa, otra vez.** El aviso de la fecha del horario empujó los arribos fuera de la
+  pantalla en el test de texto al 200 %, y con 14 rutas no hay forma de verlos sin desplazar.
 
 ---
 
@@ -785,7 +882,7 @@ locales: ninguna necesita servidor. Dónde entra cada una:
 | 6 ✅ | Modo paradero · Frecuencia como respaldo · Ocupación · Accesibilidad como filtro · Mostrar confiabilidad |
 | 7 ✅ | Modo viaje · el interruptor de accesibilidad del planificador |
 | 8 ✅ | Mis rutas aprendidas · Calcular confiabilidad |
-| 9 | Offline con fecha |
+| 9 ✅ | Offline con fecha |
 
 No cambian el orden de las fases ni sus criterios de cierre: se construyen dentro de la pantalla
 que les toca.

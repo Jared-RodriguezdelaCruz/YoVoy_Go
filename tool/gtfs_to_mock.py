@@ -226,6 +226,22 @@ def main() -> None:
     ]
     write_json("agency.json", agencies)
 
+    # -- feed.json ------------------------------------------------------------
+    # La cédula del feed: quién lo publica, de cuándo es y hasta cuándo dijo
+    # valer. La app la enseña porque un horario sin fecha se lee como si fuera
+    # de hoy, y este venció el 31 de diciembre de 2025.
+    info = feed["feed_info"][0]
+    write_json(
+        "feed.json",
+        {
+            "feed_publisher_name": info["feed_publisher_name"],
+            "feed_publisher_url": info["feed_publisher_url"],
+            "feed_start_date": info["feed_start_date"],
+            "feed_end_date": info["feed_end_date"],
+            "feed_version": info["feed_version"],
+        },
+    )
+
     # -- índices de trabajo ---------------------------------------------------
     trips_by_route: dict[str, list[dict[str, str]]] = defaultdict(list)
     for row in feed["trips"]:
@@ -860,7 +876,7 @@ oficial, así que cada campo dice de dónde viene.
 `route_type` · `stop_id` · `stop_lat` · `stop_lon` · `trip_id` · `route_id` ·
 `service_id` · `direction_id` · `shape_id` · todos los puntos de `shapes.json` ·
 todo `stop_times.json` · todo `frequencies.json` · los días de `calendar.json` ·
-la agencia.
+la agencia · todo `feed.json`, que es `feed_info.txt` tal cual.
 
 Las coordenadas de los trazos se redondean a cinco decimales (~1 m) y las de
 las paradas a seis. Nada más.

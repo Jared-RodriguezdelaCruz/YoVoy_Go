@@ -87,10 +87,16 @@ abstract final class AppTypography {
   );
 
   /// Metadatos, frescura del dato.
+  ///
+  /// Medium y no Regular: es el rol más chico de la app, y a 13 px una
+  /// Regular pierde tanto cuerpo al antialiasear que su contraste **medido**
+  /// —el que llega al ojo, no el nominal— cae por debajo de 4.5:1. Se
+  /// descubrió en la fase 9, midiendo cada pantalla con
+  /// `meetsGuideline(textContrastGuideline)`.
   static const TextStyle caption = TextStyle(
     fontFamily: family,
     fontSize: 13,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w500,
     height: 1.3,
   );
 

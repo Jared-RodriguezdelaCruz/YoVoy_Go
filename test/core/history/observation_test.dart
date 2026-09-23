@@ -136,6 +136,7 @@ void main() {
         ],
         known: const <String, Promise>{},
         now: monday8,
+        tripOf: (String _) => 'T1',
       );
 
       expect(promises.keys, <String>['V1']);
@@ -152,6 +153,7 @@ void main() {
         ],
         known: const <String, Promise>{},
         now: monday8,
+        tripOf: (String _) => 'T1',
       );
       // Un minuto después el camión dice que ahora llega en 7: la promesa
       // original manda, o siempre se cumpliría.
@@ -161,6 +163,7 @@ void main() {
         ],
         known: first,
         now: monday8.add(const Duration(minutes: 1)),
+        tripOf: (String _) => 'T1',
       );
 
       expect(second['V1']!.promisedAt, monday8.add(const Duration(minutes: 5)));
@@ -217,12 +220,23 @@ void main() {
   });
 
   group('cerrar promesas', () {
-    Promise promise({Duration lastSeen = Duration.zero}) => Promise(
+    Promise promise({
+      Duration lastSeen = Duration.zero,
+      DateTime? approachedAt,
+      bool seen = true,
+    }) => Promise(
       vehicleId: 'V1',
       routeId: 'R09',
+      tripId: 'T1',
       promisedAt: monday8.add(const Duration(minutes: 5)),
       madeAt: monday8,
       lastSeenAt: monday8.subtract(lastSeen),
+      // Por default se le acaba de ver venir: es el caso normal, un reporte
+      // antes de cruzar.
+      approachedAt: seen
+          ? (approachedAt ??
+                monday8.add(const Duration(minutes: 7, seconds: 40)))
+          : null,
     );
 
     test('al pasar, la diferencia queda anotada', () {
@@ -236,6 +250,7 @@ void main() {
         sightings: <StopSighting>[
           const StopSighting(
             vehicleId: 'V1',
+            tripId: 'T1',
             passed: true,
             age: Duration(seconds: 20),
           ),
@@ -261,6 +276,7 @@ void main() {
         sightings: <StopSighting>[
           const StopSighting(
             vehicleId: 'V1',
+            tripId: 'T1',
             passed: false,
             age: Duration(seconds: 20),
           ),
@@ -289,6 +305,161 @@ void main() {
 
       expect(settled.observations, isEmpty);
       expect(settled.pending, isEmpty);
+    });
+
+    test('si ya va en otro viaje, la promesa se tira sin anotar', () {
+      // El camión dio la vuelta. En el viaje de regreso la misma parada está
+      // en otro lugar de la secuencia, así que "ya pasó" sería mentira: lo que
+      // pasó es que el camión que prometía ya no existe. Sin esto la app
+      // guardaba adelantos imposibles —"suele llegar 26 min antes"—, que es
+      // como se encontró en el emulador en la fase 9.
+      final ({
+        List<ArrivalObservation> observations,
+        Map<String, Promise> pending,
+      })
+      settled = settlePromises(
+        promises: <String, Promise>{'V1': promise()},
+        sightings: <StopSighting>[
+          const StopSighting(
+            vehicleId: 'V1',
+            tripId: 'T2',
+            passed: true,
+            age: Duration(seconds: 20),
+          ),
+        ],
+        stopId: 'P606',
+        now: monday8.add(const Duration(minutes: 1)),
+      );
+
+      expect(settled.observations, isEmpty);
+      expect(settled.pending, isEmpty);
+    });
+
+    test('si nunca se le vio venir, tampoco se le juzga al pasar', () {
+      // Un solo punto no fecha nada: hace falta haberlo visto sin llegar y
+      // después ya pasado, de un reporte al siguiente.
+      final ({
+        List<ArrivalObservation> observations,
+        Map<String, Promise> pending,
+      })
+      settled = settlePromises(
+        promises: <String, Promise>{'V1': promise(seen: false)},
+        sightings: <StopSighting>[
+          const StopSighting(
+            vehicleId: 'V1',
+            tripId: 'T1',
+            passed: true,
+            age: Duration(seconds: 20),
+          ),
+        ],
+        stopId: 'P606',
+        now: monday8.add(const Duration(minutes: 8)),
+      );
+
+      expect(settled.observations, isEmpty);
+      expect(settled.pending, isEmpty);
+    });
+
+    test('si desapareció en medio del cruce, no se anota', () {
+      // Se le vio venir hace cinco minutos y ahora aparece del otro lado: en
+      // medio no reportó. Nadie lo vio pasar.
+      final ({
+        List<ArrivalObservation> observations,
+        Map<String, Promise> pending,
+      })
+      settled = settlePromises(
+        promises: <String, Promise>{
+          'V1': promise(approachedAt: monday8.add(const Duration(minutes: 3))),
+        },
+        sightings: <StopSighting>[
+          const StopSighting(
+            vehicleId: 'V1',
+            tripId: 'T1',
+            passed: true,
+            age: Duration(seconds: 20),
+          ),
+        ],
+        stopId: 'P606',
+        now: monday8.add(const Duration(minutes: 8)),
+      );
+
+      expect(settled.observations, isEmpty);
+      expect(settled.pending, isEmpty);
+    });
+
+    test('si cruzó en un reporte lo que prometía media hora, no se anota', () {
+      // El caso que llenó el historial en la fase 8: el camión aparece del
+      // otro lado de la parada treinta segundos después de que la app dijo
+      // "llega en 35 min". Eso no es puntualidad récord, es un dato que
+      // saltó.
+      final ({
+        List<ArrivalObservation> observations,
+        Map<String, Promise> pending,
+      })
+      settled = settlePromises(
+        promises: <String, Promise>{
+          'V1': Promise(
+            vehicleId: 'V1',
+            routeId: 'R09',
+            tripId: 'T1',
+            promisedAt: monday8.add(const Duration(minutes: 35)),
+            madeAt: monday8,
+            lastSeenAt: monday8,
+            approachedAt: monday8.add(const Duration(seconds: 30)),
+          ),
+        },
+        sightings: <StopSighting>[
+          const StopSighting(
+            vehicleId: 'V1',
+            tripId: 'T1',
+            passed: true,
+            age: Duration(seconds: 20),
+          ),
+        ],
+        stopId: 'P606',
+        now: monday8.add(const Duration(seconds: 30)),
+      );
+
+      expect(settled.observations, isEmpty);
+      expect(settled.pending, isEmpty);
+    });
+
+    test('verlo venir y después pasado sí cuenta', () {
+      final Map<String, Promise> pending = settlePromises(
+        promises: <String, Promise>{'V1': promise(seen: false)},
+        sightings: <StopSighting>[
+          const StopSighting(
+            vehicleId: 'V1',
+            tripId: 'T1',
+            passed: false,
+            age: Duration(seconds: 20),
+          ),
+        ],
+        stopId: 'P606',
+        now: monday8.add(const Duration(minutes: 7, seconds: 40)),
+      ).pending;
+
+      expect(pending['V1']!.approachedAt, isNotNull);
+
+      final ({
+        List<ArrivalObservation> observations,
+        Map<String, Promise> pending,
+      })
+      settled = settlePromises(
+        promises: pending,
+        sightings: <StopSighting>[
+          const StopSighting(
+            vehicleId: 'V1',
+            tripId: 'T1',
+            passed: true,
+            age: Duration(seconds: 20),
+          ),
+        ],
+        stopId: 'P606',
+        now: monday8.add(const Duration(minutes: 8)),
+      );
+
+      expect(settled.observations.single.delay, const Duration(minutes: 3));
     });
 
     test('un silencio corto no la tira todavía', () {

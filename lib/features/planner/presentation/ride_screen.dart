@@ -419,7 +419,13 @@ class _Walking extends StatelessWidget {
         Text(
           '${durationLabel(leg.duration)} · '
           '${distanceLabel(legMeters(leg))} a pie',
-          style: AppTypography.body.copyWith(color: colors.textSecondary),
+          // Medium y no Regular: esta pantalla se lee con el teléfono en una
+          // mano y el sol de frente, y es la única de la app donde el peso de
+          // la letra pesa más que la elegancia del texto corrido.
+          style: AppTypography.body.copyWith(
+            color: colors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
       bottom: <Widget>[

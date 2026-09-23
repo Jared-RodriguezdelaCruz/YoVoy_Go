@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/notices.dart';
 import '../../../app/routes.dart';
 import '../../../core/clock/clock_provider.dart';
 import '../../../core/data/transit_network.dart';
@@ -139,6 +140,16 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                       ),
                     ),
                   ],
+                ),
+              ),
+            ),
+            const SliverToBoxAdapter(
+              child: OfflineNotice(
+                padding: EdgeInsets.fromLTRB(
+                  Spacing.lg,
+                  Spacing.sm,
+                  Spacing.lg,
+                  0,
                 ),
               ),
             ),

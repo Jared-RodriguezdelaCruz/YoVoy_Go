@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/notices.dart';
 import '../../../app/routes.dart';
 import '../../../core/data/transit_network.dart';
 import '../../../core/history/history_providers.dart';
@@ -155,6 +156,9 @@ class _StopBoard extends ConsumerWidget {
               ),
             ],
           ),
+          const OfflineNotice(
+            padding: EdgeInsets.fromLTRB(Spacing.lg, 0, Spacing.lg, Spacing.md),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
             child: _Header(
@@ -174,6 +178,15 @@ class _StopBoard extends ConsumerWidget {
               child: AlertBanner.fromAlert(alert),
             ),
           const SizedBox(height: Spacing.xl),
+          ScheduleNotice(
+            arrivals: arrivals.value,
+            padding: const EdgeInsets.fromLTRB(
+              Spacing.lg,
+              0,
+              Spacing.lg,
+              Spacing.md,
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
             child: Text(
